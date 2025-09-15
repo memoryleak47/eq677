@@ -7,7 +7,7 @@ impl Magma {
     fn zeros(n: usize) -> Self {
         Magma {
             n,
-            data: (0..(n*n)).map(|_| 0).collect(),
+            data: std::iter::repeat(0).take(n*n).collect(),
         }
     }
 
@@ -57,7 +57,7 @@ impl Magma {
 }
 
 fn main() {
-    let mut m = Magma::by_fn(5, |x, y| (2*x + 4*y) % 5);
+    let m = Magma::by_fn(5, |x, y| (2*x + 4*y) % 5);
     dbg!(m.is667());
     dbg!(m.is225());
     
