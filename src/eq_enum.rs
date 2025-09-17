@@ -107,7 +107,15 @@ fn simplify_term(t: &mut Term, tab: &Table) {
 fn score(pos: PosIdx, ctxt: &Ctxt) -> usize {
     let mut s = 0;
     for Constraint(_, t) in &ctxt.constraints {
-        s += count_pos(pos, t);
+        let f = match termsize(t) {
+            0 => 0,
+            2 => 100,
+            3 => 30,
+            4 => 6,
+            5 => 3,
+            x => panic!("how? {x}"),
+        };
+        s += count_pos(pos, t) * f;
     }
     s
 }
@@ -122,9 +130,10 @@ fn count_pos(pos: PosIdx, term: &Term) -> usize {
     }
 }
 
+// counts the "F" terms.
 fn termsize(term: &Term) -> usize {
     match term {
-        Term::Elem(_) => 1,
+        Term::Elem(_) => 0,
         Term::F(ab) => termsize(&ab[0]) + termsize(&ab[1]) + 1,
     }
 }
