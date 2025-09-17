@@ -46,7 +46,7 @@ fn step(ctxt: Ctxt) {
         return; // We are done!
     };
     for e in 0..ctxt.n {
-        // TODO filter out e that conflict with the bijection thing!
+        if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
 
         let mut c = ctxt.clone();
         c.table.insert(pos, e);
