@@ -38,7 +38,8 @@ pub fn eq_run(n: usize) {
 fn step(mut ctxt: Ctxt) {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
-    let Some(pos) = free_pos.max_by_key(|pos| score(*pos, &ctxt)) else {
+    let score_map = score_map(&ctxt);
+    let Some(pos) = free_pos.max_by_key(|pos| score_map[pos]) else {
         let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
         println!("Model found:");
         magma.dump();
@@ -114,8 +115,8 @@ fn simplify_term(t: &mut Term, tab: &Table) {
     }
 }
 
-fn score(pos: PosIdx, ctxt: &Ctxt) -> usize {
-    let mut s = 0;
+fn score_map(ctxt: &Ctxt) -> Map<PosIdx, usize> {
+    let mut m = Map::new();
     for Constraint(_, t) in &ctxt.constraints {
         let f = match termsize(t) {
             0 => 0,
@@ -125,17 +126,21 @@ fn score(pos: PosIdx, ctxt: &Ctxt) -> usize {
             5 => 3,
             x => panic!("how? {x}"),
         };
-        s += count_pos(pos, t) * f;
+        acc_score(f, t, &mut m);
     }
-    s
+    m
 }
 
-fn count_pos(pos: PosIdx, term: &Term) -> usize {
+fn acc_score(f: usize, term: &Term, m: &mut Map<PosIdx, usize>) {
     match term {
-        Term::Elem(_) => 0,
+        Term::Elem(_) => {},
         Term::F(ab) => {
-            if ab[0] == Term::Elem(pos.0) && ab[1] == Term::Elem(pos.1) { 1 }
-            else { count_pos(pos, &ab[0]) + count_pos(pos, &ab[1]) }
+            if let Term::Elem(a) = ab[0] && let Term::Elem(b) = ab[1] {
+                *m.entry((a, b)).or_default() += f;
+            } else {
+                acc_score(f, &ab[0], m);
+                acc_score(f, &ab[1], m);
+            }
         }
     }
 }
