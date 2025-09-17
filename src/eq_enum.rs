@@ -34,7 +34,7 @@ pub fn eq_run(n: usize) {
 }
 
 
-fn step(ctxt: Ctxt) {
+fn step(mut ctxt: Ctxt) {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let Some(pos) = free_pos.max_by_key(|pos| score(*pos, &ctxt)) else {
@@ -48,6 +48,10 @@ fn step(ctxt: Ctxt) {
         return; // We are done!
     };
     let mut found_fresh = false;
+
+    ctxt.fresh[pos.0] = false;
+    ctxt.fresh[pos.1] = false;
+
     for e in 0..ctxt.n {
         if ctxt.fresh[e] {
             // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
@@ -58,10 +62,8 @@ fn step(ctxt: Ctxt) {
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
 
         let mut c = ctxt.clone();
-        c.table.insert(pos, e);
 
-        c.fresh[pos.0] = false;
-        c.fresh[pos.1] = false;
+        c.table.insert(pos, e);
         c.fresh[e] = false;
 
         if simplify(&mut c).is_none() {
