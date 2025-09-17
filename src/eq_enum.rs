@@ -1,3 +1,5 @@
+use crate::*;
+
 type Map<K, V> = indexmap::IndexMap<K, V>;
 
 type ElemIdx = usize;
@@ -34,14 +36,11 @@ fn step(ctxt: Ctxt) {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let Some(pos) = free_pos.max_by_key(|pos| score(*pos, &ctxt)) else {
-        println!("model found:");
-        for x in 0..ctxt.n {
-            for y in 0..ctxt.n {
-                let z = ctxt.table.get(&(x, y)).unwrap();
-                print!("{z} ");
-            }
-            println!("");
-        }
+        let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
+        assert!(magma.is677());
+        assert!(magma.is255());
+        println!("Model found:");
+        magma.dump();
         return; // We are done!
     };
     for e in 0..ctxt.n {

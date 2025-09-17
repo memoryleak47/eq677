@@ -41,4 +41,13 @@ impl MatrixMagma {
     fn idx(x: usize, y: usize, n: usize) -> usize {
         x + n * y
     }
+
+    pub fn dump(&self) {
+        for x in 0..self.n {
+            for y in 0..self.n {
+                print!("{} ", self.f(x, y));
+            }
+            println!("");
+        }
+    }
 }

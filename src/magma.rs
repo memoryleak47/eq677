@@ -3,7 +3,7 @@ pub trait Magma {
     fn elems(&self) -> impl Iterator<Item=Self::Elem>;
     fn f(&self, _: Self::Elem, _: Self::Elem) -> Self::Elem;
 
-    fn is667(&self) -> bool {
+    fn is677(&self) -> bool {
         for x in self.elems() {
             for y in self.elems() {
                 if x != self.f(y, self.f(x, self.f(self.f(y, x), y))) {
@@ -14,7 +14,7 @@ pub trait Magma {
         true
     }
 
-    fn is225(&self) -> bool {
+    fn is255(&self) -> bool {
         for x in self.elems() {
             if x != self.f(self.f(self.f(x, x), x), x) {
                 return false;
