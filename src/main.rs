@@ -8,7 +8,7 @@ mod eq_enum;
 pub use eq_enum::*;
 
 fn main() {
-    for i in 1..8 {
+    for i in 1..9 {
         println!("Looking for model size {i}:");
         eq_run(i);
     }

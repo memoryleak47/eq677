@@ -150,6 +150,15 @@ fn build_constraints(n: usize) -> Vec<Constraint> {
                 f(y, &f(x, &f(&f(y, x), y)))
             };
             constraints.push(Constraint(x, t));
+
+            let t = {
+                let x = &Term::Elem(x);
+                let y = &Term::Elem(y);
+
+                let yx = &f(y, x);
+                f(yx, &f(&f(y, yx), y))
+            };
+            constraints.push(Constraint(x, t));
         }
     }
     constraints
