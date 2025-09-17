@@ -21,6 +21,7 @@ struct Ctxt {
     constraints: Vec<Constraint>,
     table: Table,
     n: usize,
+    fresh: Vec<bool>, // whether an ElemIdx is still "fresh".
 }
 
 pub fn eq_run(n: usize) {
@@ -28,6 +29,7 @@ pub fn eq_run(n: usize) {
         constraints: build_constraints(n),
         table: Map::new(),
         n,
+        fresh: vec![true; n],
     });
 }
 
@@ -45,11 +47,23 @@ fn step(ctxt: Ctxt) {
 
         return; // We are done!
     };
+    let mut found_fresh = false;
     for e in 0..ctxt.n {
+        if ctxt.fresh[e] {
+            // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
+            if found_fresh { continue }
+            else { found_fresh = true; }
+        }
+
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
 
         let mut c = ctxt.clone();
         c.table.insert(pos, e);
+
+        c.fresh[pos.0] = false;
+        c.fresh[pos.1] = false;
+        c.fresh[e] = false;
+
         if simplify(&mut c).is_none() {
             step(c);
         }
@@ -78,7 +92,7 @@ fn simplify(ctxt: &mut Ctxt) -> Option<Failure> {
 
 fn simplify_term(t: &mut Term, tab: &Table) {
     match t {
-        Term::Elem(e) => {},
+        Term::Elem(_) => {},
         Term::F(ab) => {
             let [a, b] = &mut **ab;
             simplify_term(a, tab);
