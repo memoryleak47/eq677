@@ -1,4 +1,5 @@
 use crate::*;
+use rayon::prelude::*;
 
 type Map<K, V> = indexmap::IndexMap<K, V>;
 
@@ -47,13 +48,16 @@ fn step(mut ctxt: Ctxt) {
 
         return; // We are done!
     };
+
     let mut found_fresh = false;
 
     ctxt.fresh[pos.0] = false;
     ctxt.fresh[pos.1] = false;
 
+    let mut valids = Vec::new();
     for e in 0..ctxt.n {
         if ctxt.fresh[e] {
+
             // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
             if found_fresh { continue }
             else { found_fresh = true; }
@@ -61,6 +65,10 @@ fn step(mut ctxt: Ctxt) {
 
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
 
+        valids.push(e);
+    }
+
+    valids.into_par_iter().for_each(|e| {
         let mut c = ctxt.clone();
 
         c.table.insert(pos, e);
@@ -69,7 +77,7 @@ fn step(mut ctxt: Ctxt) {
         if simplify(&mut c).is_none() {
             step(c);
         }
-    }
+    });
 }
 
 struct Failure;
