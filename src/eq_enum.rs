@@ -37,10 +37,12 @@ fn step(ctxt: Ctxt) {
     let free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let Some(pos) = free_pos.max_by_key(|pos| score(*pos, &ctxt)) else {
         let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
-        assert!(magma.is677());
-        assert!(magma.is255());
         println!("Model found:");
         magma.dump();
+
+        assert!(magma.is677());
+        assert!(magma.is255());
+
         return; // We are done!
     };
     for e in 0..ctxt.n {
