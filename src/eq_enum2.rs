@@ -14,8 +14,6 @@ enum Node {
     AssertEq(ElemId, TermId),
 }
 
-type Table = Map<PosId, ElemId>;
-
 #[derive(Clone)]
 struct Class {
     node: Node,
@@ -26,7 +24,7 @@ struct Class {
 struct Ctxt {
     classes: Vec<Class>, // indexed by TermId
     constraints: Vec<TermId>,
-    table: Table,
+    table: Map<PosId, ElemId>,
     n: usize,
 }
 
