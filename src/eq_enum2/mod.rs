@@ -80,12 +80,19 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
         let terms = ctxt.pos_terms[&pos].clone();
 
         for tid in terms {
-            ctxt.classes[tid].value = Some(e);
-            for parent in ctxt.classes[tid].parents.clone() {
-                if visit_parent(parent, ctxt, &mut decisions).is_some() {
-                    return Some(Failure);
-                }
+            if set_class(tid, e, ctxt, &mut decisions).is_some() {
+                return Some(Failure);
             }
+        }
+    }
+    None
+}
+
+fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Option<Failure> {
+    ctxt.classes[t].value = Some(v);
+    for parent in ctxt.classes[t].parents.clone() {
+        if visit_parent(parent, ctxt, decisions).is_some() {
+            return Some(Failure);
         }
     }
     None
@@ -98,11 +105,8 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
             let Some(x) = ctxt.classes[x].value else { return None };
             let Some(y) = ctxt.classes[y].value else { return None };
             if let Some(z) = ctxt.table.get(&(x, y)) {
-                ctxt.classes[t].value = Some(*z);
-                for p in ctxt.classes[t].parents.clone() {
-                    if visit_parent(p, ctxt, decisions).is_some() {
-                        return Some(Failure);
-                    }
+                if set_class(t, *z, ctxt, decisions).is_some() {
+                    return Some(Failure);
                 }
             } else {
                 for p in ctxt.classes[t].parents.clone() {
