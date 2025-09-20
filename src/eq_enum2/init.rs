@@ -46,6 +46,11 @@ fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
     let out = ctxt.classes.len() - 1;
     ctxt.classes[l].parents.push(out);
     ctxt.classes[r].parents.push(out);
+
+    if let (Node::Elem(l), Node::Elem(r)) = (&ctxt.classes[l].node, &ctxt.classes[r].node) {
+        ctxt.pos_terms.entry((*l, *r)).or_default().push(out);
+    }
+
     out
 }
 
