@@ -26,8 +26,10 @@ struct Class {
 #[derive(Clone, Default)]
 struct Ctxt {
     classes: Vec<Class>, // indexed by TermId
-    constraints: Vec<TermId>,
     table: Map<PosId, ElemId>,
+
+    // maps each PosId to a set of terms that currently evaluate to this PosId (if you eval its children).
+    pos_terms: Map<PosId, Vec<TermId>>,
     n: usize,
 }
 
@@ -54,9 +56,7 @@ fn step(mut ctxt: Ctxt) {
 
         let mut c = ctxt.clone();
 
-        c.table.insert(pos, e);
-
-        if propagate(&mut c).is_none() {
+        if propagate(pos, e, &mut c).is_none() {
             step(c);
         }
     }
@@ -64,24 +64,28 @@ fn step(mut ctxt: Ctxt) {
 
 struct Failure;
 
-fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
-    'start: loop {
-        for &c in ctxt.constraints.iter() {
-            let Node::AssertEq(l, tid) = ctxt.classes[c].node else { panic!() };
-            let Node::F(x, y) = ctxt.classes[tid].node else { panic!() };
-            let Some(x) = eval_term(x, ctxt) else { continue };
-            let Some(y) = eval_term(y, ctxt) else { continue };
-            if let Some(z) = ctxt.table.get(&(x, y)) {
-                if *z != l { return Some(Failure); }
-                else { continue }
-            } else {
-                ctxt.table.insert((x, y), l);
-                continue 'start;
+fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
+    let mut decisions = vec![(pos, e)];
+    while let Some((pos, e)) = decisions.pop() {
+        ctxt.table.insert(pos, e);
+        let terms = ctxt.pos_terms[&pos].clone();
+
+        for tid in terms {
+            for &parent in &ctxt.classes[tid].parents {
+                // option 1: parent now evaluates to f(A, B).
+                //    Then we should check whether it's part of AssertEq(Z, f(A, B)), and add a corresponding decision; otherwise
+                //    we should just add it to pos_terms[(A, B)].
+                // option 2: parent now evaluates to f(A, f(...)). Then we don't care?
+                // Option 3: parent now evaluates to AssertEq(A, B); then check A=B. but is this even possible?
+                check_parent(parent, ctxt, &mut decisions);
             }
         }
-        break;
     }
     None
+}
+
+// Checks whether a parent is ready for compute
+fn check_parent(t: TermId, ctxt: &Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
 }
 
 fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {

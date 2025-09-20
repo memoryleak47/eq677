@@ -54,5 +54,4 @@ fn build_assert(l: ElemId, r: TermId, ctxt: &mut Ctxt) {
     });
     let out = ctxt.classes.len() - 1;
     ctxt.classes[r].parents.push(out);
-    ctxt.constraints.push(out);
 }
