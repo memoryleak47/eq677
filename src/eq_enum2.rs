@@ -5,34 +5,22 @@ type Map<K, V> = indexmap::IndexMap<K, V>;
 
 type ElemId = usize;
 type PosId = (usize, usize);
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-struct TermId(usize);
-
-type ConstraintId = usize;
-
-#[derive(Clone)]
-struct Constraint(ElemId, TermId);
+type TermId = usize;
 
 #[derive(Clone, PartialEq, Eq)]
-enum Term {
+enum Node {
     Elem(ElemId),
     F(TermId, TermId),
+    AssertEq(ElemId, TermId),
 }
 
 type Table = Map<PosId, ElemId>;
 
-#[derive(Clone, Copy)]
-enum ThingId {
-    Constraint(ConstraintId),
-    Term(TermId),
-}
-
 #[derive(Clone, Default)]
 struct Ctxt {
-    constraints: Vec<Constraint>,
-    terms: Vec<Term>, // indexed by TermId.
-    parents: Vec<Vec<ThingId>>, // indexed by TermId.
+    constraints: Vec<TermId>,
+    terms: Vec<Node>, // indexed by TermId.
+    parents: Vec<Vec<TermId>>, // indexed by TermId.
     table: Table,
     n: usize,
 }
@@ -76,8 +64,9 @@ struct Failure;
 
 fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
     'start: loop {
-        for &Constraint(l, tid) in ctxt.constraints.iter() {
-            let Term::F(x, y) = ctxt.terms[tid.0] else { panic!() };
+        for &c in ctxt.constraints.iter() {
+            let Node::AssertEq(l, tid) = ctxt.terms[c] else { panic!() };
+            let Node::F(x, y) = ctxt.terms[tid] else { panic!() };
             let Some(x) = eval_term(x, ctxt) else { continue };
             let Some(y) = eval_term(y, ctxt) else { continue };
             if let Some(z) = ctxt.table.get(&(x, y)) {
@@ -94,29 +83,38 @@ fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
 }
 
 fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
-    match ctxt.terms[tid.0] {
-        Term::Elem(e) => Some(e),
-        Term::F(a, b) => {
+    match ctxt.terms[tid] {
+        Node::Elem(e) => Some(e),
+        Node::F(a, b) => {
             let a = eval_term(a, ctxt)?;
             let b = eval_term(b, ctxt)?;
             ctxt.table.get(&(a, b)).copied()
         },
+        Node::AssertEq(_, _) => panic!(),
     }
 }
 
 fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
-    ctxt.terms.push(Term::Elem(e));
+    ctxt.terms.push(Node::Elem(e));
     ctxt.parents.push(Vec::new());
-    TermId(ctxt.terms.len() - 1)
+    ctxt.terms.len() - 1
 }
 
 fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
-    ctxt.terms.push(Term::F(l, r));
+    ctxt.terms.push(Node::F(l, r));
     ctxt.parents.push(Vec::new());
-    let out = TermId(ctxt.terms.len() - 1);
-    ctxt.parents[l.0].push(ThingId::Term(out));
-    ctxt.parents[r.0].push(ThingId::Term(out));
+    let out = ctxt.terms.len() - 1;
+    ctxt.parents[l].push(out);
+    ctxt.parents[r].push(out);
     out
+}
+
+fn build_assert(l: ElemId, r: TermId, ctxt: &mut Ctxt) {
+    ctxt.terms.push(Node::AssertEq(l, r));
+    ctxt.parents.push(Vec::new());
+    let out = ctxt.terms.len() - 1;
+    ctxt.parents[r].push(out);
+    ctxt.constraints.push(out);
 }
 
 fn build_constraints(n: usize, ctxt: &mut Ctxt) {
@@ -129,14 +127,12 @@ fn build_constraints(n: usize, ctxt: &mut Ctxt) {
             let t = build_f(yx, y, ctxt);
             let t = build_f(x, t, ctxt);
             let t = build_f(y, t, ctxt);
-            ctxt.constraints.push(Constraint(x_id, t));
-            ctxt.parents[t.0].push(ThingId::Constraint(ctxt.constraints.len() - 1));
+            build_assert(x_id, t, ctxt);
 
             let t = build_f(y, yx, ctxt);
             let t = build_f(t, y, ctxt);
             let t = build_f(yx, t, ctxt);
-            ctxt.constraints.push(Constraint(x_id, t));
-            ctxt.parents[t.0].push(ThingId::Constraint(ctxt.constraints.len() - 1));
+            build_assert(x_id, t, ctxt);
         }
     }
 }
