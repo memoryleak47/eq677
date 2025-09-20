@@ -89,6 +89,8 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
 }
 
 fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
+    assert!(ctxt.classes[t].value.is_none(), "Why set a class multiple times?");
+
     ctxt.classes[t].value = Some(v);
     for parent in ctxt.classes[t].parents.clone() {
         visit_parent(parent, ctxt, decisions)?;
