@@ -9,6 +9,8 @@ type PosId = (usize, usize);
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct TermId(usize);
 
+type ConstraintId = usize;
+
 #[derive(Clone)]
 struct Constraint(ElemId, TermId);
 
@@ -20,22 +22,26 @@ enum Term {
 
 type Table = Map<PosId, ElemId>;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
+enum ThingId {
+    Constraint(ConstraintId),
+    Term(TermId),
+}
+
+#[derive(Clone, Default)]
 struct Ctxt {
     constraints: Vec<Constraint>,
     terms: Vec<Term>, // indexed by TermId.
+    parents: Vec<Vec<ThingId>>, // indexed by TermId.
     table: Table,
     n: usize,
 }
 
 pub fn eq_run(n: usize) {
-    let mut terms = Vec::new();
-    step(Ctxt {
-        constraints: build_constraints(n, &mut terms),
-        terms,
-        table: Map::new(),
-        n,
-    });
+    let mut ctxt = Ctxt::default();
+    ctxt.n = n;
+    build_constraints(n, &mut ctxt);
+    step(ctxt);
 }
 
 
@@ -108,25 +114,23 @@ fn build_f(l: TermId, r: TermId, terms: &mut Vec<Term>) -> TermId {
     TermId(terms.len() - 1)
 }
 
-fn build_constraints(n: usize, terms: &mut Vec<Term>) -> Vec<Constraint> {
-    let mut constraints = Vec::new();
+fn build_constraints(n: usize, ctxt: &mut Ctxt) {
     for x_id in 0..n {
         for y_id in 0..n {
-            let x = build_elem(x_id, terms);
-            let y = build_elem(y_id, terms);
-            let mut f = |a, b| build_f(a, b, terms);
+            let x = build_elem(x_id, &mut ctxt.terms);
+            let y = build_elem(y_id, &mut ctxt.terms);
+            let mut f = |a, b| build_f(a, b, &mut ctxt.terms);
             let yx = f(y, x);
 
             let t = f(yx, y);
             let t = f(x, t);
             let t = f(y, t);
-            constraints.push(Constraint(x_id, t));
+            ctxt.constraints.push(Constraint(x_id, t));
 
             let t = f(y, yx);
             let t = f(t, y);
             let t = f(yx, t);
-            constraints.push(Constraint(x_id, t));
+            ctxt.constraints.push(Constraint(x_id, t));
         }
     }
-    constraints
 }
