@@ -12,21 +12,21 @@ type TermId = usize;
 
 type Res = Result<(), ()>;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 enum Node {
     Elem(ElemId),
     F(TermId, TermId),
     AssertEq(ElemId, TermId),
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Class {
     node: Node,
     parents: Vec<TermId>,
     value: Option<ElemId>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Default, Debug)]
 struct Ctxt {
     classes: Vec<Class>, // indexed by TermId
     table: Map<PosId, ElemId>,
@@ -43,6 +43,7 @@ pub fn eq_run(n: usize) {
 }
 
 fn step(mut ctxt: Ctxt) {
+    dbg!(&ctxt);
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let Some(pos) = free_pos.next() else {
