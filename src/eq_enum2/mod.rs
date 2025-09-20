@@ -85,13 +85,6 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
 }
 
 // Called when we've computed one of the children of "t".
-//
-// option 1: "t" now evaluates to f(A, B).
-//    Then we should check whether it's part of AssertEq(Z, f(A, B)), and add a corresponding decision; otherwise
-//    check whether table[(A, B)] is already defined, if yes check the next level parent; otherwise
-//    we should just add the parent to pos_terms[(A, B)].
-// option 2: parent now evaluates to f(A, f(...)). Then we don't care?
-// Option 3: parent now evaluates to AssertEq(A, B); then check A=B. but is this even possible?
 fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
     match ctxt.classes[t].node {
         Node::F(x, y) => {
