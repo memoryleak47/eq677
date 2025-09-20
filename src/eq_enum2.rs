@@ -5,7 +5,9 @@ type Map<K, V> = indexmap::IndexMap<K, V>;
 
 type ElemId = usize;
 type PosId = (usize, usize);
-type TermId = usize;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct TermId(usize);
 
 #[derive(Clone)]
 struct Constraint(ElemId, TermId);
@@ -68,7 +70,7 @@ struct Failure;
 fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
     'start: loop {
         for &Constraint(l, tid) in ctxt.constraints.iter() {
-            let Term::F(x, y) = ctxt.terms[tid] else { panic!() };
+            let Term::F(x, y) = ctxt.terms[tid.0] else { panic!() };
             let Some(x) = eval_term(x, ctxt) else { continue };
             let Some(y) = eval_term(y, ctxt) else { continue };
             if let Some(z) = ctxt.table.get(&(x, y)) {
@@ -85,7 +87,7 @@ fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
 }
 
 fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
-    match ctxt.terms[tid] {
+    match ctxt.terms[tid.0] {
         Term::Elem(e) => Some(e),
         Term::F(a, b) => {
             let a = eval_term(a, ctxt)?;
@@ -97,32 +99,32 @@ fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
 
 fn build_elem(e: ElemId, terms: &mut Vec<Term>) -> TermId {
     terms.push(Term::Elem(e));
-    terms.len() - 1
+    TermId(terms.len() - 1)
 }
 
 fn build_f(l: TermId, r: TermId, terms: &mut Vec<Term>) -> TermId {
     terms.push(Term::F(l, r));
-    terms.len() - 1
+    TermId(terms.len() - 1)
 }
 
 fn build_constraints(n: usize, terms: &mut Vec<Term>) -> Vec<Constraint> {
     let mut constraints = Vec::new();
-    for x in 0..n {
-        for y in 0..n {
-            let x = build_elem(x, terms);
-            let y = build_elem(y, terms);
+    for x_id in 0..n {
+        for y_id in 0..n {
+            let x = build_elem(x_id, terms);
+            let y = build_elem(y_id, terms);
             let mut f = |a, b| build_f(a, b, terms);
             let yx = f(y, x);
 
             let t = f(yx, y);
             let t = f(x, t);
             let t = f(y, t);
-            constraints.push(Constraint(x, t));
+            constraints.push(Constraint(x_id, t));
 
             let t = f(y, yx);
             let t = f(t, y);
             let t = f(yx, t);
-            constraints.push(Constraint(x, t));
+            constraints.push(Constraint(x_id, t));
         }
     }
     constraints
