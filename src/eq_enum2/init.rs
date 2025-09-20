@@ -31,7 +31,8 @@ fn add_constraints(ctxt: &mut Ctxt) {
 fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
     ctxt.classes.push(Class {
         node: Node::Elem(e),
-        parents: Vec::new()
+        parents: Vec::new(),
+        value: Some(e),
     });
     ctxt.classes.len() - 1
 }
@@ -39,7 +40,8 @@ fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
 fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
     ctxt.classes.push(Class {
         node: Node::F(l, r),
-        parents: Vec::new()
+        parents: Vec::new(),
+        value: None,
     });
     let out = ctxt.classes.len() - 1;
     ctxt.classes[l].parents.push(out);
@@ -50,7 +52,8 @@ fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
 fn build_assert(l: ElemId, r: TermId, ctxt: &mut Ctxt) {
     ctxt.classes.push(Class {
         node: Node::AssertEq(l, r),
-        parents: Vec::new()
+        parents: Vec::new(),
+        value: None,
     });
     let out = ctxt.classes.len() - 1;
     ctxt.classes[r].parents.push(out);

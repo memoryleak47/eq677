@@ -21,6 +21,7 @@ enum Node {
 struct Class {
     node: Node,
     parents: Vec<TermId>,
+    value: Option<ElemId>,
 }
 
 #[derive(Clone, Default)]
@@ -30,6 +31,7 @@ struct Ctxt {
 
     // maps each PosId to a set of terms that currently evaluate to this PosId (if you eval its children).
     pos_terms: Map<PosId, Vec<TermId>>,
+
     n: usize,
 }
 
@@ -72,6 +74,7 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
         let terms = ctxt.pos_terms[&pos].clone();
 
         for tid in terms {
+            ctxt.classes[tid].value = Some(e);
             for parent in ctxt.classes[tid].parents.clone() {
                 visit_parent(parent, ctxt, &mut decisions);
             }
