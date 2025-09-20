@@ -106,12 +106,16 @@ fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
 
 fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
     ctxt.terms.push(Term::Elem(e));
+    ctxt.parents.push(Vec::new());
     TermId(ctxt.terms.len() - 1)
 }
 
 fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
     ctxt.terms.push(Term::F(l, r));
+    ctxt.parents.push(Vec::new());
     let out = TermId(ctxt.terms.len() - 1);
+    ctxt.parents[l.0].push(ThingId::Term(out));
+    ctxt.parents[r.0].push(ThingId::Term(out));
     out
 }
 
@@ -126,11 +130,13 @@ fn build_constraints(n: usize, ctxt: &mut Ctxt) {
             let t = build_f(x, t, ctxt);
             let t = build_f(y, t, ctxt);
             ctxt.constraints.push(Constraint(x_id, t));
+            ctxt.parents[t.0].push(ThingId::Constraint(ctxt.constraints.len() - 1));
 
             let t = build_f(y, yx, ctxt);
             let t = build_f(t, y, ctxt);
             let t = build_f(yx, t, ctxt);
             ctxt.constraints.push(Constraint(x_id, t));
+            ctxt.parents[t.0].push(ThingId::Constraint(ctxt.constraints.len() - 1));
         }
     }
 }
