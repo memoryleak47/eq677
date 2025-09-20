@@ -33,6 +33,7 @@ struct Ctxt {
     n: usize,
 }
 
+
 pub fn eq_run(n: usize) {
     step(build_ctxt(n));
 }
@@ -86,16 +87,4 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
 
 // Checks whether a parent is ready for compute
 fn check_parent(t: TermId, ctxt: &Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
-}
-
-fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
-    match ctxt.classes[tid].node {
-        Node::Elem(e) => Some(e),
-        Node::F(a, b) => {
-            let a = eval_term(a, ctxt)?;
-            let b = eval_term(b, ctxt)?;
-            ctxt.table.get(&(a, b)).copied()
-        },
-        Node::AssertEq(_, _) => panic!(),
-    }
 }
