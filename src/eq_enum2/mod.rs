@@ -10,6 +10,8 @@ type ElemId = usize;
 type PosId = (usize, usize);
 type TermId = usize;
 
+type Res = Result<(), ()>;
+
 #[derive(Clone, PartialEq, Eq)]
 enum Node {
     Elem(ElemId),
@@ -59,7 +61,7 @@ fn step(mut ctxt: Ctxt) {
 
         let mut c = ctxt.clone();
 
-        if propagate(pos, e, &mut c).is_none() {
+        if let Ok(()) = propagate(pos, e, &mut c) {
             step(c);
         }
     }
@@ -67,12 +69,12 @@ fn step(mut ctxt: Ctxt) {
 
 struct Failure;
 
-fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
+fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     let mut decisions = vec![(pos, e)];
     while let Some((pos, e)) = decisions.pop() {
         // eprintln!("({}, {}) -> {}", pos.0, pos.1, e);
         if let Some(z) = ctxt.table.get(&pos) {
-            if *z != e { return Some(Failure); }
+            if *z != e { return Err(()); }
             else { continue; }
             // TODO we could also raise a Failure if we have a duplicate per row!
         }
@@ -80,34 +82,28 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
         let terms = ctxt.pos_terms[&pos].clone();
 
         for tid in terms {
-            if set_class(tid, e, ctxt, &mut decisions).is_some() {
-                return Some(Failure);
-            }
+            set_class(tid, e, ctxt, &mut decisions)?;
         }
     }
-    None
+    Ok(())
 }
 
-fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Option<Failure> {
+fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
     ctxt.classes[t].value = Some(v);
     for parent in ctxt.classes[t].parents.clone() {
-        if visit_parent(parent, ctxt, decisions).is_some() {
-            return Some(Failure);
-        }
+        visit_parent(parent, ctxt, decisions)?;
     }
-    None
+    Ok(())
 }
 
 // Called when we've computed one of the children of "t".
-fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Option<Failure> {
+fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
     match ctxt.classes[t].node {
         Node::F(x, y) => {
-            let Some(x) = ctxt.classes[x].value else { return None };
-            let Some(y) = ctxt.classes[y].value else { return None };
+            let Some(x) = ctxt.classes[x].value else { return Ok(()) };
+            let Some(y) = ctxt.classes[y].value else { return Ok(()) };
             if let Some(z) = ctxt.table.get(&(x, y)) {
-                if set_class(t, *z, ctxt, decisions).is_some() {
-                    return Some(Failure);
-                }
+                set_class(t, *z, ctxt, decisions)?;
             } else {
                 for p in ctxt.classes[t].parents.clone() {
                     if let Node::AssertEq(v, _) = ctxt.classes[p].node {
@@ -117,16 +113,14 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
 
                 ctxt.pos_terms[&(x, y)].extend(ctxt.classes[t].parents.clone());
             }
-            None
         },
         Node::AssertEq(l, r) => {
             let r = ctxt.classes[r].value.unwrap();
             if l != r {
-                return Some(Failure);
-            } else {
-                None
+                return Err(());
             }
         }
         Node::Elem(_) => unreachable!(),
     }
+    Ok(())
 }
