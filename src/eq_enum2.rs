@@ -3,30 +3,34 @@ use rayon::prelude::*;
 
 type Map<K, V> = indexmap::IndexMap<K, V>;
 
-type ElemIdx = usize;
-type PosIdx = (usize, usize);
+type ElemId = usize;
+type PosId = (usize, usize);
+type TermId = usize;
 
 #[derive(Clone)]
-struct Constraint(ElemIdx, Term);
+struct Constraint(ElemId, TermId);
 
 #[derive(Clone, PartialEq, Eq)]
 enum Term {
-    Elem(ElemIdx),
-    F(Box<[Term; 2]>),
+    Elem(ElemId),
+    F(TermId, TermId),
 }
 
-type Table = Map<PosIdx, ElemIdx>;
+type Table = Map<PosId, ElemId>;
 
 #[derive(Clone)]
 struct Ctxt {
     constraints: Vec<Constraint>,
+    terms: Vec<Term>, // indexed by TermId.
     table: Table,
     n: usize,
 }
 
 pub fn eq_run(n: usize) {
+    let mut terms = Vec::new();
     step(Ctxt {
-        constraints: build_constraints(n),
+        constraints: build_constraints(n, &mut terms),
+        terms,
         table: Map::new(),
         n,
     });
@@ -35,9 +39,8 @@ pub fn eq_run(n: usize) {
 
 fn step(mut ctxt: Ctxt) {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
-    let free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
-    let score_map = score_map(&ctxt);
-    let Some(pos) = free_pos.max_by_key(|pos| score_map[pos]) else {
+    let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
+    let Some(pos) = free_pos.next() else {
         let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
         println!("Model found:");
         magma.dump();
@@ -55,104 +58,69 @@ fn step(mut ctxt: Ctxt) {
 
         c.table.insert(pos, e);
 
-        if simplify(&mut c).is_none() {
-            step(c);
-        }
+        propagate(&mut c);
+        step(c);
     }
 }
 
 struct Failure;
 
-fn simplify(ctxt: &mut Ctxt) -> Option<Failure> {
-    'outer: loop {
-        for Constraint(l, t) in ctxt.constraints.iter_mut() {
-            simplify_term(t, &ctxt.table);
-            match t {
-                Term::F(xy) => if let [Term::Elem(x), Term::Elem(y)] = &**xy {
-                    ctxt.table.insert((*x, *y), *l);
-                    continue 'outer;
-                },
-                Term::Elem(r) => if l != r {
-                    return Some(Failure)
-                },
+fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
+    'start: loop {
+        for &Constraint(l, tid) in ctxt.constraints.iter() {
+            let Term::F(x, y) = ctxt.terms[tid] else { panic!() };
+            let Some(x) = eval_term(x, ctxt) else { continue };
+            let Some(y) = eval_term(y, ctxt) else { continue };
+            if let Some(z) = ctxt.table.get(&(x, y)) {
+                if *z != l { return Some(Failure); }
+                else { continue }
+            } else {
+                ctxt.table.insert((x, y), l);
+                continue 'start;
             }
         }
-        return None;
     }
+    None
 }
 
-fn simplify_term(t: &mut Term, tab: &Table) {
-    match t {
-        Term::Elem(_) => {},
-        Term::F(ab) => {
-            let [a, b] = &mut **ab;
-            simplify_term(a, tab);
-            simplify_term(b, tab);
-            if let [Term::Elem(a), Term::Elem(b)] = [a, b] && let Some(new) = tab.get(&(*a, *b)) {
-                *t = Term::Elem(*new);
-            }
+fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
+    match ctxt.terms[tid] {
+        Term::Elem(e) => Some(e),
+        Term::F(a, b) => {
+            let a = eval_term(a, ctxt)?;
+            let b = eval_term(b, ctxt)?;
+            ctxt.table.get(&(a, b)).copied()
         },
     }
 }
 
-fn score_map(ctxt: &Ctxt) -> Map<PosIdx, usize> {
-    let mut m = Map::new();
-    for Constraint(_, t) in &ctxt.constraints {
-        let f = match termsize(t) {
-            0 => 0,
-            2 => 100,
-            3 => 30,
-            4 => 6,
-            5 => 3,
-            x => panic!("how? {x}"),
-        };
-        acc_score(f, t, &mut m);
-    }
-    m
+fn build_elem(e: ElemId, terms: &mut Vec<Term>) -> TermId {
+    terms.push(Term::Elem(e));
+    terms.len() - 1
 }
 
-fn acc_score(f: usize, term: &Term, m: &mut Map<PosIdx, usize>) {
-    match term {
-        Term::Elem(_) => {},
-        Term::F(ab) => {
-            if let Term::Elem(a) = ab[0] && let Term::Elem(b) = ab[1] {
-                *m.entry((a, b)).or_default() += f;
-            } else {
-                acc_score(f, &ab[0], m);
-                acc_score(f, &ab[1], m);
-            }
-        }
-    }
+fn build_f(l: TermId, r: TermId, terms: &mut Vec<Term>) -> TermId {
+    terms.push(Term::F(l, r));
+    terms.len() - 1
 }
 
-// counts the "F" terms.
-fn termsize(term: &Term) -> usize {
-    match term {
-        Term::Elem(_) => 0,
-        Term::F(ab) => termsize(&ab[0]) + termsize(&ab[1]) + 1,
-    }
-}
-
-fn build_constraints(n: usize) -> Vec<Constraint> {
+fn build_constraints(n: usize, terms: &mut Vec<Term>) -> Vec<Constraint> {
     let mut constraints = Vec::new();
-    let f = |a: &Term, b: &Term| Term::F(Box::new([a.clone(), b.clone()]));
     for x in 0..n {
         for y in 0..n {
-            let t = {
-                let x = &Term::Elem(x);
-                let y = &Term::Elem(y);
+            let x = build_elem(x, terms);
+            let y = build_elem(y, terms);
+            let mut f = |a, b| build_f(a, b, terms);
+            let yx = f(y, x);
 
-                f(y, &f(x, &f(&f(y, x), y)))
-            };
+            let t = f(yx, y);
+            let t = f(x, t);
+            let t = f(y, t);
             constraints.push(Constraint(x, t));
 
-            let t = {
-                let x = &Term::Elem(x);
-                let y = &Term::Elem(y);
-
-                let yx = &f(y, x);
-                f(yx, &f(&f(y, yx), y))
-            };
+            let t = f(y, yx);
+            let t = f(t, y);
+            let t = f(yx, t);
             constraints.push(Constraint(x, t));
         }
     }
