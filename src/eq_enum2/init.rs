@@ -9,10 +9,14 @@ pub fn build_ctxt(n: usize) -> Ctxt {
 
 fn add_constraints(ctxt: &mut Ctxt) {
     let n = ctxt.n;
+    let mut xs = Vec::new();
+    for x_id in 0..n {
+        xs.push(build_elem(x_id, ctxt));
+    }
     for x_id in 0..n {
         for y_id in 0..n {
-            let x = build_elem(x_id, ctxt);
-            let y = build_elem(y_id, ctxt);
+            let x = xs[x_id];
+            let y = xs[y_id];
             let yx = build_f(y, x, ctxt);
 
             let t = build_f(yx, y, ctxt);
