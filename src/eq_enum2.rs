@@ -16,11 +16,16 @@ enum Node {
 
 type Table = Map<PosId, ElemId>;
 
+#[derive(Clone)]
+struct Class {
+    node: Node,
+    parents: Vec<TermId>,
+}
+
 #[derive(Clone, Default)]
 struct Ctxt {
+    classes: Vec<Class>, // indexed by TermId
     constraints: Vec<TermId>,
-    terms: Vec<Node>, // indexed by TermId.
-    parents: Vec<Vec<TermId>>, // indexed by TermId.
     table: Table,
     n: usize,
 }
@@ -65,8 +70,8 @@ struct Failure;
 fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
     'start: loop {
         for &c in ctxt.constraints.iter() {
-            let Node::AssertEq(l, tid) = ctxt.terms[c] else { panic!() };
-            let Node::F(x, y) = ctxt.terms[tid] else { panic!() };
+            let Node::AssertEq(l, tid) = ctxt.classes[c].node else { panic!() };
+            let Node::F(x, y) = ctxt.classes[tid].node else { panic!() };
             let Some(x) = eval_term(x, ctxt) else { continue };
             let Some(y) = eval_term(y, ctxt) else { continue };
             if let Some(z) = ctxt.table.get(&(x, y)) {
@@ -83,7 +88,7 @@ fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
 }
 
 fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
-    match ctxt.terms[tid] {
+    match ctxt.classes[tid].node {
         Node::Elem(e) => Some(e),
         Node::F(a, b) => {
             let a = eval_term(a, ctxt)?;
@@ -95,25 +100,31 @@ fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
 }
 
 fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
-    ctxt.terms.push(Node::Elem(e));
-    ctxt.parents.push(Vec::new());
-    ctxt.terms.len() - 1
+    ctxt.classes.push(Class {
+        node: Node::Elem(e),
+        parents: Vec::new()
+    });
+    ctxt.classes.len() - 1
 }
 
 fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
-    ctxt.terms.push(Node::F(l, r));
-    ctxt.parents.push(Vec::new());
-    let out = ctxt.terms.len() - 1;
-    ctxt.parents[l].push(out);
-    ctxt.parents[r].push(out);
+    ctxt.classes.push(Class {
+        node: Node::F(l, r),
+        parents: Vec::new()
+    });
+    let out = ctxt.classes.len() - 1;
+    ctxt.classes[l].parents.push(out);
+    ctxt.classes[r].parents.push(out);
     out
 }
 
 fn build_assert(l: ElemId, r: TermId, ctxt: &mut Ctxt) {
-    ctxt.terms.push(Node::AssertEq(l, r));
-    ctxt.parents.push(Vec::new());
-    let out = ctxt.terms.len() - 1;
-    ctxt.parents[r].push(out);
+    ctxt.classes.push(Class {
+        node: Node::AssertEq(l, r),
+        parents: Vec::new()
+    });
+    let out = ctxt.classes.len() - 1;
+    ctxt.classes[r].parents.push(out);
     ctxt.constraints.push(out);
 }
 
