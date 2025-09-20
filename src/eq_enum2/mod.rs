@@ -70,6 +70,7 @@ struct Failure;
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
     let mut decisions = vec![(pos, e)];
     while let Some((pos, e)) = decisions.pop() {
+        // TODO check feasibility of this decision.
         ctxt.table.insert(pos, e);
         let terms = ctxt.pos_terms[&pos].clone();
 
@@ -94,7 +95,21 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
 fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
     match ctxt.classes[t].node {
         Node::F(x, y) => {
-            todo!()
+            let Some(x) = ctxt.classes[x].value else { return };
+            let Some(y) = ctxt.classes[y].value else { return };
+            if ctxt.table.contains_key(&(x, y)) {
+                for p in ctxt.classes[t].parents.clone() {
+                    visit_parent(p, ctxt, decisions);
+                }
+            } else {
+                for p in ctxt.classes[t].parents.clone() {
+                    if let Node::AssertEq(v, _) = ctxt.classes[p].node {
+                        decisions.push(((x, y), v));
+                    }
+                }
+
+                ctxt.pos_terms[&(x, y)].extend(ctxt.classes[t].parents.clone());
+            }
         },
         Node::AssertEq(_, _) => panic!("reachable?"),
         Node::Elem(_) => unreachable!(),
