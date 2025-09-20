@@ -1,5 +1,33 @@
 use crate::eq_enum2::*;
 
+pub fn build_ctxt(n: usize) -> Ctxt {
+    let mut ctxt = Ctxt::default();
+    ctxt.n = n;
+    add_constraints(&mut ctxt);
+    ctxt
+}
+
+fn add_constraints(ctxt: &mut Ctxt) {
+    let n = ctxt.n;
+    for x_id in 0..n {
+        for y_id in 0..n {
+            let x = build_elem(x_id, ctxt);
+            let y = build_elem(y_id, ctxt);
+            let yx = build_f(y, x, ctxt);
+
+            let t = build_f(yx, y, ctxt);
+            let t = build_f(x, t, ctxt);
+            let t = build_f(y, t, ctxt);
+            build_assert(x_id, t, ctxt);
+
+            let t = build_f(y, yx, ctxt);
+            let t = build_f(t, y, ctxt);
+            let t = build_f(yx, t, ctxt);
+            build_assert(x_id, t, ctxt);
+        }
+    }
+}
+
 fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
     ctxt.classes.push(Class {
         node: Node::Elem(e),
@@ -27,24 +55,4 @@ fn build_assert(l: ElemId, r: TermId, ctxt: &mut Ctxt) {
     let out = ctxt.classes.len() - 1;
     ctxt.classes[r].parents.push(out);
     ctxt.constraints.push(out);
-}
-
-pub fn build_constraints(n: usize, ctxt: &mut Ctxt) {
-    for x_id in 0..n {
-        for y_id in 0..n {
-            let x = build_elem(x_id, ctxt);
-            let y = build_elem(y_id, ctxt);
-            let yx = build_f(y, x, ctxt);
-
-            let t = build_f(yx, y, ctxt);
-            let t = build_f(x, t, ctxt);
-            let t = build_f(y, t, ctxt);
-            build_assert(x_id, t, ctxt);
-
-            let t = build_f(y, yx, ctxt);
-            let t = build_f(t, y, ctxt);
-            let t = build_f(yx, t, ctxt);
-            build_assert(x_id, t, ctxt);
-        }
-    }
 }

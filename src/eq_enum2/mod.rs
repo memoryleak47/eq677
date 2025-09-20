@@ -32,12 +32,8 @@ struct Ctxt {
 }
 
 pub fn eq_run(n: usize) {
-    let mut ctxt = Ctxt::default();
-    ctxt.n = n;
-    build_constraints(n, &mut ctxt);
-    step(ctxt);
+    step(build_ctxt(n));
 }
-
 
 fn step(mut ctxt: Ctxt) {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
