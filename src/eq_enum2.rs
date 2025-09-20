@@ -79,6 +79,7 @@ fn propagate(ctxt: &mut Ctxt) -> Option<Failure> {
                 continue 'start;
             }
         }
+        break;
     }
     None
 }
