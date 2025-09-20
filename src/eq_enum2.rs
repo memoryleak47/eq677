@@ -104,32 +104,32 @@ fn eval_term(tid: TermId, ctxt: &Ctxt) -> Option<ElemId> {
     }
 }
 
-fn build_elem(e: ElemId, terms: &mut Vec<Term>) -> TermId {
-    terms.push(Term::Elem(e));
-    TermId(terms.len() - 1)
+fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
+    ctxt.terms.push(Term::Elem(e));
+    TermId(ctxt.terms.len() - 1)
 }
 
-fn build_f(l: TermId, r: TermId, terms: &mut Vec<Term>) -> TermId {
-    terms.push(Term::F(l, r));
-    TermId(terms.len() - 1)
+fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
+    ctxt.terms.push(Term::F(l, r));
+    let out = TermId(ctxt.terms.len() - 1);
+    out
 }
 
 fn build_constraints(n: usize, ctxt: &mut Ctxt) {
     for x_id in 0..n {
         for y_id in 0..n {
-            let x = build_elem(x_id, &mut ctxt.terms);
-            let y = build_elem(y_id, &mut ctxt.terms);
-            let mut f = |a, b| build_f(a, b, &mut ctxt.terms);
-            let yx = f(y, x);
+            let x = build_elem(x_id, ctxt);
+            let y = build_elem(y_id, ctxt);
+            let yx = build_f(y, x, ctxt);
 
-            let t = f(yx, y);
-            let t = f(x, t);
-            let t = f(y, t);
+            let t = build_f(yx, y, ctxt);
+            let t = build_f(x, t, ctxt);
+            let t = build_f(y, t, ctxt);
             ctxt.constraints.push(Constraint(x_id, t));
 
-            let t = f(y, yx);
-            let t = f(t, y);
-            let t = f(yx, t);
+            let t = build_f(y, yx, ctxt);
+            let t = build_f(t, y, ctxt);
+            let t = build_f(yx, t, ctxt);
             ctxt.constraints.push(Constraint(x_id, t));
         }
     }
