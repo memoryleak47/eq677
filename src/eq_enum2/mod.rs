@@ -72,20 +72,28 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
         let terms = ctxt.pos_terms[&pos].clone();
 
         for tid in terms {
-            for &parent in &ctxt.classes[tid].parents {
-                // option 1: parent now evaluates to f(A, B).
-                //    Then we should check whether it's part of AssertEq(Z, f(A, B)), and add a corresponding decision; otherwise
-                //    check whether table[(A, B)] is already defined, if yes check the next level parent; otherwise
-                //    we should just add the parent to pos_terms[(A, B)].
-                // option 2: parent now evaluates to f(A, f(...)). Then we don't care?
-                // Option 3: parent now evaluates to AssertEq(A, B); then check A=B. but is this even possible?
-                check_parent(parent, ctxt, &mut decisions);
+            for parent in ctxt.classes[tid].parents.clone() {
+                visit_parent(parent, ctxt, &mut decisions);
             }
         }
     }
     None
 }
 
-// Checks whether a parent is ready for compute
-fn check_parent(t: TermId, ctxt: &Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
+// Called when we've computed one of the children of "t".
+//
+// option 1: "t" now evaluates to f(A, B).
+//    Then we should check whether it's part of AssertEq(Z, f(A, B)), and add a corresponding decision; otherwise
+//    check whether table[(A, B)] is already defined, if yes check the next level parent; otherwise
+//    we should just add the parent to pos_terms[(A, B)].
+// option 2: parent now evaluates to f(A, f(...)). Then we don't care?
+// Option 3: parent now evaluates to AssertEq(A, B); then check A=B. but is this even possible?
+fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
+    match ctxt.classes[t].node {
+        Node::F(x, y) => {
+            todo!()
+        },
+        Node::AssertEq(_, _) => panic!("reachable?"),
+        Node::Elem(_) => unreachable!(),
+    }
 }
