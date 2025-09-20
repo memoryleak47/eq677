@@ -70,14 +70,21 @@ struct Failure;
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
     let mut decisions = vec![(pos, e)];
     while let Some((pos, e)) = decisions.pop() {
-        // TODO check feasibility of this decision.
+        // eprintln!("({}, {}) -> {}", pos.0, pos.1, e);
+        if let Some(z) = ctxt.table.get(&pos) {
+            if *z != e { return Some(Failure); }
+            else { continue; }
+            // TODO we could also raise a Failure if we have a duplicate per row!
+        }
         ctxt.table.insert(pos, e);
         let terms = ctxt.pos_terms[&pos].clone();
 
         for tid in terms {
             ctxt.classes[tid].value = Some(e);
             for parent in ctxt.classes[tid].parents.clone() {
-                visit_parent(parent, ctxt, &mut decisions);
+                if visit_parent(parent, ctxt, &mut decisions).is_some() {
+                    return Some(Failure);
+                }
             }
         }
     }
@@ -85,14 +92,17 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Option<Failure> {
 }
 
 // Called when we've computed one of the children of "t".
-fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) {
+fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Option<Failure> {
     match ctxt.classes[t].node {
         Node::F(x, y) => {
-            let Some(x) = ctxt.classes[x].value else { return };
-            let Some(y) = ctxt.classes[y].value else { return };
-            if ctxt.table.contains_key(&(x, y)) {
+            let Some(x) = ctxt.classes[x].value else { return None };
+            let Some(y) = ctxt.classes[y].value else { return None };
+            if let Some(z) = ctxt.table.get(&(x, y)) {
+                ctxt.classes[t].value = Some(*z);
                 for p in ctxt.classes[t].parents.clone() {
-                    visit_parent(p, ctxt, decisions);
+                    if visit_parent(p, ctxt, decisions).is_some() {
+                        return Some(Failure);
+                    }
                 }
             } else {
                 for p in ctxt.classes[t].parents.clone() {
@@ -103,8 +113,16 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
 
                 ctxt.pos_terms[&(x, y)].extend(ctxt.classes[t].parents.clone());
             }
+            None
         },
-        Node::AssertEq(_, _) => panic!("reachable?"),
+        Node::AssertEq(l, r) => {
+            let r = ctxt.classes[r].value.unwrap();
+            if l != r {
+                return Some(Failure);
+            } else {
+                None
+            }
+        }
         Node::Elem(_) => unreachable!(),
     }
 }
