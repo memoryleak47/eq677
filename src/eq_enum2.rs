@@ -60,8 +60,9 @@ fn step(mut ctxt: Ctxt) {
 
         c.table.insert(pos, e);
 
-        propagate(&mut c);
-        step(c);
+        if propagate(&mut c).is_none() {
+            step(c);
+        }
     }
 }
 
