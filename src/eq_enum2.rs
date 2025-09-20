@@ -1,0 +1,160 @@
+use crate::*;
+use rayon::prelude::*;
+
+type Map<K, V> = indexmap::IndexMap<K, V>;
+
+type ElemIdx = usize;
+type PosIdx = (usize, usize);
+
+#[derive(Clone)]
+struct Constraint(ElemIdx, Term);
+
+#[derive(Clone, PartialEq, Eq)]
+enum Term {
+    Elem(ElemIdx),
+    F(Box<[Term; 2]>),
+}
+
+type Table = Map<PosIdx, ElemIdx>;
+
+#[derive(Clone)]
+struct Ctxt {
+    constraints: Vec<Constraint>,
+    table: Table,
+    n: usize,
+}
+
+pub fn eq_run(n: usize) {
+    step(Ctxt {
+        constraints: build_constraints(n),
+        table: Map::new(),
+        n,
+    });
+}
+
+
+fn step(mut ctxt: Ctxt) {
+    let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
+    let free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
+    let score_map = score_map(&ctxt);
+    let Some(pos) = free_pos.max_by_key(|pos| score_map[pos]) else {
+        let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
+        println!("Model found:");
+        magma.dump();
+
+        assert!(magma.is677());
+        assert!(magma.is255());
+
+        return; // We are done!
+    };
+
+    for e in 0..ctxt.n {
+        if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
+
+        let mut c = ctxt.clone();
+
+        c.table.insert(pos, e);
+
+        if simplify(&mut c).is_none() {
+            step(c);
+        }
+    }
+}
+
+struct Failure;
+
+fn simplify(ctxt: &mut Ctxt) -> Option<Failure> {
+    'outer: loop {
+        for Constraint(l, t) in ctxt.constraints.iter_mut() {
+            simplify_term(t, &ctxt.table);
+            match t {
+                Term::F(xy) => if let [Term::Elem(x), Term::Elem(y)] = &**xy {
+                    ctxt.table.insert((*x, *y), *l);
+                    continue 'outer;
+                },
+                Term::Elem(r) => if l != r {
+                    return Some(Failure)
+                },
+            }
+        }
+        return None;
+    }
+}
+
+fn simplify_term(t: &mut Term, tab: &Table) {
+    match t {
+        Term::Elem(_) => {},
+        Term::F(ab) => {
+            let [a, b] = &mut **ab;
+            simplify_term(a, tab);
+            simplify_term(b, tab);
+            if let [Term::Elem(a), Term::Elem(b)] = [a, b] && let Some(new) = tab.get(&(*a, *b)) {
+                *t = Term::Elem(*new);
+            }
+        },
+    }
+}
+
+fn score_map(ctxt: &Ctxt) -> Map<PosIdx, usize> {
+    let mut m = Map::new();
+    for Constraint(_, t) in &ctxt.constraints {
+        let f = match termsize(t) {
+            0 => 0,
+            2 => 100,
+            3 => 30,
+            4 => 6,
+            5 => 3,
+            x => panic!("how? {x}"),
+        };
+        acc_score(f, t, &mut m);
+    }
+    m
+}
+
+fn acc_score(f: usize, term: &Term, m: &mut Map<PosIdx, usize>) {
+    match term {
+        Term::Elem(_) => {},
+        Term::F(ab) => {
+            if let Term::Elem(a) = ab[0] && let Term::Elem(b) = ab[1] {
+                *m.entry((a, b)).or_default() += f;
+            } else {
+                acc_score(f, &ab[0], m);
+                acc_score(f, &ab[1], m);
+            }
+        }
+    }
+}
+
+// counts the "F" terms.
+fn termsize(term: &Term) -> usize {
+    match term {
+        Term::Elem(_) => 0,
+        Term::F(ab) => termsize(&ab[0]) + termsize(&ab[1]) + 1,
+    }
+}
+
+fn build_constraints(n: usize) -> Vec<Constraint> {
+    let mut constraints = Vec::new();
+    let f = |a: &Term, b: &Term| Term::F(Box::new([a.clone(), b.clone()]));
+    for x in 0..n {
+        for y in 0..n {
+            let t = {
+                let x = &Term::Elem(x);
+                let y = &Term::Elem(y);
+
+                f(y, &f(x, &f(&f(y, x), y)))
+            };
+            constraints.push(Constraint(x, t));
+
+            let t = {
+                let x = &Term::Elem(x);
+                let y = &Term::Elem(y);
+
+                let yx = &f(y, x);
+                f(yx, &f(&f(y, yx), y))
+            };
+            constraints.push(Constraint(x, t));
+        }
+    }
+    constraints
+}
