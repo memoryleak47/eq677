@@ -120,7 +120,9 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
                     }
                 }
 
-                ctxt.pos_terms[&(x, y)].push(t);
+                if !ctxt.pos_terms[&(x, y)].contains(&t) { // TODO why is this check not always false?
+                    ctxt.pos_terms[&(x, y)].push(t);
+                }
             }
         },
         Node::AssertEq(l, r) => {
