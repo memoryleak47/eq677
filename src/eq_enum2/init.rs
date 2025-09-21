@@ -38,7 +38,7 @@ fn build_elem(e: ElemId, ctxt: &mut Ctxt) -> TermId {
         parents: Vec::new(),
         value: Some(e),
     });
-    ctxt.classes.len() - 1
+    TermId(ctxt.classes.len() - 1)
 }
 
 fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
@@ -47,11 +47,11 @@ fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
         parents: Vec::new(),
         value: None,
     });
-    let out = ctxt.classes.len() - 1;
-    ctxt.classes[l].parents.push(out);
-    ctxt.classes[r].parents.push(out);
+    let out = TermId(ctxt.classes.len() - 1);
+    ctxt.classes[l.0].parents.push(out);
+    ctxt.classes[r.0].parents.push(out);
 
-    if let (Node::Elem(l), Node::Elem(r)) = (&ctxt.classes[l].node, &ctxt.classes[r].node) {
+    if let (Node::Elem(l), Node::Elem(r)) = (&ctxt.classes[l.0].node, &ctxt.classes[r.0].node) {
         ctxt.pos_terms.entry((*l, *r)).or_default().push(out);
     }
 
@@ -64,6 +64,6 @@ fn build_assert(l: ElemId, r: TermId, ctxt: &mut Ctxt) {
         parents: Vec::new(),
         value: None,
     });
-    let out = ctxt.classes.len() - 1;
-    ctxt.classes[r].parents.push(out);
+    let out = TermId(ctxt.classes.len() - 1);
+    ctxt.classes[r.0].parents.push(out);
 }

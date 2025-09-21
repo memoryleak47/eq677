@@ -11,7 +11,9 @@ type Map<K, V> = indexmap::IndexMap<K, V>;
 
 type ElemId = usize;
 type PosId = (usize, usize);
-type TermId = usize;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct TermId(usize);
 
 type Res = Result<(), ()>;
 
@@ -93,11 +95,11 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
 }
 
 fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
-    if ctxt.classes[t].value == Some(v) { return Ok(()); }
-    assert!(ctxt.classes[t].value.is_none(), "Class set to different things?");
+    if ctxt.classes[t.0].value == Some(v) { return Ok(()); }
+    assert!(ctxt.classes[t.0].value.is_none(), "Class set to different things?");
 
-    ctxt.classes[t].value = Some(v);
-    for parent in ctxt.classes[t].parents.clone() {
+    ctxt.classes[t.0].value = Some(v);
+    for parent in ctxt.classes[t.0].parents.clone() {
         visit_parent(parent, ctxt, decisions)?;
     }
     Ok(())
@@ -105,24 +107,24 @@ fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, 
 
 // Called when we've computed one of the children of "t".
 fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
-    match ctxt.classes[t].node {
+    match ctxt.classes[t.0].node {
         Node::F(x, y) => {
-            let Some(x) = ctxt.classes[x].value else { return Ok(()) };
-            let Some(y) = ctxt.classes[y].value else { return Ok(()) };
+            let Some(x) = ctxt.classes[x.0].value else { return Ok(()) };
+            let Some(y) = ctxt.classes[y.0].value else { return Ok(()) };
             if let Some(z) = ctxt.table.get(&(x, y)) {
                 set_class(t, *z, ctxt, decisions)?;
             } else {
-                for p in ctxt.classes[t].parents.clone() {
-                    if let Node::AssertEq(v, _) = ctxt.classes[p].node {
+                for p in ctxt.classes[t.0].parents.clone() {
+                    if let Node::AssertEq(v, _) = ctxt.classes[p.0].node {
                         decisions.push(((x, y), v));
                     }
                 }
 
-                ctxt.pos_terms[&(x, y)].extend(ctxt.classes[t].parents.clone());
+                ctxt.pos_terms[&(x, y)].extend(ctxt.classes[t.0].parents.clone());
             }
         },
         Node::AssertEq(l, r) => {
-            let r = ctxt.classes[r].value.unwrap();
+            let r = ctxt.classes[r.0].value.unwrap();
             if l != r {
                 return Err(());
             }
