@@ -125,19 +125,18 @@ fn forward_step(ctxt: &mut Ctxt) {
 }
 
 fn backtrack_step(ctxt: &mut Ctxt) {
-    if ctxt.trail.is_empty() {
-        ctxt.mode = Mode::Done;
-        return;
-    }
-    match ctxt.trail.pop().unwrap() {
-        TrailEvent::DecisionPoint(pos, options) => {
-            activate_option(pos, options, ctxt);
-            return;
-        },
-        TrailEvent::TableStore(pos) => { ctxt.table[idx(pos, ctxt.n)] = ElemId::MAX; },
-        TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[idx(pos, ctxt.n)].pop(); },
-        TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
-        TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
+    loop {
+        match ctxt.trail.pop() {
+            Some(TrailEvent::DecisionPoint(pos, options)) => {
+                activate_option(pos, options, ctxt);
+                return;
+            },
+            Some(TrailEvent::TableStore(pos)) => { ctxt.table[idx(pos, ctxt.n)] = ElemId::MAX; },
+            Some(TrailEvent::PosTermsPush(pos)) => { ctxt.pos_terms[idx(pos, ctxt.n)].pop(); },
+            Some(TrailEvent::ValueSet(tid)) => { ctxt.classes[tid.0].value = None; },
+            Some(TrailEvent::Defresh(e)) => { ctxt.fresh[e] = true; },
+            None => { ctxt.mode = Mode::Done; break; }
+        }
     }
 }
 
