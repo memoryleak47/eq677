@@ -20,7 +20,7 @@ enum TrailEvent {
     TableStore(PosId), // ctxt.table.insert(pos, _);
     PosTermsPush(PosId), // ctxt.pos_terms[pos].push(_);
     ValueSet(TermId), // ctxt.classes[i].value = Some(_);
-    // Defresh(ElemId), // ctxt.fresh[i] = false;
+    Defresh(ElemId), // ctxt.fresh[i] = false;
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -60,7 +60,7 @@ struct Ctxt {
     n: usize,
     mode: Mode,
 
-    // fresh: Vec<bool>, // whether an ElemId is still "fresh".
+    fresh: Vec<bool>, // whether an ElemId is still "fresh".
 }
 
 pub fn eq_run2(n: usize) {
@@ -98,7 +98,7 @@ fn backtrack_step(ctxt: &mut Ctxt) {
         TrailEvent::TableStore(pos) => { ctxt.table.remove(&pos); },
         TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[&pos].pop(); },
         TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
-        // TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
+        TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
     }
 }
 
@@ -112,17 +112,36 @@ fn print_model(ctxt: &Ctxt) {
     assert!(magma.is255());
 }
 
-fn next_options(ctxt: &Ctxt) -> Option<(PosId, Vec<ElemId>)> {
+fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let pos = free_pos.max_by_key(|pos| ctxt.pos_terms[pos].len())?;
 
+    let mut found_fresh = false;
+
+    // TODO: maybe prefer choosing already non-fresh ones!
+    if ctxt.fresh[pos.0] {
+        ctxt.fresh[pos.0] = false;
+        ctxt.trail.push(TrailEvent::Defresh(pos.0));
+    }
+    if ctxt.fresh[pos.1] {
+        ctxt.fresh[pos.1] = false;
+        ctxt.trail.push(TrailEvent::Defresh(pos.1));
+    }
+
     let mut valids = Vec::new();
     for e in 0..ctxt.n {
+        if ctxt.fresh[e] {
+            // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
+            if found_fresh { continue }
+            else { found_fresh = true; }
+        }
+
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
 
         valids.push(e);
     }
+
     Some((pos, valids))
 }
 
@@ -131,6 +150,12 @@ fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
         ctxt.mode = Mode::Backtracking;
         return;
     };
+
+    if ctxt.fresh[e] {
+        ctxt.fresh[e] = false;
+        ctxt.trail.push(TrailEvent::Defresh(e));
+    }
+
     ctxt.mode = Mode::Forward;
     ctxt.trail.push(TrailEvent::DecisionPoint(pos, options));
     if let Err(()) = propagate(pos, e, ctxt) {
