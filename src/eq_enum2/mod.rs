@@ -82,8 +82,10 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
         if let Some(z) = ctxt.table.get(&pos) {
             if *z != e { return Err(()); }
             else { continue; }
-            // TODO we could also raise a Failure if we have a duplicate per row!
         }
+
+        if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { return Err(()); }
+
         ctxt.table.insert(pos, e);
         let terms = ctxt.pos_terms[&pos].clone();
 
