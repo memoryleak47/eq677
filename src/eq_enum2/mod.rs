@@ -44,7 +44,7 @@ struct Ctxt {
 
     n: usize,
 
-    fresh: Vec<bool>, // whether an ElemIdx is still "fresh".
+    fresh: Vec<bool>, // whether an ElemId is still "fresh".
 }
 
 pub fn eq_run2(n: usize) {
