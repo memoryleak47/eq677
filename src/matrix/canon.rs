@@ -7,6 +7,10 @@ impl MatrixMagma {
         all_perms(self.n).into_iter().map(|p| self.permute(p)).min().unwrap()
     }
 
+    pub fn canonicalize_rev(&self) -> Self {
+        all_perms(self.n).into_iter().map(|p| self.permute(p).transpose()).min().unwrap().transpose()
+    }
+
     pub fn transpose(&self) -> Self {
         let mut m = MatrixMagma::zeros(self.n);
         for x in 0..self.n {
