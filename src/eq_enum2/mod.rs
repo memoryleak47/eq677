@@ -3,8 +3,6 @@ use rayon::prelude::*;
 
 // TODO things to still implement:
 // - trail (instead of cloning)
-// - multi-threading?
-// - freshness
 
 mod init;
 pub use init::*;
@@ -45,6 +43,8 @@ struct Ctxt {
     pos_terms: Map<PosId, Vec<TermId>>,
 
     n: usize,
+
+    fresh: Vec<bool>, // whether an ElemIdx is still "fresh".
 }
 
 pub fn eq_run2(n: usize) {
@@ -66,16 +66,35 @@ fn step(mut ctxt: Ctxt) {
         return; // We are done!
     };
 
+    let mut found_fresh = false;
+
+    ctxt.fresh[pos.0] = false;
+    ctxt.fresh[pos.1] = false;
+
+    let mut valids = Vec::new();
     for e in 0..ctxt.n {
+        if ctxt.fresh[e] {
+
+            // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
+            if found_fresh { continue }
+            else { found_fresh = true; }
+        }
+
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
+
+        valids.push(e);
+    }
+
+    valids.into_par_iter().for_each(|e| {
         // println!("decide ({}, {}) -> {}", pos.0, pos.1, e);
 
         let mut c = ctxt.clone();
+        c.fresh[e] = false;
 
         if let Ok(()) = propagate(pos, e, &mut c) {
             step(c);
         }
-    }
+    });
 }
 
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
