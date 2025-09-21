@@ -120,7 +120,7 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
                     }
                 }
 
-                ctxt.pos_terms[&(x, y)].extend(ctxt.classes[t.0].parents.clone());
+                ctxt.pos_terms[&(x, y)].push(t);
             }
         },
         Node::AssertEq(l, r) => {
