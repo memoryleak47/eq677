@@ -289,6 +289,22 @@ fn handle_visit_parent(t: TermId, ctxt: &mut Ctxt) -> Res {
                     if let Node::AssertEq(v, _) = ctxt.classes[p.0].node {
                         ctxt.propagate_queue.push(PropagationTask::Decision((x, y), v));
                     }
+
+                    if let Node::F(l, r) = ctxt.classes[p.0].node {
+                        let Some(l) = ctxt.classes[l.0].value else { continue };
+                        assert!(t == r);
+                        for &pp in &ctxt.classes[p.0].parents {
+                            if let Node::AssertEq(v, _) = ctxt.classes[pp.0].node {
+                                for a in 0..ctxt.n {
+                                    if ctxt.table[idx((l, a), ctxt.n)] == v {
+                                        // if f(l, a) = v /\ f(l, f(x, y)) = v, then
+                                        // f(x, y) = a.
+                                        ctxt.propagate_queue.push(PropagationTask::Decision((x, y), a));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 let a = &mut ctxt.pos_terms[idx((x, y), ctxt.n)];
