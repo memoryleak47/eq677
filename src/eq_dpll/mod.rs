@@ -150,7 +150,7 @@ fn print_model(ctxt: &Ctxt) {
     assert!(magma.is255());
 }
 
-fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
+fn best_score(ctxt: &Ctxt) -> Option<PosId> {
     let mut best = None;
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
@@ -166,7 +166,11 @@ fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
             }
         }
     }
-    let pos = best?.0;
+    Some(best?.0)
+}
+
+fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
+    let pos = best_score(ctxt)?;
 
     let mut found_fresh = false;
 
