@@ -2,7 +2,7 @@ use crate::*;
 use rayon::prelude::*;
 use smallvec::SmallVec;
 
-fn threading_depth(n: usize) -> usize { n }
+fn threading_depth(n: usize) -> usize { n+1 }
 
 mod init;
 pub use init::*;
