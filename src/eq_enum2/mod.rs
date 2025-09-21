@@ -42,7 +42,7 @@ struct Ctxt {
     n: usize,
 }
 
-pub fn eq_run(n: usize) {
+pub fn eq_run2(n: usize) {
     step(build_ctxt(n));
 }
 
