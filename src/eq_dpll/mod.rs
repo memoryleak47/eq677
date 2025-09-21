@@ -1,6 +1,12 @@
 use crate::*;
 use rayon::prelude::*;
 use smallvec::SmallVec;
+use std::collections::HashSet;
+use std::sync::Mutex;
+
+lazy_static::lazy_static! {
+    static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
+}
 
 fn threading_depth(n: usize) -> usize { n+1 }
 
@@ -143,6 +149,13 @@ fn backtrack_step(ctxt: &mut Ctxt) {
 fn print_model(ctxt: &Ctxt) {
     let magma = MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
     let magma = magma.canonicalize();
+
+    let mut handle = DB.lock().unwrap();
+    if handle.contains(&magma) { return; }
+
+    handle.insert(magma.clone());
+    drop(handle);
+
     println!("Model found:");
     magma.dump();
     // ctxt.dump();

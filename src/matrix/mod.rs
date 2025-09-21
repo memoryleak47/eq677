@@ -2,7 +2,7 @@ use crate::*;
 
 mod canon;
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MatrixMagma {
     n: usize, // size
     data: Box<[usize]>, // of length n^2
