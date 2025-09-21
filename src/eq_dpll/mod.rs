@@ -170,7 +170,7 @@ fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     let mut valids = Vec::new();
     for e in 0..ctxt.n {
         if ctxt.fresh[e] {
-            // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
+            // If we already used a "fresh" ElemId, no reason to do the same operation for another fresh one!
             if found_fresh { continue }
             else { found_fresh = true; }
         }
