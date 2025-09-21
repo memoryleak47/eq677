@@ -1,8 +1,7 @@
 use crate::*;
 use rayon::prelude::*;
 
-// TODO things to still implement:
-// - multi-threading
+fn threading_depth(n: usize) -> usize { n }
 
 mod init;
 pub use init::*;
@@ -17,6 +16,7 @@ pub fn idx((x, y): PosId, n: usize) -> usize {
     x + n * y
 }
 
+#[derive(Clone)]
 enum TrailEvent {
     DecisionPoint(PosId, Vec<ElemId>), // We set the PosId to something. If this fails, take the next thing from the vector and try that.
     TableStore(PosId), // ctxt.table.insert(pos, _);
@@ -30,27 +30,28 @@ struct TermId(usize);
 
 type Res = Result<(), ()>;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 enum Node {
     Elem(ElemId),
     F(TermId, TermId),
     AssertEq(ElemId, TermId),
 }
 
+#[derive(Clone)]
 struct Class {
     node: Node,
     parents: Vec<TermId>,
     value: Option<ElemId>,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 enum Mode {
     #[default] Forward,
     Backtracking,
     Done,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Vec<Class>, // indexed by TermId
@@ -64,21 +65,46 @@ struct Ctxt {
     mode: Mode,
 
     fresh: Vec<bool>, // whether an ElemId is still "fresh".
+    depth: usize,
 }
 
 pub fn eq_run(n: usize) {
-    let ctxt = &mut build_ctxt(n);
+    mainloop(build_ctxt(n));
+}
 
+fn mainloop(mut ctxt: Ctxt) {
     loop {
         match ctxt.mode {
-            Mode::Forward => forward_step(ctxt),
-            Mode::Backtracking => backtrack_step(ctxt),
+            Mode::Forward => forward_step(&mut ctxt),
+            Mode::Backtracking => backtrack_step(&mut ctxt),
             Mode::Done => break,
         }
     }
 }
 
+fn threaded_forward_step(ctxt: &mut Ctxt) {
+    let Some((pos, options)) = next_options(ctxt) else {
+        print_model(ctxt);
+        ctxt.mode = Mode::Backtracking;
+        return;
+    };
+
+    options.par_iter().for_each(|e| {
+        // NOTE: this is one clone too many.
+        let mut ctxt = ctxt.clone();
+        ctxt.depth += 1;
+        activate_option(pos, vec![*e], &mut ctxt);
+        mainloop(ctxt);
+    });
+    ctxt.mode = Mode::Done;
+}
+
 fn forward_step(ctxt: &mut Ctxt) {
+    if ctxt.depth < threading_depth(ctxt.n) {
+        threaded_forward_step(ctxt);
+        return;
+    }
+
     let Some((pos, options)) = next_options(ctxt) else {
         print_model(ctxt);
         ctxt.mode = Mode::Backtracking;
