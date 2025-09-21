@@ -1,8 +1,7 @@
 use crate::eq_enum2::*;
 
 impl Ctxt {
-    pub fn dump(&self) {
-        println!("==============================================================================");
+    pub fn dump_classes(&self) {
         for (i, c) in self.classes.iter().enumerate() {
             let n = match &c.node {
                 Node::Elem(e) => format!("Elem({e})"),
@@ -23,7 +22,9 @@ impl Ctxt {
             u.push(']');
             println!("{i} := {n:20}{v:20}{u}");
         }
-        println!("------------------------------------------------------------------------------");
+    }
+
+    pub fn dump_table(&self) {
         for x in 0..self.n {
             for y in 0..self.n {
                 if let Some(z) = self.table.get(&(x, y)) {
@@ -31,7 +32,9 @@ impl Ctxt {
                 }
             }
         }
-        println!("------------------------------------------------------------------------------");
+    }
+
+    pub fn dump_pos_terms(&self) {
         for x in 0..self.n {
             for y in 0..self.n {
                 if let Some(z) = self.pos_terms.get(&(x, y)) {
@@ -39,6 +42,15 @@ impl Ctxt {
                 }
             }
         }
+    }
+
+    pub fn dump(&self) {
+        println!("==============================================================================");
+        self.dump_classes();
+        println!("------------------------------------------------------------------------------");
+        self.dump_table();
+        println!("------------------------------------------------------------------------------");
+        self.dump_pos_terms();
         println!("==============================================================================");
     }
 }
