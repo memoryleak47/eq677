@@ -151,9 +151,22 @@ fn print_model(ctxt: &Ctxt) {
 }
 
 fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
-    let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
-    let mut free_pos = all_pos.filter(|xy| ctxt.table[idx(*xy, ctxt.n)] == ElemId::MAX);
-    let pos = free_pos.max_by_key(|pos| ctxt.pos_terms[idx(*pos, ctxt.n)].len())?;
+    let mut best = None;
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            let i = idx((x, y), ctxt.n);
+            if ctxt.table[i] != ElemId::MAX { continue; }
+            let score = ctxt.pos_terms[i].len();
+            let cond = match best {
+                None => true,
+                Some((_, score2)) => score > score2,
+            };
+            if cond {
+                best = Some(((x, y), score));
+            }
+        }
+    }
+    let pos = best?.0;
 
     let mut found_fresh = false;
 
