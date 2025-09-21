@@ -51,6 +51,12 @@ enum Mode {
     Done,
 }
 
+#[derive(Clone)]
+enum PropagationTask {
+    SetClass(TermId, ElemId),
+    Decision(PosId, ElemId),
+}
+
 #[derive(Default, Clone)]
 struct Ctxt {
     trail: Vec<TrailEvent>,
@@ -66,6 +72,8 @@ struct Ctxt {
 
     fresh: Vec<bool>, // whether an ElemId is still "fresh".
     depth: usize,
+
+    propagate_queue: Vec<PropagationTask>,
 }
 
 pub fn eq_run(n: usize) {
@@ -192,52 +200,66 @@ fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
 }
 
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
-    let mut decisions = vec![(pos, e)];
-    while let Some((pos, e)) = decisions.pop() {
-        // eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
-        if let z = ctxt.table[idx(pos, ctxt.n)] && z != ElemId::MAX {
-            if z != e { return Err(()); }
-            else { continue; }
-        }
+    assert!(ctxt.propagate_queue.is_empty());
+    ctxt.propagate_queue.push(PropagationTask::Decision(pos, e));
 
-        if (0..ctxt.n).any(|z| ctxt.table[idx((pos.0, z), ctxt.n)] == e) { return Err(()); }
-
-        assert_eq!(ctxt.table[idx(pos, ctxt.n)], ElemId::MAX);
-        ctxt.table[idx(pos, ctxt.n)] = e;
-        ctxt.trail.push(TrailEvent::TableStore(pos));
-        let terms = ctxt.pos_terms[idx(pos, ctxt.n)].clone();
-
-        for tid in terms {
-            set_class(tid, e, ctxt, &mut decisions)?;
+    while let Some(task) = ctxt.propagate_queue.pop() {
+        let output = match task {
+            PropagationTask::Decision(pos, e) => handle_decision(pos, e, ctxt),
+            PropagationTask::SetClass(t, e) => handle_set_class(t, e, ctxt),
+        };
+        if let Err(()) = output {
+            ctxt.propagate_queue.clear();
+            return Err(());
         }
     }
     Ok(())
 }
 
-fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
+fn handle_decision(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
+    // eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
+    if let z = ctxt.table[idx(pos, ctxt.n)] && z != ElemId::MAX {
+        if z != e { return Err(()); }
+        else { return Ok(()); }
+    }
+
+    if (0..ctxt.n).any(|z| ctxt.table[idx((pos.0, z), ctxt.n)] == e) { return Err(()); }
+
+    assert_eq!(ctxt.table[idx(pos, ctxt.n)], ElemId::MAX);
+    ctxt.table[idx(pos, ctxt.n)] = e;
+    ctxt.trail.push(TrailEvent::TableStore(pos));
+    let terms = ctxt.pos_terms[idx(pos, ctxt.n)].clone();
+
+    for tid in terms {
+        ctxt.propagate_queue.push(PropagationTask::SetClass(tid, e));
+    }
+    Ok(())
+}
+
+fn handle_set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt) -> Res {
     if ctxt.classes[t.0].value == Some(v) { return Ok(()); }
     assert!(ctxt.classes[t.0].value.is_none(), "Class set to different things?");
 
     ctxt.classes[t.0].value = Some(v);
     ctxt.trail.push(TrailEvent::ValueSet(t));
     for parent in ctxt.classes[t.0].parents.clone() {
-        visit_parent(parent, ctxt, decisions)?;
+        visit_parent(parent, ctxt)?;
     }
     Ok(())
 }
 
 // Called when we've computed one of the children of "t".
-fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
+fn visit_parent(t: TermId, ctxt: &mut Ctxt) -> Res {
     match ctxt.classes[t.0].node {
         Node::F(x, y) => {
             let Some(x) = ctxt.classes[x.0].value else { return Ok(()) };
             let Some(y) = ctxt.classes[y.0].value else { return Ok(()) };
             if let z = ctxt.table[idx((x, y), ctxt.n)] && z != ElemId::MAX {
-                set_class(t, z, ctxt, decisions)?;
+                ctxt.propagate_queue.push(PropagationTask::SetClass(t, z));
             } else {
                 for p in ctxt.classes[t.0].parents.clone() {
                     if let Node::AssertEq(v, _) = ctxt.classes[p.0].node {
-                        decisions.push(((x, y), v));
+                        ctxt.propagate_queue.push(PropagationTask::Decision((x, y), v));
                     }
                 }
 
