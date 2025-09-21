@@ -260,7 +260,7 @@ fn handle_visit_parent(t: TermId, ctxt: &mut Ctxt) -> Res {
             if let z = ctxt.table[idx((x, y), ctxt.n)] && z != ElemId::MAX {
                 ctxt.propagate_queue.push(PropagationTask::SetClass(t, z));
             } else {
-                for p in ctxt.classes[t.0].parents.clone() {
+                for &p in &ctxt.classes[t.0].parents {
                     if let Node::AssertEq(v, _) = ctxt.classes[p.0].node {
                         ctxt.propagate_queue.push(PropagationTask::Decision((x, y), v));
                     }
