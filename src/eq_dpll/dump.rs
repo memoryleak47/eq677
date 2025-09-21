@@ -27,7 +27,7 @@ impl Ctxt {
     pub fn dump_table(&self) {
         for x in 0..self.n {
             for y in 0..self.n {
-                if let Some(z) = self.table.get(&(x, y)) {
+                if let z = self.table[idx((x, y), self.n)] && z != ElemId::MAX {
                     println!("f({x}, {y}) := {z}");
                 }
             }

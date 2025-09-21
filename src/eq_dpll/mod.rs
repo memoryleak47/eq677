@@ -16,6 +16,10 @@ type Map<K, V> = indexmap::IndexMap<K, V>;
 type ElemId = usize;
 type PosId = (usize, usize);
 
+pub fn idx((x, y): PosId, n: usize) -> usize {
+    x + n * y
+}
+
 enum TrailEvent {
     DecisionPoint(PosId, Vec<ElemId>), // We set the PosId to something. If this fails, take the next thing from the vector and try that.
     TableStore(PosId), // ctxt.table.insert(pos, _);
@@ -53,7 +57,7 @@ enum Mode {
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Vec<Class>, // indexed by TermId
-    table: Map<PosId, ElemId>,
+    table: Vec<ElemId>, // maps "PosId" (via idx encoding) to Option<ElemId>, where ElemId::MAX means None.
 
     // maps each PosId to a set of terms that currently evaluate to this PosId (if you eval its children).
     pos_terms: Map<PosId, Vec<TermId>>,
@@ -96,7 +100,7 @@ fn backtrack_step(ctxt: &mut Ctxt) {
             activate_option(pos, options, ctxt);
             return;
         },
-        TrailEvent::TableStore(pos) => { ctxt.table.remove(&pos); },
+        TrailEvent::TableStore(pos) => { ctxt.table[idx(pos, ctxt.n)] = ElemId::MAX; },
         TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[&pos].pop(); },
         TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
         TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
@@ -104,7 +108,7 @@ fn backtrack_step(ctxt: &mut Ctxt) {
 }
 
 fn print_model(ctxt: &Ctxt) {
-    let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
+    let magma = MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
     println!("Model found:");
     magma.dump();
     // ctxt.dump();
@@ -115,7 +119,7 @@ fn print_model(ctxt: &Ctxt) {
 
 fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
-    let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
+    let mut free_pos = all_pos.filter(|xy| ctxt.table[idx(*xy, ctxt.n)] == ElemId::MAX);
     let pos = free_pos.max_by_key(|pos| ctxt.pos_terms[pos].len())?;
 
     let mut found_fresh = false;
@@ -137,7 +141,7 @@ fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
             else { found_fresh = true; }
         }
 
-        if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
+        if (0..ctxt.n).any(|z| ctxt.table[idx((pos.0, z), ctxt.n)] == e) { continue }
 
         valids.push(e);
     }
@@ -167,15 +171,15 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     let mut decisions = vec![(pos, e)];
     while let Some((pos, e)) = decisions.pop() {
         // eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
-        if let Some(z) = ctxt.table.get(&pos) {
-            if *z != e { return Err(()); }
+        if let z = ctxt.table[idx(pos, ctxt.n)] && z != ElemId::MAX {
+            if z != e { return Err(()); }
             else { continue; }
         }
 
-        if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { return Err(()); }
+        if (0..ctxt.n).any(|z| ctxt.table[idx((pos.0, z), ctxt.n)] == e) { return Err(()); }
 
-        assert!(!ctxt.table.contains_key(&pos));
-        ctxt.table.insert(pos, e);
+        assert_eq!(ctxt.table[idx(pos, ctxt.n)], ElemId::MAX);
+        ctxt.table[idx(pos, ctxt.n)] = e;
         ctxt.trail.push(TrailEvent::TableStore(pos));
         let terms = ctxt.pos_terms[&pos].clone();
 
@@ -204,8 +208,8 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
         Node::F(x, y) => {
             let Some(x) = ctxt.classes[x.0].value else { return Ok(()) };
             let Some(y) = ctxt.classes[y.0].value else { return Ok(()) };
-            if let Some(z) = ctxt.table.get(&(x, y)) {
-                set_class(t, *z, ctxt, decisions)?;
+            if let z = ctxt.table[idx((x, y), ctxt.n)] && z != ElemId::MAX {
+                set_class(t, z, ctxt, decisions)?;
             } else {
                 for p in ctxt.classes[t.0].parents.clone() {
                     if let Node::AssertEq(v, _) = ctxt.classes[p.0].node {

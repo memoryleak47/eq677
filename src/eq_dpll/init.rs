@@ -4,6 +4,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
     let mut ctxt = Ctxt::default();
     ctxt.n = n;
     ctxt.fresh = vec![true; n];
+    ctxt.table = vec![ElemId::MAX; n*n];
     add_constraints(&mut ctxt);
     ctxt
 }
