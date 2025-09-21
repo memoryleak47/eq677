@@ -56,6 +56,7 @@ enum Mode {
 enum PropagationTask {
     SetClass(TermId, ElemId),
     Decision(PosId, ElemId),
+    VisitParent(TermId),
 }
 
 #[derive(Default, Clone)]
@@ -208,6 +209,7 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
         let output = match task {
             PropagationTask::Decision(pos, e) => handle_decision(pos, e, ctxt),
             PropagationTask::SetClass(t, e) => handle_set_class(t, e, ctxt),
+            PropagationTask::VisitParent(p) => handle_visit_parent(p, ctxt),
         };
         if let Err(()) = output {
             ctxt.propagate_queue.clear();
@@ -243,14 +245,14 @@ fn handle_set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt) -> Res {
 
     ctxt.classes[t.0].value = Some(v);
     ctxt.trail.push(TrailEvent::ValueSet(t));
-    for parent in ctxt.classes[t.0].parents.clone() {
-        visit_parent(parent, ctxt)?;
+    for &parent in &ctxt.classes[t.0].parents {
+        ctxt.propagate_queue.push(PropagationTask::VisitParent(parent));
     }
     Ok(())
 }
 
 // Called when we've computed one of the children of "t".
-fn visit_parent(t: TermId, ctxt: &mut Ctxt) -> Res {
+fn handle_visit_parent(t: TermId, ctxt: &mut Ctxt) -> Res {
     match ctxt.classes[t.0].node {
         Node::F(x, y) => {
             let Some(x) = ctxt.classes[x.0].value else { return Ok(()) };
