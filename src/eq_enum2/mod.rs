@@ -119,7 +119,6 @@ fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
 
     let mut found_fresh = false;
 
-    // TODO: maybe prefer choosing already non-fresh ones!
     if ctxt.fresh[pos.0] {
         ctxt.fresh[pos.0] = false;
         ctxt.trail.push(TrailEvent::Defresh(pos.0));
