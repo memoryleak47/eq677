@@ -265,10 +265,9 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt) -> Res {
                 }
 
                 let a = &mut ctxt.pos_terms[idx((x, y), ctxt.n)];
-                if !a.contains(&t) { // TODO why is this check not always false?
-                    a.push(t);
-                    ctxt.trail.push(TrailEvent::PosTermsPush((x, y)));
-                }
+                // invariant: assert!(!a.contains(&t));
+                a.push(t);
+                ctxt.trail.push(TrailEvent::PosTermsPush((x, y)));
             }
         },
         Node::AssertEq(l, r) => {
