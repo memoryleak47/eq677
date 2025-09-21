@@ -42,6 +42,13 @@ struct Class {
 }
 
 #[derive(Default)]
+enum Mode {
+    #[default] Forward,
+    Backtracking,
+    Done,
+}
+
+#[derive(Default)]
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Vec<Class>, // indexed by TermId
@@ -51,7 +58,7 @@ struct Ctxt {
     pos_terms: Map<PosId, Vec<TermId>>,
 
     n: usize,
-    done: bool,
+    mode: Mode,
 
     // fresh: Vec<bool>, // whether an ElemId is still "fresh".
 }
@@ -59,32 +66,39 @@ struct Ctxt {
 pub fn eq_run2(n: usize) {
     let ctxt = &mut build_ctxt(n);
 
-    while !ctxt.done {
-        let Some((pos, options)) = next_options(ctxt) else {
-            print_model(ctxt);
-            return;
-        };
-
-        activate_option(pos, options, ctxt);
+    loop {
+        match ctxt.mode {
+            Mode::Forward => forward_step(ctxt),
+            Mode::Backtracking => backtrack_step(ctxt),
+            Mode::Done => break,
+        }
     }
 }
 
-fn backtrack(ctxt: &mut Ctxt) {
-    loop {
-        if ctxt.trail.is_empty() {
-            ctxt.done = true;
+fn forward_step(ctxt: &mut Ctxt) {
+    let Some((pos, options)) = next_options(ctxt) else {
+        print_model(ctxt);
+        ctxt.mode = Mode::Backtracking;
+        return;
+    };
+
+    activate_option(pos, options, ctxt);
+}
+
+fn backtrack_step(ctxt: &mut Ctxt) {
+    if ctxt.trail.is_empty() {
+        ctxt.mode = Mode::Done;
+        return;
+    }
+    match ctxt.trail.pop().unwrap() {
+        TrailEvent::DecisionPoint(pos, options) => {
+            activate_option(pos, options, ctxt);
             return;
-        }
-        match ctxt.trail.pop().unwrap() {
-            TrailEvent::DecisionPoint(pos, options) => {
-                activate_option(pos, options, ctxt);
-                return;
-            },
-            TrailEvent::TableStore(pos) => { ctxt.table.remove(&pos); },
-            TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[&pos].pop(); },
-            TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
-            // TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
-        }
+        },
+        TrailEvent::TableStore(pos) => { ctxt.table.remove(&pos); },
+        TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[&pos].pop(); },
+        TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
+        // TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
     }
 }
 
@@ -114,12 +128,13 @@ fn next_options(ctxt: &Ctxt) -> Option<(PosId, Vec<ElemId>)> {
 
 fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
     let Some(e) = options.pop() else {
-        backtrack(ctxt);
+        ctxt.mode = Mode::Backtracking;
         return;
     };
+    ctxt.mode = Mode::Forward;
     ctxt.trail.push(TrailEvent::DecisionPoint(pos, options));
     if let Err(()) = propagate(pos, e, ctxt) {
-        backtrack(ctxt);
+        ctxt.mode = Mode::Backtracking;
     }
 }
 
