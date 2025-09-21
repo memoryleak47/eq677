@@ -152,6 +152,7 @@ fn print_model(ctxt: &Ctxt) {
 
 fn best_score(ctxt: &Ctxt) -> Option<PosId> {
     let mut best = None;
+    // NOTE: flipping these loops doubles the runtime. So this is crucially important.
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let i = idx((x, y), ctxt.n);
