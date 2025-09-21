@@ -134,6 +134,7 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
 
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { return Err(()); }
 
+        assert!(!ctxt.table.contains_key(&pos));
         ctxt.table.insert(pos, e);
         ctxt.trail.push(TrailEvent::TableStore(pos));
         let terms = ctxt.pos_terms[&pos].clone();
