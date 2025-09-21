@@ -228,9 +228,9 @@ fn handle_decision(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     assert_eq!(ctxt.table[idx(pos, ctxt.n)], ElemId::MAX);
     ctxt.table[idx(pos, ctxt.n)] = e;
     ctxt.trail.push(TrailEvent::TableStore(pos));
-    let terms = ctxt.pos_terms[idx(pos, ctxt.n)].clone();
+    let terms = &ctxt.pos_terms[idx(pos, ctxt.n)];
 
-    for tid in terms {
+    for &tid in terms {
         ctxt.propagate_queue.push(PropagationTask::SetClass(tid, e));
     }
     Ok(())
