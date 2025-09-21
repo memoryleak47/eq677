@@ -69,6 +69,7 @@ fn step(mut ctxt: Ctxt) {
 
     let mut found_fresh = false;
 
+    // NOTE: I should probably prefer choosing non-fresh pos.0 and pos.1 due to this!
     ctxt.fresh[pos.0] = false;
     ctxt.fresh[pos.1] = false;
 
