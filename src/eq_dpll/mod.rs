@@ -64,7 +64,7 @@ struct Ctxt {
     fresh: Vec<bool>, // whether an ElemId is still "fresh".
 }
 
-pub fn eq_run2(n: usize) {
+pub fn eq_run(n: usize) {
     let ctxt = &mut build_ctxt(n);
 
     loop {

@@ -1,4 +1,4 @@
-use crate::eq_enum2::*;
+use crate::eq_dpll::*;
 
 impl Ctxt {
     pub fn dump_classes(&self) {

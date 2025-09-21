@@ -1,4 +1,4 @@
-use crate::eq_enum2::*;
+use crate::eq_dpll::*;
 
 pub fn build_ctxt(n: usize) -> Ctxt {
     let mut ctxt = Ctxt::default();
