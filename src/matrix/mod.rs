@@ -2,7 +2,7 @@ use crate::*;
 
 mod canon;
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct MatrixMagma {
     n: usize, // size
     data: Box<[usize]>, // of length n^2
@@ -25,6 +25,23 @@ impl MatrixMagma {
             n,
             data: std::iter::repeat(0).take(n*n).collect(),
         }
+    }
+
+    pub fn parse(s: &str) -> Self {
+        let s = s.replace(",", " ");
+        let s = s.trim();
+        let mut lines: Vec<_> = s.lines().collect();
+
+        let mut m = MatrixMagma::zeros(lines.len());
+
+        for (x, line) in lines.into_iter().enumerate() {
+            for (y, s) in line.split_whitespace().enumerate() {
+                let i: usize = s.parse().unwrap();
+                m.set_f(x, y, i);
+            }
+        }
+
+        m
     }
 
     pub fn by_fn(n: usize, f: impl Fn(usize, usize) -> usize) -> Self {
