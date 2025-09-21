@@ -1,6 +1,11 @@
 use crate::*;
 use rayon::prelude::*;
 
+// TODO things to still implement:
+// - trail (instead of cloning)
+// - multi-threading?
+// - freshness
+
 mod init;
 pub use init::*;
 
@@ -50,7 +55,7 @@ fn step(mut ctxt: Ctxt) {
     // ctxt.dump();
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
-    let Some(pos) = free_pos.next() else {
+    let Some(pos) = free_pos.max_by_key(|pos| ctxt.pos_terms[pos].len()) else {
         let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
         println!("Model found:");
         magma.dump();
@@ -72,8 +77,6 @@ fn step(mut ctxt: Ctxt) {
         }
     }
 }
-
-struct Failure;
 
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     let mut decisions = vec![(pos, e)];
