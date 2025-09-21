@@ -191,7 +191,7 @@ fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
             else { found_fresh = true; }
         }
 
-        if (0..ctxt.n).any(|z| ctxt.table[idx((pos.0, z), ctxt.n)] == e) { continue }
+        if infeasible_decision(pos, e, ctxt) { continue }
 
         valids.push(e);
     }
@@ -235,6 +235,13 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     Ok(())
 }
 
+fn infeasible_decision((x, y): PosId, e: ElemId, ctxt: &Ctxt) -> bool {
+    for z in 0..ctxt.n {
+        if ctxt.table[x + z*ctxt.n] == e { return true; }
+    }
+    false
+}
+
 fn handle_decision(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     // eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
     if let z = ctxt.table[idx(pos, ctxt.n)] && z != ElemId::MAX {
@@ -242,7 +249,8 @@ fn handle_decision(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
         else { return Ok(()); }
     }
 
-    if (0..ctxt.n).any(|z| ctxt.table[idx((pos.0, z), ctxt.n)] == e) { return Err(()); }
+    if infeasible_decision(pos, e, ctxt) { return Err(()); }
+
 
     assert_eq!(ctxt.table[idx(pos, ctxt.n)], ElemId::MAX);
     ctxt.table[idx(pos, ctxt.n)] = e;
