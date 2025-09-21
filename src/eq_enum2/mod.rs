@@ -2,7 +2,8 @@ use crate::*;
 use rayon::prelude::*;
 
 // TODO things to still implement:
-// - trail (instead of cloning)
+// - multi-threading
+// - replace Map<Pos, X> with Vec<X>
 
 mod init;
 pub use init::*;
