@@ -61,6 +61,7 @@ fn step(mut ctxt: Ctxt) {
 
     for e in 0..ctxt.n {
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
+        println!("decide ({}, {}) -> {}", pos.0, pos.1, e);
 
         let mut c = ctxt.clone();
 
@@ -75,7 +76,7 @@ struct Failure;
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     let mut decisions = vec![(pos, e)];
     while let Some((pos, e)) = decisions.pop() {
-        // eprintln!("({}, {}) -> {}", pos.0, pos.1, e);
+        eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
         if let Some(z) = ctxt.table.get(&pos) {
             if *z != e { return Err(()); }
             else { continue; }
