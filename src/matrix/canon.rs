@@ -7,6 +7,16 @@ impl MatrixMagma {
         all_perms(self.n).into_iter().map(|p| self.permute(p)).min().unwrap()
     }
 
+    pub fn transpose(&self) -> Self {
+        let mut m = MatrixMagma::zeros(self.n);
+        for x in 0..self.n {
+            for y in 0..self.n {
+                m.set_f(y, x, self.f(x, y));
+            }
+        }
+        m
+    }
+
     fn permute(&self, p: Perm) -> Self {
         let mut c = Self::zeros(self.n);
         for x in 0..self.n {
