@@ -142,6 +142,7 @@ fn backtrack_step(ctxt: &mut Ctxt) {
 
 fn print_model(ctxt: &Ctxt) {
     let magma = MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
+    let magma = magma.canonicalize();
     println!("Model found:");
     magma.dump();
     // ctxt.dump();
