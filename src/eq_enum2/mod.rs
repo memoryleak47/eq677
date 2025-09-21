@@ -45,7 +45,7 @@ pub fn eq_run(n: usize) {
 }
 
 fn step(mut ctxt: Ctxt) {
-    ctxt.dump();
+    // ctxt.dump();
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let Some(pos) = free_pos.next() else {
@@ -61,7 +61,7 @@ fn step(mut ctxt: Ctxt) {
 
     for e in 0..ctxt.n {
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
-        println!("decide ({}, {}) -> {}", pos.0, pos.1, e);
+        // println!("decide ({}, {}) -> {}", pos.0, pos.1, e);
 
         let mut c = ctxt.clone();
 
@@ -76,7 +76,7 @@ struct Failure;
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     let mut decisions = vec![(pos, e)];
     while let Some((pos, e)) = decisions.pop() {
-        eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
+        // eprintln!("prop ({}, {}) -> {}", pos.0, pos.1, e);
         if let Some(z) = ctxt.table.get(&pos) {
             if *z != e { return Err(()); }
             else { continue; }
@@ -93,7 +93,8 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
 }
 
 fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>) -> Res {
-    assert!(ctxt.classes[t].value.is_none(), "Why set a class multiple times?");
+    if ctxt.classes[t].value == Some(v) { return Ok(()); }
+    assert!(ctxt.classes[t].value.is_none(), "Class set to different things?");
 
     ctxt.classes[t].value = Some(v);
     for parent in ctxt.classes[t].parents.clone() {
