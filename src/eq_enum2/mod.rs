@@ -59,6 +59,7 @@ fn step(mut ctxt: Ctxt) {
         let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
         println!("Model found:");
         magma.dump();
+        ctxt.dump();
 
         assert!(magma.is677());
         assert!(magma.is255());
