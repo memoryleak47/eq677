@@ -4,6 +4,9 @@ use rayon::prelude::*;
 mod init;
 pub use init::*;
 
+mod dump;
+pub use dump::*;
+
 type Map<K, V> = indexmap::IndexMap<K, V>;
 
 type ElemId = usize;
@@ -12,21 +15,21 @@ type TermId = usize;
 
 type Res = Result<(), ()>;
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq)]
 enum Node {
     Elem(ElemId),
     F(TermId, TermId),
     AssertEq(ElemId, TermId),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 struct Class {
     node: Node,
     parents: Vec<TermId>,
     value: Option<ElemId>,
 }
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Default)]
 struct Ctxt {
     classes: Vec<Class>, // indexed by TermId
     table: Map<PosId, ElemId>,
@@ -37,13 +40,12 @@ struct Ctxt {
     n: usize,
 }
 
-
 pub fn eq_run(n: usize) {
     step(build_ctxt(n));
 }
 
 fn step(mut ctxt: Ctxt) {
-    dbg!(&ctxt);
+    ctxt.dump();
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
     let Some(pos) = free_pos.next() else {
