@@ -37,17 +37,16 @@ impl Ctxt {
     pub fn dump_pos_terms(&self) {
         for x in 0..self.n {
             for y in 0..self.n {
-                if let Some(z) = self.pos_terms.get(&(x, y)) {
-                    let mut zz = format!("[");
-                    for (i, a) in z.iter().enumerate() {
-                        zz.push_str(&format!("${}", a.0));
-                        if i != z.len() - 1 {
-                            zz.push_str(", ");
-                        }
+                let z = &self.pos_terms[idx((x, y), self.n)];
+                let mut zz = format!("[");
+                for (i, a) in z.iter().enumerate() {
+                    zz.push_str(&format!("${}", a.0));
+                    if i != z.len() - 1 {
+                        zz.push_str(", ");
                     }
-                    zz.push(']');
-                    println!("pos_terms({x}, {y}) := {zz}");
                 }
+                zz.push(']');
+                println!("pos_terms({x}, {y}) := {zz}");
             }
         }
     }

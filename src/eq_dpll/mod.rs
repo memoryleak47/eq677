@@ -3,15 +3,12 @@ use rayon::prelude::*;
 
 // TODO things to still implement:
 // - multi-threading
-// - replace Map<Pos, X> with Vec<X>
 
 mod init;
 pub use init::*;
 
 mod dump;
 pub use dump::*;
-
-type Map<K, V> = indexmap::IndexMap<K, V>;
 
 type ElemId = usize;
 type PosId = (usize, usize);
@@ -60,7 +57,8 @@ struct Ctxt {
     table: Vec<ElemId>, // maps "PosId" (via idx encoding) to Option<ElemId>, where ElemId::MAX means None.
 
     // maps each PosId to a set of terms that currently evaluate to this PosId (if you eval its children).
-    pos_terms: Map<PosId, Vec<TermId>>,
+    // Note: PosId use idx encoding.
+    pos_terms: Vec<Vec<TermId>>,
 
     n: usize,
     mode: Mode,
@@ -101,7 +99,7 @@ fn backtrack_step(ctxt: &mut Ctxt) {
             return;
         },
         TrailEvent::TableStore(pos) => { ctxt.table[idx(pos, ctxt.n)] = ElemId::MAX; },
-        TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[&pos].pop(); },
+        TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[idx(pos, ctxt.n)].pop(); },
         TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
         TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
     }
@@ -120,7 +118,7 @@ fn print_model(ctxt: &Ctxt) {
 fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table[idx(*xy, ctxt.n)] == ElemId::MAX);
-    let pos = free_pos.max_by_key(|pos| ctxt.pos_terms[pos].len())?;
+    let pos = free_pos.max_by_key(|pos| ctxt.pos_terms[idx(*pos, ctxt.n)].len())?;
 
     let mut found_fresh = false;
 
@@ -181,7 +179,7 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
         assert_eq!(ctxt.table[idx(pos, ctxt.n)], ElemId::MAX);
         ctxt.table[idx(pos, ctxt.n)] = e;
         ctxt.trail.push(TrailEvent::TableStore(pos));
-        let terms = ctxt.pos_terms[&pos].clone();
+        let terms = ctxt.pos_terms[idx(pos, ctxt.n)].clone();
 
         for tid in terms {
             set_class(tid, e, ctxt, &mut decisions)?;
@@ -217,8 +215,9 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
                     }
                 }
 
-                if !ctxt.pos_terms[&(x, y)].contains(&t) { // TODO why is this check not always false?
-                    ctxt.pos_terms[&(x, y)].push(t);
+                let a = &mut ctxt.pos_terms[idx((x, y), ctxt.n)];
+                if !a.contains(&t) { // TODO why is this check not always false?
+                    a.push(t);
                     ctxt.trail.push(TrailEvent::PosTermsPush((x, y)));
                 }
             }

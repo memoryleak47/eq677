@@ -5,6 +5,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
     ctxt.n = n;
     ctxt.fresh = vec![true; n];
     ctxt.table = vec![ElemId::MAX; n*n];
+    ctxt.pos_terms = vec![Vec::new(); n*n];
     add_constraints(&mut ctxt);
     ctxt
 }
@@ -56,7 +57,7 @@ fn build_f(l: TermId, r: TermId, ctxt: &mut Ctxt) -> TermId {
     }
 
     if let (Node::Elem(l), Node::Elem(r)) = (&ctxt.classes[l.0].node, &ctxt.classes[r.0].node) {
-        ctxt.pos_terms.entry((*l, *r)).or_default().push(out);
+        ctxt.pos_terms[idx((*l, *r), ctxt.n)].push(out);
     }
 
     out
