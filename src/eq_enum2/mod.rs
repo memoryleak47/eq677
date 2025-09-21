@@ -15,27 +15,35 @@ type Map<K, V> = indexmap::IndexMap<K, V>;
 type ElemId = usize;
 type PosId = (usize, usize);
 
+enum TrailEvent {
+    DecisionPoint(PosId, Vec<ElemId>), // We set the PosId to something. If this fails, take the next thing from the vector and try that.
+    TableStore(PosId), // ctxt.table.insert(pos, _);
+    PosTermsPush(PosId), // ctxt.pos_terms[pos].push(_);
+    ValueSet(TermId), // ctxt.classes[i].value = Some(_);
+    // Defresh(ElemId), // ctxt.fresh[i] = false;
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct TermId(usize);
 
 type Res = Result<(), ()>;
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(PartialEq, Eq)]
 enum Node {
     Elem(ElemId),
     F(TermId, TermId),
     AssertEq(ElemId, TermId),
 }
 
-#[derive(Clone)]
 struct Class {
     node: Node,
     parents: Vec<TermId>,
     value: Option<ElemId>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 struct Ctxt {
+    trail: Vec<TrailEvent>,
     classes: Vec<Class>, // indexed by TermId
     table: Map<PosId, ElemId>,
 
@@ -43,60 +51,76 @@ struct Ctxt {
     pos_terms: Map<PosId, Vec<TermId>>,
 
     n: usize,
+    done: bool,
 
-    fresh: Vec<bool>, // whether an ElemId is still "fresh".
+    // fresh: Vec<bool>, // whether an ElemId is still "fresh".
 }
 
 pub fn eq_run2(n: usize) {
-    step(build_ctxt(n));
+    let ctxt = &mut build_ctxt(n);
+
+    while !ctxt.done {
+        let Some((pos, options)) = next_options(ctxt) else {
+            print_model(ctxt);
+            return;
+        };
+
+        activate_option(pos, options, ctxt);
+    }
 }
 
-fn step(mut ctxt: Ctxt) {
+fn backtrack(ctxt: &mut Ctxt) {
+    loop {
+        if ctxt.trail.is_empty() {
+            ctxt.done = true;
+            return;
+        }
+        match ctxt.trail.pop().unwrap() {
+            TrailEvent::DecisionPoint(pos, options) => {
+                activate_option(pos, options, ctxt);
+                return;
+            },
+            TrailEvent::TableStore(pos) => { ctxt.table.remove(&pos); },
+            TrailEvent::PosTermsPush(pos) => { ctxt.pos_terms[&pos].pop(); },
+            TrailEvent::ValueSet(tid) => { ctxt.classes[tid.0].value = None; },
+            // TrailEvent::Defresh(e) => { ctxt.fresh[e] = true; },
+        }
+    }
+}
+
+fn print_model(ctxt: &Ctxt) {
+    let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
+    println!("Model found:");
+    magma.dump();
     // ctxt.dump();
+
+    assert!(magma.is677());
+    assert!(magma.is255());
+}
+
+fn next_options(ctxt: &Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     let all_pos = (0..ctxt.n).map(|x| (0..ctxt.n).map(move |y| (x, y))).flatten();
     let mut free_pos = all_pos.filter(|xy| ctxt.table.get(xy).is_none());
-    let Some(pos) = free_pos.max_by_key(|pos| ctxt.pos_terms[pos].len()) else {
-        let magma = MatrixMagma::by_fn(ctxt.n, |x, y| *ctxt.table.get(&(x, y)).unwrap());
-        println!("Model found:");
-        magma.dump();
-        ctxt.dump();
-
-        assert!(magma.is677());
-        assert!(magma.is255());
-
-        return; // We are done!
-    };
-
-    let mut found_fresh = false;
-
-    // NOTE: I should probably prefer choosing non-fresh pos.0 and pos.1 due to this!
-    ctxt.fresh[pos.0] = false;
-    ctxt.fresh[pos.1] = false;
+    let pos = free_pos.max_by_key(|pos| ctxt.pos_terms[pos].len())?;
 
     let mut valids = Vec::new();
     for e in 0..ctxt.n {
-        if ctxt.fresh[e] {
-
-            // If we already used a "fresh" ElemIdx, no reason to do the same operation for another fresh one!
-            if found_fresh { continue }
-            else { found_fresh = true; }
-        }
-
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { continue }
 
         valids.push(e);
     }
+    Some((pos, valids))
+}
 
-    valids.into_par_iter().for_each(|e| {
-        // println!("decide ({}, {}) -> {}", pos.0, pos.1, e);
-
-        let mut c = ctxt.clone();
-        c.fresh[e] = false;
-
-        if let Ok(()) = propagate(pos, e, &mut c) {
-            step(c);
-        }
-    });
+fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
+    let Some(e) = options.pop() else {
+        backtrack(ctxt);
+        return;
+    };
+    ctxt.trail.push(TrailEvent::DecisionPoint(pos, options));
+    if let Err(()) = propagate(pos, e, ctxt) {
+        backtrack(ctxt);
+    }
 }
 
 fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
@@ -111,6 +135,7 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
         if (0..ctxt.n).any(|z| ctxt.table.get(&(pos.0, z)) == Some(&e)) { return Err(()); }
 
         ctxt.table.insert(pos, e);
+        ctxt.trail.push(TrailEvent::TableStore(pos));
         let terms = ctxt.pos_terms[&pos].clone();
 
         for tid in terms {
@@ -125,6 +150,7 @@ fn set_class(t: TermId, v: ElemId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, 
     assert!(ctxt.classes[t.0].value.is_none(), "Class set to different things?");
 
     ctxt.classes[t.0].value = Some(v);
+    ctxt.trail.push(TrailEvent::ValueSet(t));
     for parent in ctxt.classes[t.0].parents.clone() {
         visit_parent(parent, ctxt, decisions)?;
     }
@@ -148,6 +174,7 @@ fn visit_parent(t: TermId, ctxt: &mut Ctxt, decisions: &mut Vec<(PosId, ElemId)>
 
                 if !ctxt.pos_terms[&(x, y)].contains(&t) { // TODO why is this check not always false?
                     ctxt.pos_terms[&(x, y)].push(t);
+                    ctxt.trail.push(TrailEvent::PosTermsPush((x, y)));
                 }
             }
         },
