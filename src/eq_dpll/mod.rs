@@ -1,5 +1,6 @@
 use crate::*;
 use rayon::prelude::*;
+use smallvec::SmallVec;
 
 fn threading_depth(n: usize) -> usize { n }
 
@@ -40,7 +41,7 @@ enum Node {
 #[derive(Clone)]
 struct Class {
     node: Node,
-    parents: Vec<TermId>,
+    parents: SmallVec<[TermId; 2]>,
     value: Option<ElemId>,
 }
 
