@@ -16,6 +16,9 @@ pub use init::*;
 mod dump;
 pub use dump::*;
 
+mod split;
+pub use split::*;
+
 type ElemId = usize;
 type PosId = (usize, usize);
 
@@ -85,7 +88,9 @@ struct Ctxt {
 }
 
 pub fn eq_run(n: usize) {
-    mainloop(build_ctxt(n));
+    split_models(build_ctxt(n)).into_par_iter().for_each(|ctxt| {
+        mainloop(ctxt);
+    });
 }
 
 fn mainloop(mut ctxt: Ctxt) {
