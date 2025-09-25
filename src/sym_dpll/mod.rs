@@ -17,7 +17,7 @@ fn new_ctxt(n: usize) -> Ctxt {
     Ctxt {
         xyz: Map::default(),
         xzy: Map::default(),
-        unionfind: Vec::new(),
+        unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
         n,
         dirty: false,
     }
