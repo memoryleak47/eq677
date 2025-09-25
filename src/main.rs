@@ -14,7 +14,7 @@ mod db;
 pub use db::*;
 
 fn main() {
-    for i in 1..10 {
+    for i in 1..7 {
         println!("Looking for model size {i}:");
         sym_run(i);
     }

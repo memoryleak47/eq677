@@ -7,7 +7,6 @@ use crate::*;
 // - somehow improve rebuilding
 // - PosId selection heuristic
 // - model splitting
-// - infeasible decision checking
 
 mod api;
 pub use api::*;
@@ -42,12 +41,12 @@ struct Ctxt {
     paradox: bool,
 }
 
-fn choose_branch_id(ctxt: &Ctxt) -> Option<Id> {
+fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let z = ctxt.xyz[&(x, y)];
             if z >= ctxt.n {
-                return Some(z);
+                return Some((x, y));
             }
         }
     }
@@ -72,14 +71,21 @@ fn print_model(ctxt: &Ctxt) {
     assert!(magma.is255());
 }
 
+fn infeasible_decision((x, y): (Id, Id), z: Id, ctxt: &Ctxt) -> bool {
+    ctxt.xzy[&(x, z)] < ctxt.n
+}
+
 fn mainloop(ctxt: Ctxt) {
-    let Some(z) = choose_branch_id(&ctxt) else {
+    let Some((x, y)) = choose_branch_id(&ctxt) else {
         print_model(&ctxt);
         return;
     };
-    for x in 0..ctxt.n {
+    for e in 0..ctxt.n {
+        if infeasible_decision((x, y), e, &ctxt) { continue; }
+
+        let z = ctxt.xyz[&(x, y)];
         let mut c = ctxt.clone();
-        union(x, z, &mut c);
+        union(e, z, &mut c);
         rebuild(&mut c);
         if !c.paradox {
             mainloop(c);
