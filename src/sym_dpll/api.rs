@@ -81,6 +81,7 @@ pub fn rebuild(ctxt: &mut Ctxt) {
             let z = find(zo, ctxt);
 
             add_triple((x, y, z), ctxt);
+            if ctxt.paradox { return; }
         }
     }
 }
