@@ -4,7 +4,6 @@ use crate::*;
 // - trail
 // - multi-threading
 // - somehow improve rebuilding
-// - model splitting
 
 mod api;
 pub use api::*;
@@ -107,5 +106,7 @@ fn mainloop(mut ctxt: Ctxt) {
 }
 
 pub fn sym_run(n: usize) {
-    mainloop(new_ctxt(n));
+    for ctxt in new_ctxts(n) {
+        mainloop(ctxt);
+    }
 }

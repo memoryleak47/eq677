@@ -1,6 +1,6 @@
 use crate::sym_dpll::*;
 
-pub fn new_ctxt(n: usize) -> Ctxt {
+pub fn new_ctxts(n: usize) -> Vec<Ctxt> {
     let mut ctxt = Ctxt {
         xyz: Map::default(),
         xzy: Map::default(),
@@ -12,7 +12,7 @@ pub fn new_ctxt(n: usize) -> Ctxt {
         fresh: vec![true; n],
     };
     setup_constraints(&mut ctxt);
-    ctxt
+    split_models(ctxt)
 }
 
 pub fn setup_constraints(ctxt: &mut Ctxt) {
@@ -38,4 +38,31 @@ pub fn setup_constraints(ctxt: &mut Ctxt) {
         }
     }
     rebuild(ctxt);
+}
+
+fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
+    if ctxt.n == 1 { return vec![ctxt] }
+
+    let mut out = Vec::new();
+
+    {
+        let mut ctxt = ctxt.clone();
+        ctxt.fresh[0] = false;
+        ctxt.fresh[1] = false;
+        union(ctxt.xyz[&(0, 0)], 1, &mut ctxt);
+        rebuild(&mut ctxt);
+        assert!(!ctxt.paradox);
+        out.push(ctxt);
+    }
+
+    {
+        let mut ctxt = ctxt.clone();
+        for i in 0..ctxt.n {
+            union(ctxt.xyz[&(i, i)], i, &mut ctxt);
+        }
+        assert!(!ctxt.paradox);
+        out.push(ctxt);
+    }
+
+    out
 }
