@@ -7,6 +7,7 @@ use crate::*;
 // - somehow improve rebuilding
 // - PosId selection heuristic
 // - model splitting
+// - infeasible decision checking
 
 mod api;
 pub use api::*;
