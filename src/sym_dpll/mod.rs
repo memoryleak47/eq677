@@ -4,7 +4,6 @@ use rayon::prelude::*;
 
 // TODO things to add:
 // - trail
-// - multi-threading
 // - somehow improve rebuilding
 
 mod api;
