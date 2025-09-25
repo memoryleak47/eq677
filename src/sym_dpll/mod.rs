@@ -5,6 +5,8 @@ use crate::*;
 // - multi-threading
 // - symmetry breaking (via freshness)
 // - somehow improve rebuilding
+// - PosId selection heuristic
+// - model splitting
 
 mod api;
 pub use api::*;
