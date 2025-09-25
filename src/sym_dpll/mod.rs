@@ -4,7 +4,6 @@ use crate::*;
 // - trail
 // - multi-threading
 // - somehow improve rebuilding
-// - PosId selection heuristic
 // - model splitting
 
 mod api;
@@ -43,15 +42,18 @@ struct Ctxt {
 }
 
 fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
+    let mut best: Option<((Id, Id), usize)> = None;
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let z = ctxt.xyz[&(x, y)];
-            if z >= ctxt.n {
-                return Some((x, y));
+            if z < ctxt.n { continue; }
+            let score = ctxt.usages[z].len(); // Is this a good heuristic?
+            if best.map(|(_, score2) | score2 < score).unwrap_or(true) {
+                best = Some(((x, y), score));
             }
         }
     }
-    None
+    Some(best?.0)
 }
 
 fn print_model(ctxt: &Ctxt) {
