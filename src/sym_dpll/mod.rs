@@ -1,9 +1,19 @@
+use crate::*;
+
+use std::sync::Mutex;
+use std::collections::HashSet;
+
+lazy_static::lazy_static! {
+    static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
+}
+
 type Map<T, K> = fxhash::FxHashMap<T, K>;
 
 // e-class Id.
 // ids less than ctxt.n correspond to ElemIds aswell.
 type Id = usize;
 
+#[derive(Clone)]
 struct Ctxt {
     // Note: f(x, y) = z
     xyz: Map<(Id, Id), Id>,
@@ -11,6 +21,7 @@ struct Ctxt {
     unionfind: Vec<Id>, // indexed by Id.
     n: usize,
     dirty: bool,
+    paradox: bool,
 }
 
 fn new_ctxt(n: usize) -> Ctxt {
@@ -20,6 +31,7 @@ fn new_ctxt(n: usize) -> Ctxt {
         unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
         n,
         dirty: false,
+        paradox: false,
     }
 }
 
@@ -42,9 +54,14 @@ fn union(x: Id, y: Id, ctxt: &mut Ctxt) {
     let y = find(y, ctxt);
     if x == y { return; }
 
+
     let (x, y) = if x < y { (x, y) } else { (y, x) };
     ctxt.unionfind[y] = x;
     ctxt.dirty = true;
+
+    if x < ctxt.n && y < ctxt.n {
+        ctxt.paradox = true;
+    }
 }
 
 fn find(x: Id, ctxt: &mut Ctxt) -> Id {
@@ -77,6 +94,67 @@ fn rebuild(ctxt: &mut Ctxt) {
     }
 }
 
-fn sym_run(n: usize) {
-    let ctxt = new_ctxt(n);
+fn setup_constraints(ctxt: &mut Ctxt) {
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            // x = f(y, f(x, f(f(y, x), y)))
+            let yx = add(y, x, ctxt);
+            let yxy = add(yx, y, ctxt);
+            let xyxy = add(x, yxy, ctxt);
+            let yxyxy = add(y, xyxy, ctxt);
+            union(x, yxyxy, ctxt);
+        }
+    }
+    rebuild(ctxt);
+}
+
+fn choose_branch_id(ctxt: &Ctxt) -> Option<Id> {
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            let z = ctxt.xyz[&(x, y)];
+            if z >= ctxt.n {
+                return Some(z);
+            }
+        }
+    }
+    None
+}
+
+fn print_model(ctxt: &Ctxt) {
+    let magma = MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.xyz[&(x, y)]);
+    let magma = magma.canonicalize();
+
+    let mut handle = DB.lock().unwrap();
+    if handle.contains(&magma) { return; }
+
+    handle.insert(magma.clone());
+    drop(handle);
+
+    println!("Model found:");
+    magma.dump();
+    // ctxt.dump();
+
+    assert!(magma.is677());
+    assert!(magma.is255());
+}
+
+fn mainloop(ctxt: Ctxt) {
+    let Some(z) = choose_branch_id(&ctxt) else {
+        print_model(&ctxt);
+        return;
+    };
+    for x in 0..ctxt.n {
+        let mut c = ctxt.clone();
+        union(x, z, &mut c);
+        rebuild(&mut c);
+        if !c.paradox {
+            mainloop(c);
+        }
+    }
+}
+
+pub fn sym_run(n: usize) {
+    let mut ctxt = new_ctxt(n);
+    setup_constraints(&mut ctxt);
+    mainloop(ctxt);
 }
