@@ -85,7 +85,7 @@ fn rebuild(ctxt: &mut Ctxt) {
                 union(z, z2, ctxt);
             }
             ctxt.xyz.insert((x, y), z);
-            if let Some(&y2) = ctxt.xyz.get(&(x, z)) {
+            if let Some(&y2) = ctxt.xzy.get(&(x, z)) {
                 union(y, y2, ctxt);
             }
             ctxt.xzy.insert((x, z), y);
