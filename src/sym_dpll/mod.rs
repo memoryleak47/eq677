@@ -1,6 +1,8 @@
 type Map<T, K> = fxhash::FxHashMap<T, K>;
 
-type Id = usize; // e-class Id.
+// e-class Id.
+// ids less than ctxt.n correspond to ElemIds aswell.
+type Id = usize;
 
 struct Ctxt {
     // Note: f(x, y) = z
