@@ -1,5 +1,11 @@
 use crate::*;
 
+// TODO things to add:
+// - trail
+// - multi-threading
+// - symmetry breaking (via freshness)
+// - somehow improve rebuilding
+
 mod api;
 pub use api::*;
 
