@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+fxhash = "0.2.1"
 indexmap = "2.11.3"
 lazy_static = "1.5.0"
 rayon = "1.11.0"
