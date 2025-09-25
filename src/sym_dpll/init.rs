@@ -9,6 +9,7 @@ pub fn new_ctxt(n: usize) -> Ctxt {
         n,
         dirty_stack: Vec::new(),
         paradox: false,
+        fresh: vec![true; n],
     };
     setup_constraints(&mut ctxt);
     ctxt

@@ -3,7 +3,6 @@ use crate::*;
 // TODO things to add:
 // - trail
 // - multi-threading
-// - symmetry breaking (via freshness)
 // - somehow improve rebuilding
 // - PosId selection heuristic
 // - model splitting
@@ -39,6 +38,8 @@ struct Ctxt {
     n: usize,
     dirty_stack: Vec<Id>,
     paradox: bool,
+
+    fresh: Vec<bool>,
 }
 
 fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
@@ -75,16 +76,26 @@ fn infeasible_decision((x, y): (Id, Id), z: Id, ctxt: &Ctxt) -> bool {
     ctxt.xzy[&(x, z)] < ctxt.n
 }
 
-fn mainloop(ctxt: Ctxt) {
+fn mainloop(mut ctxt: Ctxt) {
     let Some((x, y)) = choose_branch_id(&ctxt) else {
         print_model(&ctxt);
         return;
     };
+
+    ctxt.fresh[x] = false;
+    ctxt.fresh[y] = false;
+
+    let mut found_fresh = false;
     for e in 0..ctxt.n {
         if infeasible_decision((x, y), e, &ctxt) { continue; }
+        if ctxt.fresh[e] {
+            if found_fresh { continue; }
+            else { found_fresh = true; }
+        }
 
         let z = ctxt.xyz[&(x, y)];
         let mut c = ctxt.clone();
+        c.fresh[e] = false;
         union(e, z, &mut c);
         rebuild(&mut c);
         if !c.paradox {
