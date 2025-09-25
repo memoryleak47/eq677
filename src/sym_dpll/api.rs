@@ -6,9 +6,10 @@ pub fn add(x: Id, y: Id, ctxt: &mut Ctxt) -> Id {
     }
 
     let z = ctxt.unionfind.len();
-    ctxt.xyz.insert((x, y), z);
-    ctxt.xzy.insert((x, z), y);
     ctxt.unionfind.push(z);
+    ctxt.usages.push(Vec::new());
+
+    add_triple((x, y, z), ctxt);
 
     z
 }
@@ -21,7 +22,7 @@ pub fn union(x: Id, y: Id, ctxt: &mut Ctxt) {
 
     let (x, y) = if x < y { (x, y) } else { (y, x) };
     ctxt.unionfind[y] = x;
-    ctxt.dirty = true;
+    ctxt.dirty_stack.push(y);
 
     if x < ctxt.n && y < ctxt.n {
         ctxt.paradox = true;
@@ -39,22 +40,57 @@ pub fn find(x: Id, ctxt: &mut Ctxt) -> Id {
     z
 }
 
+fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
+    if let Some(&z2) = ctxt.xyz.get(&(x, y)) {
+        union(z, z2, ctxt);
+        return;
+    }
+    if let Some(&y2) = ctxt.xzy.get(&(x, z)) {
+        union(y, y2, ctxt);
+        return;
+    }
+
+    ctxt.xyz.insert((x, y), z);
+    ctxt.xzy.insert((x, z), y);
+    ctxt.usages[x].push((x, y, z));
+    if x != y {
+        ctxt.usages[y].push((x, y, z));
+    }
+    if x != z && y != z {
+        ctxt.usages[z].push((x, y, z));
+    }
+}
+
+fn rm_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
+    assert_eq!(ctxt.xyz.get(&(x, y)), Some(&z));
+
+    ctxt.usages[x].retain(|t2| *t2 != t);
+    ctxt.usages[y].retain(|t2| *t2 != t);
+    ctxt.usages[z].retain(|t2| *t2 != t);
+    assert_eq!(ctxt.xyz.remove(&(x, y)), Some(z));
+    assert_eq!(ctxt.xzy.remove(&(x, z)), Some(y));
+}
+
 pub fn rebuild(ctxt: &mut Ctxt) {
-    while ctxt.dirty {
-        ctxt.dirty = false;
-        for ((x, y), z) in ctxt.xyz.clone() {
-            let x = find(x, ctxt);
-            let y = find(y, ctxt);
-            let z = find(z, ctxt);
-            if let Some(&z2) = ctxt.xyz.get(&(x, y)) {
-                union(z, z2, ctxt);
-            }
-            ctxt.xyz.insert((x, y), z);
-            if let Some(&y2) = ctxt.xzy.get(&(x, z)) {
-                union(y, y2, ctxt);
-            }
-            ctxt.xzy.insert((x, z), y);
+    while let Some(a) = ctxt.dirty_stack.pop() {
+        for t@(xo, yo, zo) in ctxt.usages[a].clone() {
+            rm_triple(t, ctxt);
+
+            let x = find(xo, ctxt);
+            let y = find(yo, ctxt);
+            let z = find(zo, ctxt);
+
+            add_triple((x, y, z), ctxt);
         }
     }
 }
 
+pub fn check(ctxt: &Ctxt) {
+    let mut a: Vec<(Id, Id, Id)> = ctxt.xyz.iter().map(|((x, y), z)| (*x, *y, *z)).collect();
+    let mut b: Vec<(Id, Id, Id)> = ctxt.xzy.iter().map(|((x, z), y)| (*x, *y, *z)).collect();
+
+    a.sort();
+    b.sort();
+
+    assert_eq!(a, b);
+}

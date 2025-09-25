@@ -1,5 +1,19 @@
 use crate::sym_dpll::*;
 
+pub fn new_ctxt(n: usize) -> Ctxt {
+    let mut ctxt = Ctxt {
+        xyz: Map::default(),
+        xzy: Map::default(),
+        usages: (0..n).map(|_| Vec::new()).collect(),
+        unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
+        n,
+        dirty_stack: Vec::new(),
+        paradox: false,
+    };
+    setup_constraints(&mut ctxt);
+    ctxt
+}
+
 pub fn setup_constraints(ctxt: &mut Ctxt) {
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
@@ -24,4 +38,3 @@ pub fn setup_constraints(ctxt: &mut Ctxt) {
     }
     rebuild(ctxt);
 }
-

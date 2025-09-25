@@ -24,21 +24,13 @@ struct Ctxt {
     // Note: f(x, y) = z
     xyz: Map<(Id, Id), Id>,
     xzy: Map<(Id, Id), Id>,
+
+    usages: Vec<Vec<(Id, Id, Id)>>,
+
     unionfind: Vec<Id>, // indexed by Id.
     n: usize,
-    dirty: bool,
+    dirty_stack: Vec<Id>,
     paradox: bool,
-}
-
-fn new_ctxt(n: usize) -> Ctxt {
-    Ctxt {
-        xyz: Map::default(),
-        xzy: Map::default(),
-        unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
-        n,
-        dirty: false,
-        paradox: false,
-    }
 }
 
 fn choose_branch_id(ctxt: &Ctxt) -> Option<Id> {
@@ -87,7 +79,5 @@ fn mainloop(ctxt: Ctxt) {
 }
 
 pub fn sym_run(n: usize) {
-    let mut ctxt = new_ctxt(n);
-    setup_constraints(&mut ctxt);
-    mainloop(ctxt);
+    mainloop(new_ctxt(n));
 }
