@@ -54,7 +54,6 @@ fn union(x: Id, y: Id, ctxt: &mut Ctxt) {
     let y = find(y, ctxt);
     if x == y { return; }
 
-
     let (x, y) = if x < y { (x, y) } else { (y, x) };
     ctxt.unionfind[y] = x;
     ctxt.dirty = true;
