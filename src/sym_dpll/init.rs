@@ -60,6 +60,7 @@ fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
         for i in 0..ctxt.n {
             union(ctxt.xyz[&(i, i)], i, &mut ctxt);
         }
+        rebuild(&mut ctxt);
         assert!(!ctxt.paradox);
         out.push(ctxt);
     }
