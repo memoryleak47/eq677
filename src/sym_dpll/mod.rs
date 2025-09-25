@@ -1,5 +1,7 @@
 use crate::*;
 
+use rayon::prelude::*;
+
 // TODO things to add:
 // - trail
 // - multi-threading
@@ -77,6 +79,20 @@ fn infeasible_decision((x, y): (Id, Id), z: Id, ctxt: &Ctxt) -> bool {
     ctxt.xzy[&(x, z)] < ctxt.n
 }
 
+fn get_options((x, y): (Id, Id), ctxt: &Ctxt) -> Vec<Id> {
+    let mut found_fresh = false;
+    let mut options = Vec::new();
+    for e in 0..ctxt.n {
+        if infeasible_decision((x, y), e, &ctxt) { continue; }
+        if ctxt.fresh[e] {
+            if found_fresh { continue; }
+            else { found_fresh = true; }
+        }
+        options.push(e);
+    }
+    options
+}
+
 fn mainloop(mut ctxt: Ctxt) {
     let Some((x, y)) = choose_branch_id(&ctxt) else {
         print_model(&ctxt);
@@ -86,14 +102,8 @@ fn mainloop(mut ctxt: Ctxt) {
     ctxt.fresh[x] = false;
     ctxt.fresh[y] = false;
 
-    let mut found_fresh = false;
-    for e in 0..ctxt.n {
-        if infeasible_decision((x, y), e, &ctxt) { continue; }
-        if ctxt.fresh[e] {
-            if found_fresh { continue; }
-            else { found_fresh = true; }
-        }
-
+    let options = get_options((x, y), &ctxt);
+    options.into_par_iter().for_each(|e| {
         let z = ctxt.xyz[&(x, y)];
         let mut c = ctxt.clone();
         c.fresh[e] = false;
@@ -102,11 +112,11 @@ fn mainloop(mut ctxt: Ctxt) {
         if !c.paradox {
             mainloop(c);
         }
-    }
+    });
 }
 
 pub fn sym_run(n: usize) {
-    for ctxt in new_ctxts(n) {
+    new_ctxts(n).into_par_iter().for_each(|ctxt| {
         mainloop(ctxt);
-    }
+    });
 }
