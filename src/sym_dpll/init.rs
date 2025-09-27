@@ -20,6 +20,14 @@ pub fn setup_constraints(ctxt: &mut Ctxt) {
     const EQ2: bool = false;
     const EQ3: bool = false;
 
+    // This allows for efficient indexing!
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            let xy = add(x, y, ctxt);
+            assert_eq!(xy, y + (x+1)*ctxt.n);
+        }
+    }
+
     if EQ1 {
         for x in 0..ctxt.n {
             for y in 0..ctxt.n {
