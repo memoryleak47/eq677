@@ -115,8 +115,8 @@ fn backtrack(ctxt: &mut Ctxt) {
                 activate_option(z, options, ctxt);
                 return;
             },
-            TrailEvent::RmXYZ(x, y, z) => { add_triple((x, y, z), ctxt); },
-            TrailEvent::AddXYZ(x, y, z) => { rm_triple((x, y, z), ctxt); },
+            TrailEvent::RmXYZ(x, y, z) => { raw_add_triple((x, y, z), ctxt); },
+            TrailEvent::AddXYZ(x, y, z) => { raw_rm_triple((x, y, z), ctxt); },
             TrailEvent::Equate(x, y) => { ctxt.unionfind[y] = y; },
             TrailEvent::Defresh(x) => { ctxt.fresh[x] = true; },
         }

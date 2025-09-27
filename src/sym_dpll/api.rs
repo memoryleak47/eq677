@@ -51,6 +51,11 @@ pub fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
 
     ctxt.trail.push(TrailEvent::AddXYZ(x, y, z));
 
+    raw_add_triple(t, ctxt);
+}
+
+pub fn raw_add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
+    assert!(!ctxt.xyz.contains_key(&(x, y)));
     ctxt.xyz.insert((x, y), z);
     ctxt.xzy.insert((x, z), y);
     ctxt.usages[x].push((x, y, z));
@@ -63,9 +68,12 @@ pub fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
 }
 
 pub fn rm_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
-    assert_eq!(ctxt.xyz.get(&(x, y)), Some(&z));
-
     ctxt.trail.push(TrailEvent::RmXYZ(x, y, z));
+    raw_rm_triple(t, ctxt);
+}
+
+pub fn raw_rm_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
+    assert_eq!(ctxt.xyz.get(&(x, y)), Some(&z));
 
     ctxt.usages[x].retain(|t2| *t2 != t);
     ctxt.usages[y].retain(|t2| *t2 != t);
