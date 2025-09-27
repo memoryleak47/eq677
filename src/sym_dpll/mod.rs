@@ -1,7 +1,5 @@
 use crate::*;
 
-use rayon::prelude::*;
-
 // TODO things to add:
 // - trail
 // - somehow improve rebuilding
@@ -102,7 +100,7 @@ fn mainloop(mut ctxt: Ctxt) {
     ctxt.fresh[y] = false;
 
     let options = get_options((x, y), &ctxt);
-    options.into_par_iter().for_each(|e| {
+    into_par_for_each(options, |e| {
         let z = ctxt.xyz[&(x, y)];
         let mut c = ctxt.clone();
         c.fresh[e] = false;
@@ -115,7 +113,8 @@ fn mainloop(mut ctxt: Ctxt) {
 }
 
 pub fn sym_run(n: usize) {
-    new_ctxts(n).into_par_iter().for_each(|ctxt| {
+    let models = new_ctxts(n);
+    into_par_for_each(models, |ctxt| {
         mainloop(ctxt);
     });
 }

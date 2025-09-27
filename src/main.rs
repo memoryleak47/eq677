@@ -13,6 +13,9 @@ pub use sym_dpll::*;
 mod db;
 pub use db::*;
 
+mod parallel;
+pub use parallel::*;
+
 fn main() {
     for i in 1..10 {
         println!("Looking for model size {i}:");

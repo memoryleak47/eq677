@@ -1,5 +1,4 @@
 use crate::*;
-use rayon::prelude::*;
 use smallvec::SmallVec;
 use std::collections::HashSet;
 use std::sync::Mutex;
@@ -88,7 +87,8 @@ struct Ctxt {
 }
 
 pub fn eq_run(n: usize) {
-    split_models(build_ctxt(n)).into_par_iter().for_each(|ctxt| {
+    let models = split_models(build_ctxt(n));
+    into_par_for_each(models, |ctxt| {
         mainloop(ctxt);
     });
 }
@@ -110,11 +110,11 @@ fn threaded_forward_step(ctxt: &mut Ctxt) {
         return;
     };
 
-    options.par_iter().for_each(|e| {
+    into_par_for_each(options, |e| {
         // NOTE: this is one clone too many.
         let mut ctxt = ctxt.clone();
         ctxt.depth += 1;
-        activate_option(pos, vec![*e], &mut ctxt);
+        activate_option(pos, vec![e], &mut ctxt);
         mainloop(ctxt);
     });
     ctxt.mode = Mode::Done;
