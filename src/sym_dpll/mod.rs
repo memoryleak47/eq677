@@ -23,6 +23,22 @@ type Map<T, K> = fxhash::FxHashMap<T, K>;
 // ids less than ctxt.n correspond to ElemIds aswell.
 type Id = usize;
 
+#[derive(Clone, PartialEq, Eq)]
+enum Mode {
+    Forward,
+    Backtrack,
+    Done,
+}
+
+#[derive(Clone)]
+enum TrailEvent {
+    DecisionPoint(Id, /*remaining options*/ Vec<Id>),
+    RmXYZ(Id, Id, Id),
+    AddXYZ(Id, Id, Id),
+    Equate(/*x*/ Id, /*y*/ Id), // equates x <- y.
+    Defresh(Id),
+}
+
 #[derive(Clone)]
 struct Ctxt {
     // Note: f(x, y) = z
@@ -34,9 +50,11 @@ struct Ctxt {
     unionfind: Vec<Id>, // indexed by Id.
     n: usize,
     dirty_stack: Vec<Id>,
-    paradox: bool,
 
     fresh: Vec<bool>,
+
+    trail: Vec<TrailEvent>,
+    mode: Mode,
 }
 
 fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
@@ -66,7 +84,6 @@ fn print_model(ctxt: &Ctxt) {
 
     println!("Model found:");
     magma.dump();
-    // ctxt.dump();
 
     assert!(magma.is677());
     assert!(magma.is255());
@@ -90,31 +107,75 @@ fn get_options((x, y): (Id, Id), ctxt: &Ctxt) -> Vec<Id> {
     options
 }
 
-fn mainloop(mut ctxt: Ctxt) {
-    let Some((x, y)) = choose_branch_id(&ctxt) else {
+fn backtrack(ctxt: &mut Ctxt) {
+    loop {
+        if ctxt.trail.is_empty() { ctxt.mode = Mode::Done; return; }
+        match ctxt.trail.pop().unwrap() {
+            TrailEvent::DecisionPoint(z, options) => {
+                activate_option(z, options, ctxt);
+                return;
+            },
+            TrailEvent::RmXYZ(x, y, z) => { add_triple((x, y, z), ctxt); },
+            TrailEvent::AddXYZ(x, y, z) => { rm_triple((x, y, z), ctxt); },
+            TrailEvent::Equate(x, y) => { ctxt.unionfind[y] = y; },
+            TrailEvent::Defresh(x) => { ctxt.fresh[x] = true; },
+        }
+    }
+}
+
+fn forward(ctxt: &mut Ctxt) {
+    let Some((x, y)) = choose_branch_id(ctxt) else {
         print_model(&ctxt);
+        ctxt.mode = Mode::Backtrack;
         return;
     };
 
-    ctxt.fresh[x] = false;
-    ctxt.fresh[y] = false;
+    if ctxt.fresh[x] {
+        ctxt.trail.push(TrailEvent::Defresh(x));
+        ctxt.fresh[x] = false;
+    }
+    if ctxt.fresh[y] {
+        ctxt.trail.push(TrailEvent::Defresh(y));
+        ctxt.fresh[y] = false;
+    }
 
-    let options = get_options((x, y), &ctxt);
-    into_par_for_each(options, |e| {
-        let z = ctxt.xyz[&(x, y)];
-        let mut c = ctxt.clone();
-        c.fresh[e] = false;
-        union(e, z, &mut c);
-        rebuild(&mut c);
-        if !c.paradox {
-            mainloop(c);
+    let options = get_options((x, y), ctxt);
+    let z = ctxt.xyz[&(x, y)];
+    activate_option(z, options, ctxt);
+}
+
+fn mainloop(mut ctxt: Ctxt) {
+    loop {
+        match ctxt.mode {
+            Mode::Forward => forward(&mut ctxt),
+            Mode::Backtrack => backtrack(&mut ctxt),
+            Mode::Done => return,
         }
-    });
+    }
+}
+
+fn activate_option(z: Id, mut options: Vec<Id>, ctxt: &mut Ctxt) {
+    let Some(e) = options.pop() else {
+        ctxt.mode = Mode::Backtrack;
+        return;
+    };
+
+    ctxt.mode = Mode::Forward;
+
+    if ctxt.fresh[e] {
+        ctxt.trail.push(TrailEvent::Defresh(e));
+        ctxt.fresh[e] = false;
+    }
+
+    ctxt.trail.push(TrailEvent::DecisionPoint(z, options));
+
+    union(z, e, ctxt);
+    rebuild(ctxt);
 }
 
 pub fn sym_run(n: usize) {
     let models = new_ctxts(n);
-    into_par_for_each(models, |ctxt| {
+    for ctxt in models {
         mainloop(ctxt);
-    });
+    }
 }

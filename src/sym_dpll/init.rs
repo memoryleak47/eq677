@@ -8,8 +8,9 @@ pub fn new_ctxts(n: usize) -> Vec<Ctxt> {
         unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
         n,
         dirty_stack: Vec::new(),
-        paradox: false,
         fresh: vec![true; n],
+        trail: Vec::new(),
+        mode: Mode::Forward,
     };
     setup_constraints(&mut ctxt);
     split_models(ctxt)
@@ -84,7 +85,7 @@ fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
         ctxt.fresh[1] = false;
         union(ctxt.xyz[&(0, 0)], 1, &mut ctxt);
         rebuild(&mut ctxt);
-        assert!(!ctxt.paradox);
+        assert!(ctxt.mode != Mode::Backtrack);
         out.push(ctxt);
     }
 
@@ -94,7 +95,7 @@ fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
             union(ctxt.xyz[&(i, i)], i, &mut ctxt);
         }
         rebuild(&mut ctxt);
-        assert!(!ctxt.paradox);
+        assert!(ctxt.mode != Mode::Backtrack);
         out.push(ctxt);
     }
 

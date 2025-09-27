@@ -23,24 +23,23 @@ pub fn union(x: Id, y: Id, ctxt: &mut Ctxt) {
     let (x, y) = if x < y { (x, y) } else { (y, x) };
     ctxt.unionfind[y] = x;
     ctxt.dirty_stack.push(y);
+    ctxt.trail.push(TrailEvent::Equate(x, y));
 
     if x < ctxt.n && y < ctxt.n {
-        ctxt.paradox = true;
+        ctxt.mode = Mode::Backtrack;
     }
 }
 
-pub fn find(x: Id, ctxt: &mut Ctxt) -> Id {
-    let y = ctxt.unionfind[x];
-    if x == y { return y; }
-
-    let z = find(y, ctxt);
-    if z != y {
-        ctxt.unionfind[x] = z;
+// TODO re-add path compression
+pub fn find(mut x: Id, ctxt: &Ctxt) -> Id {
+    loop {
+        let y = ctxt.unionfind[x];
+        if x == y { return x; }
+        x = y;
     }
-    z
 }
 
-fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
+pub fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
     if let Some(&z2) = ctxt.xyz.get(&(x, y)) {
         union(z, z2, ctxt);
         return;
@@ -49,6 +48,8 @@ fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
         union(y, y2, ctxt);
         return;
     }
+
+    ctxt.trail.push(TrailEvent::AddXYZ(x, y, z));
 
     ctxt.xyz.insert((x, y), z);
     ctxt.xzy.insert((x, z), y);
@@ -61,8 +62,10 @@ fn add_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
     }
 }
 
-fn rm_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
+pub fn rm_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut Ctxt) {
     assert_eq!(ctxt.xyz.get(&(x, y)), Some(&z));
+
+    ctxt.trail.push(TrailEvent::RmXYZ(x, y, z));
 
     ctxt.usages[x].retain(|t2| *t2 != t);
     ctxt.usages[y].retain(|t2| *t2 != t);
@@ -81,7 +84,7 @@ pub fn rebuild(ctxt: &mut Ctxt) {
             let z = find(zo, ctxt);
 
             add_triple((x, y, z), ctxt);
-            if ctxt.paradox { return; }
+            // TODO: Re-add this: if ctxt.paradox { return; }
         }
     }
 }
