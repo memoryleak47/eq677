@@ -92,7 +92,11 @@ pub fn rebuild(ctxt: &mut Ctxt) {
             let z = find(zo, ctxt);
 
             add_triple((x, y, z), ctxt);
-            // TODO: Re-add this: if ctxt.paradox { return; }
+
+            if ctxt.mode == Mode::Backtrack {
+                ctxt.dirty_stack.clear();
+                return;
+            }
         }
     }
 }
