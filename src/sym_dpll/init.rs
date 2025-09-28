@@ -1,6 +1,6 @@
 use crate::sym_dpll::*;
 
-pub fn new_ctxts(n: usize) -> Vec<Ctxt> {
+pub(in crate::sym_dpll) fn new_ctxts(n: usize) -> Vec<Ctxt> {
     let mut ctxt = Ctxt {
         xyz: Map::default(),
         xzy: Map::default(),
@@ -16,7 +16,7 @@ pub fn new_ctxts(n: usize) -> Vec<Ctxt> {
     split_models(ctxt)
 }
 
-pub fn setup_constraints(ctxt: &mut Ctxt) {
+fn setup_constraints(ctxt: &mut Ctxt) {
     const EQ1: bool = true;
     const EQ2: bool = false;
     const EQ3: bool = false;
