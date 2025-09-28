@@ -1,8 +1,8 @@
 use crate::*;
 
 // TODO things to add:
-// - trail
-// - somehow improve rebuilding
+// - multi-threading
+// - somehow improve rebuilding (the "usages" datastructure thing seems suboptimal)
 
 mod api;
 pub use api::*;
