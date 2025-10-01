@@ -9,7 +9,15 @@ pub(in crate::sym_dpll) fn add(x: Id, y: Id, ctxt: &mut Ctxt) -> Id {
     ctxt.unionfind.push(z);
     ctxt.usages.push(Vec::new());
 
-    add_triple((x, y, z), ctxt);
+    ctxt.xyz.insert((x, y), z);
+    ctxt.xzy.insert((x, z), y);
+    ctxt.usages[x].push((x, y, z));
+    if x != y {
+        ctxt.usages[y].push((x, y, z));
+    }
+    if x != z && y != z {
+        ctxt.usages[z].push((x, y, z));
+    }
 
     z
 }
