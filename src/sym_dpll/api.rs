@@ -97,22 +97,36 @@ fn rebuild_usages(a: Id, b: Id, bb: Id, ctxt: &mut Ctxt) {
         let z2 = if z == b { a } else { z };
 
         if ctxt.xyz.get(&(x, y)) == Some(&z) {
+            use std::collections::hash_map::Entry;
+
             ctxt.trail.push(TrailEvent::RmXYZ(x, y, z));
             assert_eq!(ctxt.xyz.remove(&(x, y)), Some(z));
             assert_eq!(ctxt.xzy.remove(&(x, z)), Some(y));
 
-            if let Some(z3) = ctxt.xyz.get(&(x2, y2)) {
-                union(z2, *z3, ctxt);
-                continue;
-            }
-            if let Some(y3) = ctxt.xzy.get(&(x2, z2)) {
-                union(y2, *y3, ctxt);
-                continue;
-            }
+            let e1 = ctxt.xyz.entry((x2, y2));
+            let e2 = ctxt.xzy.entry((x2, z2));
+
+            let e1 = match e1 {
+                Entry::Vacant(e1) => e1,
+                Entry::Occupied(e1) => {
+                    let z3 = e1.get();
+                    union(z2, *z3, ctxt);
+                    continue;
+                },
+            };
+
+            let e2 = match e2 {
+                Entry::Vacant(e2) => e2,
+                Entry::Occupied(e2) => {
+                    let y3 = e2.get();
+                    union(y2, *y3, ctxt);
+                    continue;
+                },
+            };
 
             ctxt.trail.push(TrailEvent::AddXYZ(x2, y2, z2));
-            ctxt.xyz.insert((x2, y2), z2);
-            ctxt.xzy.insert((x2, z2), y2);
+            e1.insert(z2);
+            e2.insert(y2);
         }
     }
 }
