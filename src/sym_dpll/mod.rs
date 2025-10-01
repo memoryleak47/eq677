@@ -40,15 +40,19 @@ enum TrailEvent {
 }
 
 #[derive(Clone)]
+struct Class {
+    uf: Id, // unionfind entry (pointer to leader)
+    uf_rev: Vec<Id>, // c.uf_rev.contains(d) <-> (c != d && d.uf == c)
+    usages: Vec<(Id, Id, Id)>, // This one is kept immutable after the "add"-phase is done.
+}
+
+#[derive(Clone)]
 struct Ctxt {
     // Note: f(x, y) = z
     xyz: Map<(Id, Id), Id>,
     xzy: Map<(Id, Id), Id>,
 
-    usages: Vec<Vec<(Id, Id, Id)>>, // we keep this immutable, after the initial "add"s are done.
-
-    unionfind: Vec<Id>, // indexed by Id.
-    unionfind_rev: Vec<Vec<Id>>, // (x = unionfind[y] && x != y) <-> unionfind[x].contains(y)
+    classes: Vec<Class>,
 
     n: usize,
     dirty_stack: Vec<(Id, Id)>,
@@ -65,7 +69,7 @@ fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
         for y in 0..ctxt.n {
             let z = ctxt.xyz[&(x, y)];
             if z < ctxt.n { continue; }
-            let score = ctxt.usages[z].len(); // Is this a good heuristic?
+            let score = ctxt.classes[z].usages.len(); // Is this a good heuristic?
             if best.map(|(_, score2) | score2 < score).unwrap_or(true) {
                 best = Some(((x, y), score));
             }
@@ -126,8 +130,8 @@ fn backtrack(ctxt: &mut Ctxt) {
                 assert_eq!(ctxt.xzy.remove(&(x, z)), Some(y));
             },
             TrailEvent::Equate(x, y) => {
-                ctxt.unionfind[y] = y;
-                assert_eq!(ctxt.unionfind_rev[x].pop(), Some(y));
+                ctxt.classes[y].uf = y;
+                assert_eq!(ctxt.classes[x].uf_rev.pop(), Some(y));
             },
             TrailEvent::Defresh(x) => { ctxt.fresh[x] = true; },
         }

@@ -5,21 +5,20 @@ pub(in crate::sym_dpll) fn add(x: Id, y: Id, ctxt: &mut Ctxt) -> Id {
         return *z;
     }
 
-    let z = ctxt.unionfind.len();
+    let z = ctxt.classes.len();
 
-    ctxt.unionfind.push(z);
-    ctxt.unionfind_rev.push(Vec::new());
-
-    ctxt.usages.push(Vec::new());
+    ctxt.classes.push(Class {
+        uf: z,
+        uf_rev: Vec::new(),
+        usages: vec![(x, y, z)],
+    });
 
     ctxt.xyz.insert((x, y), z);
     ctxt.xzy.insert((x, z), y);
-    ctxt.usages[x].push((x, y, z));
+
+    ctxt.classes[x].usages.push((x, y, z));
     if x != y {
-        ctxt.usages[y].push((x, y, z));
-    }
-    if x != z && y != z {
-        ctxt.usages[z].push((x, y, z));
+        ctxt.classes[y].usages.push((x, y, z));
     }
 
     z
@@ -40,7 +39,7 @@ pub(in crate::sym_dpll) fn union(x: Id, y: Id, ctxt: &mut Ctxt) {
 
 pub(in crate::sym_dpll) fn find(mut x: Id, ctxt: &Ctxt) -> Id {
     loop {
-        let y = ctxt.unionfind[x];
+        let y = ctxt.classes[x].uf;
         if x == y { return x; }
         x = y;
     }
@@ -66,8 +65,8 @@ pub(in crate::sym_dpll) fn rebuild(ctxt: &mut Ctxt) {
         rebuild_usages(a, b, b, ctxt);
 
         ctxt.trail.push(TrailEvent::Equate(a, b));
-        ctxt.unionfind[b] = a;
-        ctxt.unionfind_rev[a].push(b);
+        ctxt.classes[b].uf = a;
+        ctxt.classes[a].uf_rev.push(b);
     }
 }
 
@@ -79,11 +78,11 @@ fn rebuild_usages(a: Id, b: Id, bb: Id, ctxt: &mut Ctxt) {
         return;
     }
 
-    for bbb in ctxt.unionfind_rev[bb].clone() {
+    for bbb in ctxt.classes[bb].uf_rev.clone() {
         rebuild_usages(a, b, bbb, ctxt);
     }
 
-    for (xo, yo, zo) in ctxt.usages[bb].clone() {
+    for (xo, yo, zo) in ctxt.classes[bb].usages.clone() {
         if ctxt.mode == Mode::Backtrack {
             ctxt.dirty_stack.clear();
             return;

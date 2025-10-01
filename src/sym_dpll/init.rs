@@ -4,9 +4,11 @@ pub(in crate::sym_dpll) fn new_ctxts(n: usize) -> Vec<Ctxt> {
     let mut ctxt = Ctxt {
         xyz: Map::default(),
         xzy: Map::default(),
-        usages: (0..n).map(|_| Vec::new()).collect(),
-        unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
-        unionfind_rev: (0..n).map(|_| Vec::new()).collect(),
+        classes: (0..n).map(|x| Class {
+            uf: x,
+            uf_rev: Vec::new(),
+            usages: Vec::new(),
+        }).collect(),
         n,
         dirty_stack: Vec::new(),
         fresh: vec![true; n],
