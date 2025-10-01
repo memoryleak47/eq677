@@ -104,11 +104,12 @@ fn rebuild_usages(a: Id, b: Id, bb: Id, ctxt: &mut Ctxt) {
         let y2 = if y == b { a } else { y };
         let z2 = if z == b { a } else { z };
 
-        if ctxt.xyz.get(&(x, y)) == Some(&z) {
-            use std::collections::hash_map::Entry;
+        use std::collections::hash_map::Entry;
 
+        let e = ctxt.xyz.entry((x, y));
+        if let Entry::Occupied(e) = e && e.get() == &z {
             ctxt.trail.push(TrailEvent::RmXYZ(x, y, z));
-            assert_eq!(ctxt.xyz.remove(&(x, y)), Some(z));
+            assert_eq!(e.remove_entry().1, z);
             assert_eq!(ctxt.xzy.remove(&(x, z)), Some(y));
 
             let e1 = ctxt.xyz.entry((x2, y2));
