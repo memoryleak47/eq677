@@ -20,10 +20,7 @@ pub(in crate::sym_dpll) fn union(x: Id, y: Id, ctxt: &mut Ctxt) {
     let y = find(y, ctxt);
     if x == y { return; }
 
-    let (x, y) = if x < y { (x, y) } else { (y, x) };
-    ctxt.unionfind[y] = x;
-    ctxt.dirty_stack.push(y);
-    ctxt.trail.push(TrailEvent::Equate(x, y));
+    ctxt.dirty_stack.push((x, y)); // unordered x = y.
 
     if x < ctxt.n && y < ctxt.n {
         ctxt.mode = Mode::Backtrack;
@@ -83,13 +80,31 @@ pub(in crate::sym_dpll) fn raw_rm_triple(t@(x, y, z): (Id, Id, Id), ctxt: &mut C
 }
 
 pub(in crate::sym_dpll) fn rebuild(ctxt: &mut Ctxt) {
-    while let Some(a) = ctxt.dirty_stack.pop() {
-        for t@(xo, yo, zo) in ctxt.usages[a].clone() {
-            rm_triple(t, ctxt);
+    if ctxt.mode == Mode::Backtrack {
+        ctxt.dirty_stack.clear();
+        return;
+    }
+    while let Some((a, b)) = ctxt.dirty_stack.pop() {
+        let a = find(a, ctxt);
+        let b = find(b, ctxt);
+        if a == b { continue; }
+        let (a, b) = if a < b { (a, b) } else { (b, a) };
 
-            let x = find(xo, ctxt);
-            let y = find(yo, ctxt);
-            let z = find(zo, ctxt);
+        if a < ctxt.n && b < ctxt.n {
+            ctxt.mode = Mode::Backtrack;
+            ctxt.dirty_stack.clear();
+            return;
+        }
+
+        ctxt.trail.push(TrailEvent::Equate(a, b));
+        ctxt.unionfind[b] = a;
+
+        for (x, y, z) in ctxt.usages[b].clone() {
+            rm_triple((x, y, z), ctxt);
+
+            let x = if x == b { a } else { x };
+            let y = if y == b { a } else { y };
+            let z = if z == b { a } else { z };
 
             add_triple((x, y, z), ctxt);
 

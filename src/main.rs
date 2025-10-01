@@ -17,7 +17,7 @@ mod parallel;
 pub use parallel::*;
 
 fn main() {
-    for i in 1..10 {
+    for i in 1..9 {
         println!("Looking for model size {i}:");
         sym_run(i);
     }

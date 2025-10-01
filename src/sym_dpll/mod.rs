@@ -49,7 +49,7 @@ struct Ctxt {
 
     unionfind: Vec<Id>, // indexed by Id.
     n: usize,
-    dirty_stack: Vec<Id>,
+    dirty_stack: Vec<(Id, Id)>,
 
     fresh: Vec<bool>,
 
