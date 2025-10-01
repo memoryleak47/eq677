@@ -14,6 +14,7 @@ pub(in crate::sym_dpll) fn new_ctxts(n: usize) -> Vec<Ctxt> {
         fresh: vec![true; n],
         trail: Vec::new(),
         mode: Mode::Forward,
+        depth: 0,
     };
     setup_constraints(&mut ctxt);
     split_models(ctxt)

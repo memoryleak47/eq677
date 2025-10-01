@@ -1,7 +1,6 @@
 use crate::*;
 
 // TODO things to add:
-// - multi-threading
 // - somehow improve rebuilding (the "usages" datastructure thing seems suboptimal)
 
 mod api;
@@ -18,6 +17,8 @@ lazy_static::lazy_static! {
 }
 
 type Map<T, K> = fxhash::FxHashMap<T, K>;
+
+fn threading_depth(n: usize) -> usize { n+1 }
 
 // e-class Id.
 // ids less than ctxt.n correspond to ElemIds aswell.
@@ -61,6 +62,8 @@ struct Ctxt {
 
     trail: Vec<TrailEvent>,
     mode: Mode,
+
+    depth: usize,
 }
 
 fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
@@ -138,7 +141,39 @@ fn backtrack(ctxt: &mut Ctxt) {
     }
 }
 
+fn threaded_forward(ctxt: &mut Ctxt) {
+    let Some((x, y)) = choose_branch_id(ctxt) else {
+        print_model(&ctxt);
+        ctxt.mode = Mode::Backtrack;
+        return;
+    };
+
+    if ctxt.fresh[x] {
+        ctxt.trail.push(TrailEvent::Defresh(x));
+        ctxt.fresh[x] = false;
+    }
+    if ctxt.fresh[y] {
+        ctxt.trail.push(TrailEvent::Defresh(y));
+        ctxt.fresh[y] = false;
+    }
+
+    let options = get_options((x, y), ctxt);
+    let z = ctxt.xyz[&(x, y)];
+    into_par_for_each(options, |e| {
+        let mut ctxt = ctxt.clone();
+        ctxt.depth += 1;
+        activate_option(z, vec![e], &mut ctxt);
+        mainloop(ctxt);
+    });
+    ctxt.mode = Mode::Done;
+}
+
 fn forward(ctxt: &mut Ctxt) {
+    if ctxt.depth < threading_depth(ctxt.n) {
+        threaded_forward(ctxt);
+        return;
+    }
+
     let Some((x, y)) = choose_branch_id(ctxt) else {
         print_model(&ctxt);
         ctxt.mode = Mode::Backtrack;
