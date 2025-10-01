@@ -6,6 +6,7 @@ pub(in crate::sym_dpll) fn new_ctxts(n: usize) -> Vec<Ctxt> {
         xzy: Map::default(),
         usages: (0..n).map(|_| Vec::new()).collect(),
         unionfind: (0..n).collect(), // setup the initial 0..n ElemId classes.
+        unionfind_rev: (0..n).map(|_| Vec::new()).collect(),
         n,
         dirty_stack: Vec::new(),
         fresh: vec![true; n],

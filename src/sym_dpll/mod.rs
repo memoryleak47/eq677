@@ -45,9 +45,11 @@ struct Ctxt {
     xyz: Map<(Id, Id), Id>,
     xzy: Map<(Id, Id), Id>,
 
-    usages: Vec<Vec<(Id, Id, Id)>>,
+    usages: Vec<Vec<(Id, Id, Id)>>, // we keep this immutable, after the initial "add"s are done.
 
     unionfind: Vec<Id>, // indexed by Id.
+    unionfind_rev: Vec<Vec<Id>>, // (x = unionfind[y] && x != y) <-> unionfind[x].contains(y)
+
     n: usize,
     dirty_stack: Vec<(Id, Id)>,
 
@@ -115,9 +117,18 @@ fn backtrack(ctxt: &mut Ctxt) {
                 activate_option(z, options, ctxt);
                 return;
             },
-            TrailEvent::RmXYZ(x, y, z) => { raw_add_triple((x, y, z), ctxt); },
-            TrailEvent::AddXYZ(x, y, z) => { raw_rm_triple((x, y, z), ctxt); },
-            TrailEvent::Equate(x, y) => { ctxt.unionfind[y] = y; },
+            TrailEvent::RmXYZ(x, y, z) => {
+                ctxt.xyz.insert((x, y), z);
+                ctxt.xzy.insert((x, z), y);
+            },
+            TrailEvent::AddXYZ(x, y, z) => {
+                assert_eq!(ctxt.xyz.remove(&(x, y)), Some(z));
+                assert_eq!(ctxt.xzy.remove(&(x, z)), Some(y));
+            },
+            TrailEvent::Equate(x, y) => {
+                ctxt.unionfind[y] = y;
+                assert_eq!(ctxt.unionfind_rev[x].pop(), Some(y));
+            },
             TrailEvent::Defresh(x) => { ctxt.fresh[x] = true; },
         }
     }
