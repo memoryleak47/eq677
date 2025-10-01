@@ -62,11 +62,23 @@ pub(in crate::sym_dpll) fn rebuild(ctxt: &mut Ctxt) {
             return;
         }
 
-        rebuild_usages(a, b, b, ctxt);
+        let mut followers = vec![b];
+        get_followers(b, &mut followers, ctxt);
+        for bb in followers {
+            rebuild_usages(a, b, bb, ctxt);
+        }
 
         ctxt.trail.push(TrailEvent::Equate(a, b));
         ctxt.classes[b].uf = a;
         ctxt.classes[a].uf_rev.push(b);
+    }
+}
+
+// assumption: b is already in followers.
+fn get_followers(b: Id, followers: &mut Vec<Id>, ctxt: &Ctxt) {
+    followers.extend(ctxt.classes[b].uf_rev.iter().copied());
+    for bb in ctxt.classes[b].uf_rev.iter().copied() {
+        get_followers(bb, followers, ctxt);
     }
 }
 
@@ -76,10 +88,6 @@ fn rebuild_usages(a: Id, b: Id, bb: Id, ctxt: &mut Ctxt) {
     if ctxt.mode == Mode::Backtrack {
         ctxt.dirty_stack.clear();
         return;
-    }
-
-    for bbb in ctxt.classes[bb].uf_rev.clone() {
-        rebuild_usages(a, b, bbb, ctxt);
     }
 
     for (xo, yo, zo) in ctxt.classes[bb].usages.clone() {
