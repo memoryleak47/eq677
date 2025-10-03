@@ -81,7 +81,7 @@ struct Ctxt {
     mode: Mode,
 
     fresh: Vec<bool>, // whether an ElemId is still "fresh".
-    depth: usize,
+    depth: usize, // The number of DecisionPoints on the current trail.
 
     propagate_queue: Vec<PropagationTask>,
 }
@@ -113,7 +113,6 @@ fn threaded_forward_step(ctxt: &mut Ctxt) {
     into_par_for_each(options, |e| {
         // NOTE: this is one clone too many.
         let mut ctxt = ctxt.clone();
-        ctxt.depth += 1;
         activate_option(pos, vec![e], &mut ctxt);
         mainloop(ctxt);
     });
@@ -139,6 +138,7 @@ fn backtrack_step(ctxt: &mut Ctxt) {
     loop {
         match ctxt.trail.pop() {
             Some(TrailEvent::DecisionPoint(pos, options)) => {
+                ctxt.depth -= 1;
                 activate_option(pos, options, ctxt);
                 return;
             },
@@ -219,8 +219,22 @@ fn next_options(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     Some((pos, valids))
 }
 
+// Counts the number of "found" PosIds.
+fn progress(ctxt: &Ctxt) -> usize {
+    let mut c = 0;
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            c += (ctxt.table[idx((x, y), ctxt.n)] != usize::MAX) as usize;
+        }
+    }
+    c
+}
+
 fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
     let Some(e) = options.pop() else {
+        // dbg!(ctxt.depth);
+        // dbg!(progress(ctxt));
+
         ctxt.mode = Mode::Backtracking;
         return;
     };
@@ -231,7 +245,10 @@ fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
     }
 
     ctxt.mode = Mode::Forward;
+
     ctxt.trail.push(TrailEvent::DecisionPoint(pos, options));
+    ctxt.depth += 1;
+
     if let Err(()) = propagate(pos, e, ctxt) {
         ctxt.mode = Mode::Backtracking;
     }

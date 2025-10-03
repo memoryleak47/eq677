@@ -63,7 +63,7 @@ struct Ctxt {
     trail: Vec<TrailEvent>,
     mode: Mode,
 
-    depth: usize,
+    depth: usize, // The number of DecisionPoints on the current trail
 }
 
 fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
@@ -121,6 +121,7 @@ fn backtrack(ctxt: &mut Ctxt) {
         if ctxt.trail.is_empty() { ctxt.mode = Mode::Done; return; }
         match ctxt.trail.pop().unwrap() {
             TrailEvent::DecisionPoint(z, options) => {
+                ctxt.depth -= 1;
                 activate_option(z, options, ctxt);
                 return;
             },
@@ -161,7 +162,6 @@ fn threaded_forward(ctxt: &mut Ctxt) {
     let z = ctxt.xyz[&(x, y)];
     into_par_for_each(options, |e| {
         let mut ctxt = ctxt.clone();
-        ctxt.depth += 1;
         activate_option(z, vec![e], &mut ctxt);
         mainloop(ctxt);
     });
@@ -204,8 +204,22 @@ fn mainloop(mut ctxt: Ctxt) {
     }
 }
 
+// Counts the number of found PosIds.
+fn progress(ctxt: &Ctxt) -> usize {
+    let mut c = 0;
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            c += (ctxt.xyz[&(x, y)] < ctxt.n) as usize;
+        }
+    }
+    c
+}
+
 fn activate_option(z: Id, mut options: Vec<Id>, ctxt: &mut Ctxt) {
     let Some(e) = options.pop() else {
+        // dbg!(ctxt.depth);
+        // dbg!(progress(ctxt));
+
         ctxt.mode = Mode::Backtrack;
         return;
     };
@@ -218,6 +232,7 @@ fn activate_option(z: Id, mut options: Vec<Id>, ctxt: &mut Ctxt) {
     }
 
     ctxt.trail.push(TrailEvent::DecisionPoint(z, options));
+    ctxt.depth += 1;
 
     union(z, e, ctxt);
     rebuild(ctxt);
