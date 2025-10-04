@@ -4,8 +4,8 @@ mod canon;
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct MatrixMagma {
-    n: usize, // size
-    data: Box<[usize]>, // of length n^2
+    pub n: usize, // size
+    pub data: Box<[usize]>, // of length n^2
 }
 
 impl Magma for MatrixMagma {
