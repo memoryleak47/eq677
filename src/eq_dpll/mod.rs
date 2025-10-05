@@ -113,10 +113,27 @@ pub fn eq_run2(n: usize) {
         }
     }
 
+    println!("deduplication! from {} ...", candidates.len());
+    use std::collections::HashSet;
+
+    let mut seen = HashSet::new();
+    for candidate in std::mem::take(&mut candidates) {
+        let mut m = get_partial_magma(&candidate);
+        m.canonicalize();
+        if seen.insert(m) {
+            candidates.push(candidate);
+        }
+    }
+    println!("... to {}", candidates.len());
+
     into_par_for_each(candidates, |mut ctxt| {
         ctxt.depth = 200;
         mainloop(ctxt);
     });
+}
+
+fn get_partial_magma(ctxt: &Ctxt) -> MatrixMagma {
+    MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x,y), ctxt.n)])
 }
 
 fn mainloop(mut ctxt: Ctxt) {

@@ -19,6 +19,6 @@ pub use parallel::*;
 fn main() {
     for i in 0..12 {
         println!("Looking for model size {i}:");
-        eq_run(i);
+        eq_run2(i);
     }
 }
