@@ -47,7 +47,8 @@ pub fn eq_run2(n: usize) {
     for mut candidate in std::mem::take(&mut candidates) {
         if revisit(&mut candidate).is_err() { continue }
 
-        let m = get_partial_magma(&candidate).canonicalize();
+        // TODO: change back to the non-terrible version, when the bug is fixed.
+        let m = get_partial_magma(&candidate).canonicalize_terrible();
         if seen.insert(m) {
             candidates.push(candidate);
         }

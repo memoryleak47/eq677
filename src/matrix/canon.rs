@@ -39,6 +39,25 @@ impl MatrixMagma {
         m
     }
 
+     pub fn permute_old(&self, p: Perm) -> Self {
+        let mut c = Self::zeros(self.n);
+        for x in 0..self.n {
+            for y in 0..self.n {
+                // f(x, y) = z
+                // -> f(p[x], p[y]) = p[z]
+                let z = self.f(x, y);
+
+                let mut pz = usize::MAX;
+                if z != usize::MAX {
+                    pz = p[z];
+                    assert!(pz != usize::MAX);
+                }
+                c.set_f(p[x], p[y], pz);
+            }
+        }
+        c
+    }
+
     // This function also works on partial magmas.
     pub fn canonicalize(&self) -> Self {
         let n = self.n;
@@ -106,7 +125,7 @@ impl MatrixMagma {
     }
 
     pub fn canonicalize_terrible(&self) -> Self {
-        all_perms(self.n).into_iter().map(|p| self.permute(p)).min().unwrap()
+        all_perms(self.n).into_iter().map(|p| self.permute_old(p)).min().unwrap()
     }
 }
 
