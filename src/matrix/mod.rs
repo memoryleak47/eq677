@@ -3,6 +3,7 @@ use crate::*;
 mod canon;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
+// This magma might be partial; we use usize::MAX to encoding missing entries.
 pub struct MatrixMagma {
     pub n: usize, // size
     pub data: Box<[usize]>, // of length n^2
@@ -66,9 +67,18 @@ impl MatrixMagma {
         let div = self.n/10 + 2;
         for x in 0..self.n {
             for y in 0..self.n {
-                print!("{:<width$}", self.f(x, y), width = div);
+                let z = self.f(x, y);
+                if z == usize::MAX {
+                    print!("{:<width$}", z, width = div);
+                } else {
+                    print!("{:<width$}", '-', width = div);
+                }
             }
             println!("");
         }
+    }
+
+    pub fn is_total(&self) -> bool {
+        !self.data.contains(&usize::MAX)
     }
 }

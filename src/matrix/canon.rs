@@ -29,6 +29,7 @@ impl MatrixMagma {
         c
     }
 
+    // This function also works on partial magmas.
     pub fn canonicalize(&self) -> Self {
         let n = self.n;
         let start_perm = vec![usize::MAX; n];
@@ -55,7 +56,12 @@ impl MatrixMagma {
                     assert!(cy != usize::MAX);
 
                     let cz = self.f(cx, cy);
-                    candidates.extend(choose_c_rev(c, cz));
+                    // missing elements simply remain missing.
+                    if cz == usize::MAX {
+                        candidates.push(c);
+                    } else {
+                        candidates.extend(choose_c_rev(c, cz));
+                    }
                 }
 
                 // filter out suboptimal partial perms.
@@ -64,7 +70,7 @@ impl MatrixMagma {
                     let cx = idx(&c, x);
                     let cy = idx(&c, y);
                     let cz = self.f(cx, cy);
-                    let z = idx_rev(&c, cz);
+                    let z = if cz == usize::MAX { usize::MAX } else { idx_rev(&c, cz) };
                     if z <= optimal {
                         if z < optimal {
                             candidates.clear();
