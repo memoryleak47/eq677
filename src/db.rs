@@ -2,6 +2,12 @@ use crate::*;
 
 pub fn db() -> Vec<MatrixMagma> {
     vec![
+        // size 0
+        MatrixMagma::parse(""),
+
+        // size 1
+        MatrixMagma::parse("0"),
+
         // size 5
         MatrixMagma::parse("
             0 3 4 1 2

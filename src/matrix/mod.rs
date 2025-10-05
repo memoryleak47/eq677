@@ -63,9 +63,10 @@ impl MatrixMagma {
     }
 
     pub fn dump(&self) {
+        let div = self.n/10 + 2;
         for x in 0..self.n {
             for y in 0..self.n {
-                print!("{} ", self.f(x, y));
+                print!("{:<width$}", self.f(x, y), width = div);
             }
             println!("");
         }
