@@ -34,8 +34,7 @@ pub fn eq_run2(n: usize) {
 
     let mut seen = HashSet::new();
     for candidate in std::mem::take(&mut candidates) {
-        let mut m = get_partial_magma(&candidate);
-        let m = m.canonicalize();
+        let m = get_partial_magma(&candidate).canonicalize();
         if seen.insert(m) {
             candidates.push(candidate);
         }
