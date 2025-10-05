@@ -1,3 +1,7 @@
+#![allow(unused)] // heh
+#![allow(private_interfaces)]
+#![allow(irrefutable_let_patterns)]
+
 mod magma;
 pub use magma::*;
 

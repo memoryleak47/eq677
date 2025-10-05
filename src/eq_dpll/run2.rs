@@ -4,6 +4,7 @@ const GRID_SIZE: usize = 4;
 
 pub fn eq_run2(n: usize) {
     let mut candidates = vec![build_ctxt(n)];
+    // candidates[0].fresh.iter_mut().for_each(|x| { *x = false; });
     let mut out_candidates = Vec::new();
 
     while candidates.len() > 0 {
