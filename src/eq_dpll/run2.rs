@@ -33,7 +33,10 @@ pub fn eq_run2(n: usize) {
     use std::collections::HashSet;
 
     let mut seen = HashSet::new();
-    for candidate in std::mem::take(&mut candidates) {
+    for mut candidate in std::mem::take(&mut candidates) {
+        revisit(&mut candidate); // TODO I think technically, this thing could have found a model that it wouldn't report?
+        if let Mode::Backtracking = candidate.mode { continue; }
+
         let m = get_partial_magma(&candidate).canonicalize();
         if seen.insert(m) {
             candidates.push(candidate);
@@ -47,7 +50,7 @@ pub fn eq_run2(n: usize) {
     });
 }
 
-fn get_partial_magma(ctxt: &Ctxt) -> MatrixMagma {
+pub fn get_partial_magma(ctxt: &Ctxt) -> MatrixMagma {
     MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x,y), ctxt.n)])
 }
 
@@ -104,3 +107,13 @@ fn best_score2(ctxt: &Ctxt) -> Option<PosId> {
     Some(best?.0)
 }
 
+pub fn revisit(ctxt: &mut Ctxt) -> Res{
+    for (i, c) in ctxt.classes.iter().enumerate() {
+        if c.value.is_some() {
+            for p in c.parents.iter() {
+                ctxt.propagate_queue.push(PropagationTask::VisitParent(*p));
+            }
+        }
+    }
+    propagate_loop(ctxt)
+}

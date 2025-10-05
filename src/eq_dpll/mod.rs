@@ -261,6 +261,10 @@ fn propagate(pos: PosId, e: ElemId, ctxt: &mut Ctxt) -> Res {
     assert!(ctxt.propagate_queue.is_empty());
     ctxt.propagate_queue.push(PropagationTask::Decision(pos, e));
 
+    propagate_loop(ctxt)
+}
+
+fn propagate_loop(ctxt: &mut Ctxt) -> Res {
     while let Some(task) = ctxt.propagate_queue.pop() {
         let output = match task {
             PropagationTask::Decision(pos, e) => handle_decision(pos, e, ctxt),
