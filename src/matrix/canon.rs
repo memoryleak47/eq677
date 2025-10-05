@@ -21,8 +21,18 @@ impl MatrixMagma {
         for x in 0..self.n {
             for y in 0..self.n {
                 // recall: f2(x, y) = c^-1(f1(c(x), c(y)))
-                let fxy = self.f(idx(&c, x), idx(&c, y));
-                let z = if fxy == usize::MAX { usize::MAX } else { idx_rev(&c, fxy) };
+                let cx = idx(&c, x);
+                let cy = idx(&c, y);
+
+                assert!(cx < self.n);
+                assert!(cy < self.n);
+
+                let fxy = self.f(cx, cy);
+                let mut z = usize::MAX;
+                if fxy != usize::MAX {
+                    z = idx_rev(&c, fxy);
+                    assert!(z != usize::MAX);
+                }
                 m.set_f(x, y, z);
             }
         }
@@ -69,8 +79,17 @@ impl MatrixMagma {
                 for c in std::mem::take(&mut candidates) {
                     let cx = idx(&c, x);
                     let cy = idx(&c, y);
+
+                    assert!(cx != usize::MAX);
+                    assert!(cy != usize::MAX);
+
                     let cz = self.f(cx, cy);
-                    let z = if cz == usize::MAX { usize::MAX } else { idx_rev(&c, cz) };
+
+                    let mut z = usize::MAX;
+                    if cz != usize::MAX {
+                        z = idx_rev(&c, cz);
+                        assert!(z != usize::MAX);
+                    }
                     if z <= optimal {
                         if z < optimal {
                             candidates.clear();
