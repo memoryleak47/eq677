@@ -16,17 +16,16 @@ impl MatrixMagma {
         m
     }
 
-    pub fn permute(&self, p: Perm) -> Self {
-        let mut c = Self::zeros(self.n);
+    pub fn permute(&self, c: Perm) -> Self {
+        let mut m = Self::zeros(self.n);
         for x in 0..self.n {
             for y in 0..self.n {
-                // f(x, y) = z
-                // -> f(p[x], p[y]) = p[z]
-                let z = idx_rev(&p, self.f(p[x], p[y]));
-                c.set_f(x, y, z);
+                // recall: f2(x, y) = c^-1(f1(c(x), c(y)))
+                let z = idx_rev(&c, self.f(idx(&c, x), idx(&c, y)));
+                m.set_f(x, y, z);
             }
         }
-        c
+        m
     }
 
     // This function also works on partial magmas.
