@@ -53,7 +53,7 @@ struct Class {
     value: Option<ElemId>,
 }
 
-#[derive(Default, Clone)]
+#[derive(Default, Clone, PartialEq, Eq)]
 enum Mode {
     #[default] Forward,
     Backtracking,
@@ -89,6 +89,32 @@ struct Ctxt {
 pub fn eq_run(n: usize) {
     let models = split_models(build_ctxt(n));
     into_par_for_each(models, |ctxt| {
+        mainloop(ctxt);
+    });
+}
+
+pub fn eq_run2(n: usize) {
+    let mut candidates = vec![build_ctxt(n)];
+
+    for _ in 0..10 {
+        for mut candidate in std::mem::take(&mut candidates) {
+            let Some((pos, options)) = next_options(&mut candidate) else {
+                print_model(&candidate);
+                continue;
+            };
+
+            for o in options {
+                let mut ctxt = candidate.clone();
+                activate_option(pos, vec![o], &mut ctxt);
+                if ctxt.mode != Mode::Backtracking {
+                    candidates.push(ctxt);
+                }
+            }
+        }
+    }
+
+    into_par_for_each(candidates, |mut ctxt| {
+        ctxt.depth = 200;
         mainloop(ctxt);
     });
 }
