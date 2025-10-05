@@ -4,7 +4,6 @@ type Perm = Vec<usize>;
 
 // f2(x, y) = c^-1(f1(c(x), c(y)))
 // c: M2 (canonical) -> M1 (original).
-// We want to lexicographically minimize [f2(0, 0), f2(0, 1), f2(0, 2), ..., f2(1, 0), f2(1, 1), ...]
 
 impl MatrixMagma {
     pub fn transpose(&self) -> Self {
@@ -100,7 +99,7 @@ fn choose_c(c: Vec<usize>, x: usize) -> Vec<Perm> {
     if idx(&c, x) != usize::MAX { return vec![c] }
 
     let mut out = Vec::new();
-    for o in (0..c.len()) {
+    for o in 0..c.len() {
         if idx_rev(&c, o) != usize::MAX { continue }
 
         let mut c2 = c.clone();
@@ -116,7 +115,7 @@ fn choose_c_rev(c: Vec<usize>, x: usize) -> Vec<Perm> {
     if idx_rev(&c, x) != usize::MAX { return vec![c] }
 
     let mut out = Vec::new();
-    for o in (0..c.len()) {
+    for o in 0..c.len() {
         if idx(&c, o) != usize::MAX { continue }
 
         let mut c2 = c.clone();
