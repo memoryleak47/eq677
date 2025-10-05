@@ -28,18 +28,19 @@ pub fn eq_run2(n: usize) {
     }
 
     candidates = out_candidates;
-    println!("deduplication! from {} ...", candidates.len());
+    let old_size = candidates.len();
+
     use std::collections::HashSet;
 
     let mut seen = HashSet::new();
     for candidate in std::mem::take(&mut candidates) {
         let mut m = get_partial_magma(&candidate);
-        m.canonicalize();
+        let m = m.canonicalize();
         if seen.insert(m) {
             candidates.push(candidate);
         }
     }
-    println!("... to {}", candidates.len());
+    println!("-- deduplicated from {} to {}", old_size, candidates.len());
 
     into_par_for_each(candidates, |mut ctxt| {
         ctxt.depth = 200;
