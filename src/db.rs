@@ -116,9 +116,13 @@ fn db_is255() {
 #[test]
 fn db_left_cancellative() {
     for m in db() {
-        for ((a,b), c) in (0..m.n).zip(0..m.n).zip(0..m.n) {
-            // a*b = a*c -> b = c.
-            assert!(m.f(a, b) != m.f(a, c) || b == c);
+        for a in 0..m.n {
+            for b in 0..m.n {
+                for c in 0..m.n {
+                    // a*b = a*c -> b = c.
+                    assert!(m.f(a, b) != m.f(a, c) || b == c);
+                }
+            }
         }
     }
 }
@@ -126,9 +130,13 @@ fn db_left_cancellative() {
 #[test]
 fn db_right_cancellative() {
     for m in db() {
-        for ((a,b), c) in (0..m.n).zip(0..m.n).zip(0..m.n) {
-            // b*a = c*a -> b = c
-            assert!(m.f(b, a) != m.f(c, a) || b == c);
+        for a in 0..m.n {
+            for b in 0..m.n {
+                for c in 0..m.n {
+                    // b*a = c*a -> b = c
+                    assert!(m.f(b, a) != m.f(c, a) || b == c);
+                }
+            }
         }
     }
 }
