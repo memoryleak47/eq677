@@ -69,9 +69,9 @@ impl MatrixMagma {
             for y in 0..self.n {
                 let z = self.f(x, y);
                 if z == usize::MAX {
-                    print!("{:<width$}", z, width = div);
-                } else {
                     print!("{:<width$}", '-', width = div);
+                } else {
+                    print!("{:<width$}", z, width = div);
                 }
             }
             println!("");
