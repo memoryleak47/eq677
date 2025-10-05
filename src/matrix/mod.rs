@@ -16,6 +16,8 @@ impl Magma for MatrixMagma {
     }
 
     fn f(&self, x: usize, y: usize) -> usize {
+        assert!(x < self.n);
+        assert!(y < self.n);
         self.data[MatrixMagma::idx(x, y, self.n)]
     }
 }

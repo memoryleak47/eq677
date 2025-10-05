@@ -21,7 +21,8 @@ impl MatrixMagma {
         for x in 0..self.n {
             for y in 0..self.n {
                 // recall: f2(x, y) = c^-1(f1(c(x), c(y)))
-                let z = idx_rev(&c, self.f(idx(&c, x), idx(&c, y)));
+                let fxy = self.f(idx(&c, x), idx(&c, y));
+                let z = if fxy == usize::MAX { usize::MAX } else { idx_rev(&c, fxy) };
                 m.set_f(x, y, z);
             }
         }
@@ -92,11 +93,13 @@ impl MatrixMagma {
 
 // returns c(x)
 fn idx(c: &[usize], x: usize) -> usize {
+    assert!(x < c.len());
     c[x]
 }
 
 // returns c^-1(x)
 fn idx_rev(c: &[usize], x: usize) -> usize {
+    assert!(x < c.len());
     for y in 0..c.len() {
         if idx(c, y) == x { return y; }
     }
@@ -105,6 +108,8 @@ fn idx_rev(c: &[usize], x: usize) -> usize {
 
 // after this function, `c(x)` is defined.
 fn choose_c(c: Perm, x: usize) -> Vec<Perm> {
+    assert!(x < c.len());
+
     if idx(&c, x) != usize::MAX { return vec![c] }
 
     let mut out = Vec::new();
@@ -121,6 +126,8 @@ fn choose_c(c: Perm, x: usize) -> Vec<Perm> {
 
 // after this function, `c^-1(x)` is defined.
 fn choose_c_rev(c: Perm, x: usize) -> Vec<Perm> {
+    assert!(x < c.len());
+
     if idx_rev(&c, x) != usize::MAX { return vec![c] }
 
     let mut out = Vec::new();
