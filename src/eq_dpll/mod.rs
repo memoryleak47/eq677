@@ -74,6 +74,8 @@ enum PropagationTask {
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Vec<Class>, // indexed by TermId
+
+    // TODO it might be useful to replace this table by a MatrixMagma.
     table: Vec<ElemId>, // maps "PosId" (via idx encoding) to Option<ElemId>, where ElemId::MAX means None.
 
     // maps each PosId to a set of terms that currently evaluate to this PosId (if you eval its children).

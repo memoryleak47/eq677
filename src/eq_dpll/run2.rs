@@ -5,6 +5,9 @@ const GRID_SIZE: usize = 4;
 pub fn eq_run2(n: usize) {
     let mut candidates = vec![build_ctxt(n)];
     // candidates[0].fresh.iter_mut().for_each(|x| { *x = false; });
+
+    // TODO: weird bug: De-freshing 1 yields more candidates even after "canonicalization".
+    // candidates[0].fresh[1] = false;
     let mut out_candidates = Vec::new();
 
     while candidates.len() > 0 {

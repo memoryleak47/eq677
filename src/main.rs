@@ -21,8 +21,7 @@ mod parallel;
 pub use parallel::*;
 
 fn main() {
-    for i in 0..12 {
-        println!("Looking for model size {i}:");
-        eq_run2(i);
-    }
+    let i = 6;
+    println!("Looking for model size {i}:");
+    eq_run2(i);
 }
