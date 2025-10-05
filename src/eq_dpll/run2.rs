@@ -1,12 +1,19 @@
 use crate::eq_dpll::*;
 
+const GRID_SIZE: usize = 4;
+
 pub fn eq_run2(n: usize) {
     let mut candidates = vec![build_ctxt(n)];
+    let mut out_candidates = Vec::new();
 
-    for _ in 0..10 {
+    while candidates.len() > 0 {
         for mut candidate in std::mem::take(&mut candidates) {
             let Some((pos, options)) = next_options2(&mut candidate) else {
-                print_model(&candidate);
+                if get_partial_magma(&candidate).is_total() {
+                    print_model(&candidate);
+                } else {
+                    out_candidates.push(candidate);
+                }
                 continue;
             };
 
@@ -20,6 +27,7 @@ pub fn eq_run2(n: usize) {
         }
     }
 
+    candidates = out_candidates;
     println!("deduplication! from {} ...", candidates.len());
     use std::collections::HashSet;
 
@@ -45,7 +53,7 @@ fn get_partial_magma(ctxt: &Ctxt) -> MatrixMagma {
 
 // TODO improve choice heuristic.
 fn next_options2(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
-    let pos = best_score(ctxt)?;
+    let pos = best_score2(ctxt)?;
 
     let mut found_fresh = false;
 
@@ -72,5 +80,27 @@ fn next_options2(ctxt: &mut Ctxt) -> Option<(PosId, Vec<ElemId>)> {
     }
 
     Some((pos, valids))
+}
+
+fn best_score2(ctxt: &Ctxt) -> Option<PosId> {
+    let mut best = None;
+    // NOTE: flipping these loops doubles the runtime. So this is crucially important.
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            if x >= GRID_SIZE || y >= GRID_SIZE { continue; }
+
+            let i = idx((x, y), ctxt.n);
+            if ctxt.table[i] != ElemId::MAX { continue; }
+            let score = ctxt.pos_terms[i].len();
+            let cond = match best {
+                None => true,
+                Some((_, score2)) => score > score2,
+            };
+            if cond {
+                best = Some(((x, y), score));
+            }
+        }
+    }
+    Some(best?.0)
 }
 
