@@ -22,8 +22,8 @@ impl MatrixMagma {
             for y in 0..self.n {
                 // f(x, y) = z
                 // -> f(p[x], p[y]) = p[z]
-                let z = self.f(x, y);
-                c.set_f(p[x], p[y], p[z]);
+                let z = idx_rev(&p, self.f(p[x], p[y]));
+                c.set_f(x, y, z);
             }
         }
         c
@@ -101,7 +101,7 @@ fn idx_rev(c: &[usize], x: usize) -> usize {
 }
 
 // after this function, `c(x)` is defined.
-fn choose_c(c: Vec<usize>, x: usize) -> Vec<Perm> {
+fn choose_c(c: Perm, x: usize) -> Vec<Perm> {
     if idx(&c, x) != usize::MAX { return vec![c] }
 
     let mut out = Vec::new();
@@ -117,7 +117,7 @@ fn choose_c(c: Vec<usize>, x: usize) -> Vec<Perm> {
 }
 
 // after this function, `c^-1(x)` is defined.
-fn choose_c_rev(c: Vec<usize>, x: usize) -> Vec<Perm> {
+fn choose_c_rev(c: Perm, x: usize) -> Vec<Perm> {
     if idx_rev(&c, x) != usize::MAX { return vec![c] }
 
     let mut out = Vec::new();
