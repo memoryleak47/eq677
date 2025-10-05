@@ -2,7 +2,7 @@ use crate::*;
 
 mod canon;
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
 // This magma might be partial; we use usize::MAX to encoding missing entries.
 pub struct MatrixMagma {
     pub n: usize, // size
@@ -37,8 +37,12 @@ impl MatrixMagma {
 
         for (x, line) in lines.into_iter().enumerate() {
             for (y, s) in line.split_whitespace().enumerate() {
-                let i: usize = s.parse().unwrap();
-                m.set_f(x, y, i);
+                if s == "-" {
+                    m.set_f(x, y, usize::MAX);
+                } else {
+                    let i: usize = s.parse().unwrap();
+                    m.set_f(x, y, i);
+                }
             }
         }
 

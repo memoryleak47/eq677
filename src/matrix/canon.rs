@@ -84,6 +84,10 @@ impl MatrixMagma {
         let candidate = candidates.pop().unwrap();
         self.permute(candidate)
     }
+
+    pub fn canonicalize_terrible(&self) -> Self {
+        all_perms(self.n).into_iter().map(|p| self.permute(p)).min().unwrap()
+    }
 }
 
 // returns c(x)
@@ -129,4 +133,42 @@ fn choose_c_rev(c: Perm, x: usize) -> Vec<Perm> {
     }
 
     out
+}
+
+pub fn all_perms(n: usize) -> Vec<Perm> {
+    if n == 0 { return vec![Vec::new()]; }
+
+    let mut outs = Vec::new();
+
+    // we decide 'out[0] = a'.
+    for p in all_perms(n-1) {
+        for a in 0..n {
+            let mut out = Vec::new();
+            out.push(a);
+            out.extend(p.iter().copied().map(|x| x + (x >= a) as usize));
+            outs.push(out);
+        }
+    }
+    outs
+}
+
+#[test]
+fn test_canon() {
+    let m = MatrixMagma::parse("
+        3 1 - - -
+        2 3 4 - -
+        3 - 2 - -
+        - - - - -
+        - - - - 2
+    ");
+    m.dump();
+    println!("===================================");
+    m.canonicalize().dump();
+    println!("===================================");
+    m.canonicalize_terrible().dump();
+
+    for p in all_perms(5) {
+        let m = m.permute(p);
+        assert_eq!(m.canonicalize(), m.canonicalize_terrible());
+    }
 }
