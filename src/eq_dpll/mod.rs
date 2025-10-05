@@ -18,6 +18,9 @@ pub use dump::*;
 mod split;
 pub use split::*;
 
+mod run2;
+pub use run2::*;
+
 type ElemId = usize;
 type PosId = (usize, usize);
 
@@ -91,49 +94,6 @@ pub fn eq_run(n: usize) {
     into_par_for_each(models, |ctxt| {
         mainloop(ctxt);
     });
-}
-
-pub fn eq_run2(n: usize) {
-    let mut candidates = vec![build_ctxt(n)];
-
-    for _ in 0..10 {
-        for mut candidate in std::mem::take(&mut candidates) {
-            let Some((pos, options)) = next_options(&mut candidate) else {
-                print_model(&candidate);
-                continue;
-            };
-
-            for o in options {
-                let mut ctxt = candidate.clone();
-                activate_option(pos, vec![o], &mut ctxt);
-                if ctxt.mode != Mode::Backtracking {
-                    candidates.push(ctxt);
-                }
-            }
-        }
-    }
-
-    println!("deduplication! from {} ...", candidates.len());
-    use std::collections::HashSet;
-
-    let mut seen = HashSet::new();
-    for candidate in std::mem::take(&mut candidates) {
-        let mut m = get_partial_magma(&candidate);
-        m.canonicalize();
-        if seen.insert(m) {
-            candidates.push(candidate);
-        }
-    }
-    println!("... to {}", candidates.len());
-
-    into_par_for_each(candidates, |mut ctxt| {
-        ctxt.depth = 200;
-        mainloop(ctxt);
-    });
-}
-
-fn get_partial_magma(ctxt: &Ctxt) -> MatrixMagma {
-    MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x,y), ctxt.n)])
 }
 
 fn mainloop(mut ctxt: Ctxt) {
