@@ -24,6 +24,11 @@ pub fn eq_run2(n: usize) {
             for o in options {
                 let mut ctxt = candidate.clone();
                 activate_option(pos, vec![o], &mut ctxt);
+
+                assert!(!ctxt.fresh[pos.0]);
+                assert!(!ctxt.fresh[pos.1]);
+                assert!(!ctxt.fresh[o]);
+
                 if ctxt.mode != Mode::Backtracking {
                     candidates.push(ctxt);
                 }
