@@ -23,7 +23,9 @@ pub fn eq_run2(n: usize) {
 
             for o in options {
                 let mut ctxt = candidate.clone();
+                fresh_chk(&ctxt);
                 activate_option(pos, vec![o], &mut ctxt);
+                fresh_chk(&ctxt);
 
                 assert!(!ctxt.fresh[pos.0]);
                 assert!(!ctxt.fresh[pos.1]);
@@ -124,4 +126,16 @@ pub fn revisit(ctxt: &mut Ctxt) -> Res{
         }
     }
     propagate_loop(ctxt)
+}
+
+fn fresh_chk(ctxt: &Ctxt) {
+    for x in 0..ctxt.n {
+        if ctxt.fresh[x] {
+            assert!(!ctxt.table.contains(&x));
+            for y in 0..ctxt.n {
+                assert_eq!(ctxt.table[idx((x, y), ctxt.n)], usize::MAX);
+                assert_eq!(ctxt.table[idx((y, x), ctxt.n)], usize::MAX);
+            }
+        }
+    }
 }
