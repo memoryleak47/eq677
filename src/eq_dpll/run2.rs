@@ -35,8 +35,7 @@ pub fn eq_run2(n: usize) {
 
     let mut seen = HashSet::new();
     for mut candidate in std::mem::take(&mut candidates) {
-        revisit(&mut candidate); // TODO I think technically, this thing could have found a model that it wouldn't report?
-        if let Mode::Backtracking = candidate.mode { continue; }
+        if revisit(&mut candidate).is_err() { continue }
 
         let m = get_partial_magma(&candidate).canonicalize();
         if seen.insert(m) {
