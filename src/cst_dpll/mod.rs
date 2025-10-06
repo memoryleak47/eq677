@@ -1,4 +1,5 @@
 use crate::*;
+use smallvec::SmallVec;
 
 mod init;
 use init::*;
@@ -7,45 +8,34 @@ mod run;
 pub use run::*;
 
 // identifies an element.
-type E = usize;
+type E = u8;
 
 // identifies an (x,y)-position of Es.
-type P = usize;
+type P = u16;
 
-struct Class {
-    c1: C1,
-    c2: C2,
-    value: Option<E>,
+// Constraint
+enum C {
+    C1M0(/*x*/ E, /*y*/ E),                     // x = y*(x*((y*x)*y))
+    C1M1(/*x*/ E, /*y*/ E, /*a*/ E),            // x = y*(x*(  a  *y))
+    C1M2(/*x*/ E, /*y*/ E, /*a*/ E),            // x = y*(x*a)
 
-    // The constraints that await our decision.
-    listening_c1: Vec<P>,
-    listening_c2: Vec<P>,
+    C2M0(/*x*/ E, /*y*/ E),                     // x = (y*x) * ((y*(y*x)) * y)
+    C2M1(/*x*/ E, /*y*/ E, /*yx*/ E),           // x = yx    * ((y*  yx)  * y)
+    C2M2(/*x*/ E, /*y*/ E, /*yx*/ E, /*a*/ E),  // x = yx    * (a  * y)
 }
 
-enum TrailEvent {
-    ChangeC1(P, C1), // C1 is the old state.
-    ChangeC2(P, C2), // C2 is the old state.
-    Decide(P, Vec<E>) // Vec<E> are the other options I should try.
-    // TODO add more
+enum Class {
+    Evaluated(E),
+    Pending(SmallVec<[C; 4]>), // the constraints that currently wait on us.
 }
 
 struct Ctxt {
     trail: Vec<TrailEvent>,
-
-    // indexed via `idx`.
     classes: Vec<Class>,
 }
 
-enum C1 {
-    M0,          // x = y*(x*((y*x)*y))
-    M1(/*a*/ E), // x = y*(x*(a*y))
-    M2(/*a*/ E), // x = y*(x*a)
-    M3(/*a*/ E), // x = y*a
-}
-
-enum C2 {
-    M0,                    // x = (y*x) * ((y*(y*x)) *y)
-    M1(/*yx*/ E),          // x = yx * ((y*yx) *y)
-    M2(/*yx*/ E, /*a*/ E), // x = yx * (a * y)
-    M3(/*yx*/ E, /*a*/ E), // x = yx * a
+enum TrailEvent {
+    TickC(/*old pos*/ P, /*new pos*/ P, /*old c*/ C),
+    Decide(P, Vec<E>) // Vec<E> are the other options I should try.
+    // TODO add more
 }
