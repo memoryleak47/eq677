@@ -14,6 +14,10 @@ struct Class {
     c1: C1,
     c2: C2,
     value: Option<E>,
+
+    // The constraints that await our decision.
+    listening_c1: Vec<P>,
+    listening_c2: Vec<P>,
 }
 
 enum TrailEvent {
