@@ -158,7 +158,10 @@ fn print_model(ctxt: &Ctxt) {
     let magma = magma.canonicalize();
 
     let mut handle = DB.lock().unwrap();
-    if handle.contains(&magma) { return; }
+    if handle.contains(&magma) {
+        println!("duplicate model found! suboptimal symmetry breaking!");
+        return;
+    }
 
     handle.insert(magma.clone());
     drop(handle);
