@@ -1,14 +1,16 @@
 use crate::*;
 
+mod init;
+use init::*;
+
+mod run;
+pub use run::*;
+
 // identifies an element.
 type E = usize;
 
 // identifies an (x,y)-position of Es.
 type P = usize;
-
-pub fn cst_run(n: usize) {
-    todo!()
-}
 
 struct Class {
     c1: C1,

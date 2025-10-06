@@ -10,13 +10,13 @@ lazy_static::lazy_static! {
 fn threading_depth(n: usize) -> usize { n+1 }
 
 mod init;
-pub use init::*;
+use init::*;
 
 mod dump;
-pub use dump::*;
+use dump::*;
 
 mod split;
-pub use split::*;
+use split::*;
 
 type ElemId = usize;
 type PosId = (usize, usize);
