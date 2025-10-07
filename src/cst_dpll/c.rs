@@ -2,14 +2,33 @@ use crate::cst_dpll::*;
 
 // Constraints
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum C {
-    C1M0(/*x*/ E, /*y*/ E),                     // x = y*(x*((y*x)*y))
-    C1M1(/*x*/ E, /*y*/ E, /*a*/ E),            // x = y*(x*(  a  *y))
-    C1M2(/*x*/ E, /*y*/ E, /*a*/ E),            // x = y*(x*a)
+    C1M1(C1M1),
+    C1M2(C1M2),
+    C1M3(C1M3),
 
-    C2M0(/*x*/ E, /*y*/ E),                     // x = (y*x) * ((y*(y*x)) * y)
-    C2M1(/*x*/ E, /*y*/ E, /*yx*/ E),           // x = yx    * ((y*  yx)  * y)
-    C2M2(/*x*/ E, /*y*/ E, /*yx*/ E, /*a*/ E),  // x = yx    * (a  * y)
+    C2M1(C2M1),
+    C2M2(C2M2),
+    C2M3(C2M3),
 }
 
+#[derive(Clone, Copy)]
+pub struct C1M1;                    // a = b*(a*((b*a)*b))
+                                    //            x*y
+#[derive(Clone, Copy)]
+pub struct C1M2(/*a*/ E);           // a = b*(a*(ba*b))
+                                    //            x*y
+#[derive(Clone, Copy)]
+pub struct C1M3(/*b*/ E);           // a = b*(a*bab)
+                                    //        x*y
+
+#[derive(Clone, Copy)]
+pub struct C2M1;                    // a = (b*a) * ((b*(b*a)) * b)
+                                    //                  x*y
+#[derive(Clone, Copy)]
+pub struct C2M2(/*a*/ E);           // a = ba * ((b*ba) * b)
+                                    //            x*y
+#[derive(Clone, Copy)]
+pub struct C2M3(/*a*/ E, /*ba*/ E); // a = ba * (bba * b)
+                                    //            x  * y

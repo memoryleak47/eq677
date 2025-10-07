@@ -1,5 +1,5 @@
 use crate::*;
-use smallvec::SmallVec;
+use smallvec::{SmallVec, smallvec};
 
 mod init;
 use init::*;
