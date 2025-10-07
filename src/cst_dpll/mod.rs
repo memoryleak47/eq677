@@ -25,12 +25,14 @@ enum Class {
     Pending(SmallVec<[C; 4]>), // the constraints that currently wait on us.
 }
 
+#[derive(Clone)]
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Box<[Class]>,
     n: usize,
 }
 
+#[derive(Clone)]
 enum TrailEvent {
     TickC(/*old pos*/ P, /*new pos*/ P, /*old c*/ C),
     Decide(P, Vec<E>) // Vec<E> are the other options I should try.
