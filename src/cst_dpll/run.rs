@@ -38,9 +38,11 @@ fn mainloop(mut ctxt: Ctxt) {
     }
 }
 
-fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+pub fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    if let Class::Decided(e2) = ctxt.classes[p as usize] && e == e2 { return Ok(()); }
+
     let Class::Pending(cs) = std::mem::replace(&mut ctxt.classes[p as usize], Class::Decided(e)) else {
-        panic!("double-defined class!");
+        return Err(());
     };
 
     let x = px(p, ctxt.n);
