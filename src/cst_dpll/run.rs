@@ -50,7 +50,7 @@ fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     {
         // x*y = e.
         let (a, b, ba) = (y, x, e);
-        visit_c11(a, b, ba, ctxt);
+        visit_c11(a, b, ba, ctxt)?;
     }
 
     for c in cs {
