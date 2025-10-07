@@ -22,7 +22,7 @@ type P = u16;
 #[derive(Clone)]
 enum Class {
     Defined(E),
-    Pending(SmallVec<[C; 4]>), // the constraints that currently wait on us.
+    Pending(SmallVec<[C; 7]>), // the constraints that currently wait on us.
 }
 
 #[derive(Clone)]
