@@ -1,4 +1,4 @@
-use crate::cst_dpll::*;
+use crate::c_dpll::*;
 
 pub fn build_ctxt(n: usize) -> Ctxt {
     let mut ctxt = Ctxt {

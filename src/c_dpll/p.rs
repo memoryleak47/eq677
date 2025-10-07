@@ -1,4 +1,4 @@
-use crate::cst_dpll::*;
+use crate::c_dpll::*;
 
 pub fn mk_p(x: E, y: E, n: usize) -> P {
     let x = x as P;

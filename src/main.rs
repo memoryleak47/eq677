@@ -14,8 +14,8 @@ pub use eq_dpll::*;
 mod sym_dpll;
 pub use sym_dpll::*;
 
-mod cst_dpll;
-pub use cst_dpll::*;
+mod c_dpll;
+pub use c_dpll::*;
 
 mod db;
 pub use db::*;
@@ -29,6 +29,6 @@ pub use present::*;
 fn main() {
     for i in 0..12 {
         println!("Looking for model size {i}:");
-        cst_run(i);
+        c_run(i);
     }
 }

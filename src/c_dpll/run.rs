@@ -1,6 +1,6 @@
-use crate::cst_dpll::*;
+use crate::c_dpll::*;
 
-pub fn cst_run(n: usize) {
+pub fn c_run(n: usize) {
     let ctxt = build_ctxt(n);
     mainloop(ctxt);
 }
