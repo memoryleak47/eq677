@@ -6,12 +6,11 @@ pub fn c_run(n: usize) {
 }
 
 // returns None if we are done.
-fn select_p(ctxt: &Ctxt) -> Option<P> {
+fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     let mut best = None;
-    for x in 0..(ctxt.n as E) {
-        for y in 0..(ctxt.n as E) {
-            let p = mk_p(x, y, ctxt.n);
-            let score = match &ctxt.classes[p as usize] {
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            let score = match &ctxt.classes[idx(x, y, ctxt.n)] {
                 Class::Defined(_) => continue,
                 Class::Pending(cs) => cs.len(),
             };
@@ -20,7 +19,7 @@ fn select_p(ctxt: &Ctxt) -> Option<P> {
                 Some((_, score2)) => score > score2,
             };
             if cond {
-                best = Some((p, score));
+                best = Some(((x, y), score));
             }
         }
     }
@@ -28,33 +27,33 @@ fn select_p(ctxt: &Ctxt) -> Option<P> {
 }
 
 // TODO filter infeasible options
-fn get_options(p: P, ctxt: &Ctxt) -> Vec<E> {
-    (0..(ctxt.n as u8)).collect()
+fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
+    (0..ctxt.n).collect()
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n, |x, y| match ctxt.classes[mk_p(x as E, y as E, ctxt.n) as usize] {
+    present_model(ctxt.n as usize, |x, y| match ctxt.classes[idx(x as E, y as E, ctxt.n)] {
         Class::Defined(e) => e as usize,
         Class::Pending(_) => unreachable!(),
     });
 }
 
 fn mainloop(mut ctxt: Ctxt) {
-    let Some(p) = select_p(&ctxt) else {
+    let Some((x, y)) = select_p(&ctxt) else {
         submit_model(&ctxt);
         return;
     };
 
-    for e in get_options(p, &ctxt) {
+    for e in get_options(x, y, &ctxt) {
         let mut c = ctxt.clone();
-        if propagate(p, e, &mut c).is_ok() {
+        if propagate(x, y, e, &mut c).is_ok() {
             mainloop(c);
         }
     }
 }
 
-pub fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class = &mut ctxt.classes[p as usize];
+pub fn propagate(x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
     let cs = match class {
         Class::Defined(e2) => return if e == *e2 { Ok(()) } else { Err(()) },
         Class::Pending(cs) => {
@@ -63,9 +62,6 @@ pub fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             cs
         },
     };
-
-    let x = px(p, ctxt.n);
-    let y = py(p, ctxt.n);
 
     // spawn constraints!
     {

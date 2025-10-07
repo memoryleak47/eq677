@@ -27,14 +27,14 @@ pub fn progress_c(c: C, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             let a = x;
             let bab = y;
             let abab = e;
-            propagate(mk_p(b, abab, ctxt.n), a, ctxt)
+            propagate(b, abab, a, ctxt)
         },
         _ => todo!(),
     }
 }
 
 pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    match &mut ctxt.classes[mk_p(ba, b, ctxt.n) as usize] {
+    match &mut ctxt.classes[idx(ba, b, ctxt.n)] {
         Class::Defined(bab) => return visit_c12(a, b, *bab, ctxt),
         Class::Pending(cs) => cs.push(C::C11(a)),
     }
@@ -42,8 +42,8 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    match &mut ctxt.classes[mk_p(a, bab, ctxt.n) as usize] {
-        Class::Defined(abab) => return propagate(mk_p(b, *abab, ctxt.n), a, ctxt),
+    match &mut ctxt.classes[idx(a, bab, ctxt.n)] {
+        Class::Defined(abab) => return propagate(b, *abab, a, ctxt),
         Class::Pending(cs) => cs.push(C::C12(b)),
     }
     Ok(())

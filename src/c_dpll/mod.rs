@@ -4,9 +4,6 @@ use smallvec::{SmallVec, smallvec};
 mod init;
 use init::*;
 
-mod p;
-use p::*;
-
 mod c;
 use c::*;
 
@@ -15,9 +12,6 @@ pub use run::*;
 
 // identifies an element.
 type E = u8;
-
-// identifies an (x,y)-position of Es.
-type P = u16;
 
 #[derive(Clone)]
 enum Class {
@@ -29,12 +23,12 @@ enum Class {
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Box<[Class]>,
-    n: usize,
+    n: E,
 }
 
 #[derive(Clone)]
-enum TrailEvent {
-    TickC(/*old pos*/ P, /*new pos*/ P, /*old c*/ C),
-    Decide(P, Vec<E>) // Vec<E> are the other options I should try.
-    // TODO add more
+enum TrailEvent {}
+
+fn idx(x: E, y: E, n: E) -> usize {
+    (x as usize) + (n as usize) * (y as usize)
 }
