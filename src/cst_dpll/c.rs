@@ -16,7 +16,7 @@ pub enum C {
 }
 
 // note: progress_c is called when we know the value that a constraint is waiting on.
-//       visit_c*m* is called when we want to check whether we can call `progress_c`,
+//       visit_c* is called when we want to check whether we can call `progress_c`,
 //       or rather store the constraint in some class.
 
 pub fn progress_c(c: C, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
