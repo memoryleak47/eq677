@@ -33,14 +33,22 @@ pub struct C2M2(/*a*/ E);           // a = ba * ((b*ba) * b)
 pub struct C2M3(/*a*/ E, /*ba*/ E); // a = ba * (bba * b)
                                     //            x  * y
 
-pub fn tick_c(c: C, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+// note: progress_c is called when we know the value that a constraint is waiting on.
+//       visit_c*m* is called when we want to check whether we can call `progress_c`,
+//       or rather store the constraint in some class.
+
+pub fn progress_c(c: C, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
-        C::C1M1(c) => tick_c1m1(c, p, e, ctxt),
+        C::C1M1(c) => progress_c1m1(c, p, e, ctxt),
         _ => todo!(),
     }
 }
 
-fn tick_c1m1(_: C1M1, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let c = C::C1M2(C1M2(py(p, ctxt.n)));
-    todo!("put it somewhere")
+fn progress_c1m1(_: C1M1, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let c = C1M2(py(p, ctxt.n));
+    visit_c1m2(c, todo!(), ctxt)
+}
+
+fn visit_c1m2(c: C1M2, p: P, ctxt: &mut Ctxt) -> Result<(), ()> {
+    todo!()
 }
