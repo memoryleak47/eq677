@@ -7,6 +7,9 @@ use init::*;
 mod p;
 use p::*;
 
+mod c;
+use c::*;
+
 mod run;
 pub use run::*;
 
@@ -15,18 +18,6 @@ type E = u8;
 
 // identifies an (x,y)-position of Es.
 type P = u16;
-
-// Constraint
-#[derive(Clone)]
-enum C {
-    C1M0(/*x*/ E, /*y*/ E),                     // x = y*(x*((y*x)*y))
-    C1M1(/*x*/ E, /*y*/ E, /*a*/ E),            // x = y*(x*(  a  *y))
-    C1M2(/*x*/ E, /*y*/ E, /*a*/ E),            // x = y*(x*a)
-
-    C2M0(/*x*/ E, /*y*/ E),                     // x = (y*x) * ((y*(y*x)) * y)
-    C2M1(/*x*/ E, /*y*/ E, /*yx*/ E),           // x = yx    * ((y*  yx)  * y)
-    C2M2(/*x*/ E, /*y*/ E, /*yx*/ E, /*a*/ E),  // x = yx    * (a  * y)
-}
 
 #[derive(Clone)]
 enum Class {
