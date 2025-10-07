@@ -42,6 +42,9 @@ fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let Class::Pending(cs) = std::mem::replace(&mut ctxt.classes[p as usize], Class::Decided(e)) else {
         panic!("double-defined class!");
     };
+
+    // TODO call visit_c12 for the now-created constraints.
+
     for c in cs {
         progress_c(c, p, e, ctxt)?;
     }
