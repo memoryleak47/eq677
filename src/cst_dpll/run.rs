@@ -54,10 +54,14 @@ fn mainloop(mut ctxt: Ctxt) {
 }
 
 pub fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    if let Class::Defined(e2) = ctxt.classes[p as usize] && e == e2 { return Ok(()); }
-
-    let Class::Pending(cs) = std::mem::replace(&mut ctxt.classes[p as usize], Class::Defined(e)) else {
-        return Err(());
+    let class = &mut ctxt.classes[p as usize];
+    let cs = match class {
+        Class::Defined(e2) => return if e == *e2 { Ok(()) } else { Err(()) },
+        Class::Pending(cs) => {
+            let cs = std::mem::take(cs);
+            *class = Class::Defined(e);
+            cs
+        },
     };
 
     let x = px(p, ctxt.n);
