@@ -43,7 +43,7 @@ fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         panic!("double-defined class!");
     };
     for c in cs {
-        tick_c(c, p, ctxt)?;
+        tick_c(c, p, e, ctxt)?;
     }
     Ok(())
 }

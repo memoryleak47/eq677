@@ -33,13 +33,14 @@ pub struct C2M2(/*a*/ E);           // a = ba * ((b*ba) * b)
 pub struct C2M3(/*a*/ E, /*ba*/ E); // a = ba * (bba * b)
                                     //            x  * y
 
-pub fn tick_c(c: C, p: P, ctxt: &mut Ctxt) -> Result<(), ()> {
+pub fn tick_c(c: C, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
-        C::C1M1(c) => tick_c1m1(c, p, ctxt),
+        C::C1M1(c) => tick_c1m1(c, p, e, ctxt),
         _ => todo!(),
     }
 }
 
-fn tick_c1m1(_: C1M1, p: P, ctxt: &mut Ctxt) -> Result<(), ()> {
-    todo!()
+fn tick_c1m1(_: C1M1, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let c = C::C1M2(C1M2(py(p, ctxt.n)));
+    todo!("put it somewhere")
 }
