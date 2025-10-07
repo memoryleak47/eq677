@@ -15,21 +15,24 @@ pub enum C {
                             //            x  * y
 }
 
-// note: progress_c is called when we know the value that a constraint is waiting on.
-//       visit_c* is called when we want to check whether we can call `progress_c`,
-//       or rather store the constraint in some class.
-
-pub fn progress_c(c: C, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+pub fn progress_c(c: C, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
-        C::C11(a) => progress_c11(a, p, e, ctxt),
+        C::C11(a) => {
+            let (a, b, bab) = (a, y, e);
+            visit_c12(a, b, bab, ctxt)
+        }
         _ => todo!(),
     }
 }
 
-fn progress_c11(a: E, p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    visit_c12(todo!(), todo!(), ctxt)
+pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    match &mut ctxt.classes[mk_p(ba, b, ctxt.n) as usize] {
+        Class::Decided(bab) => return visit_c12(a, b, *bab, ctxt),
+        Class::Pending(cs) => cs.push(C::C11(a)),
+    }
+    Ok(())
 }
 
-fn visit_c12(_: (), p: P, ctxt: &mut Ctxt) -> Result<(), ()> {
+fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     todo!()
 }

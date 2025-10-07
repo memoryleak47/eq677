@@ -43,10 +43,18 @@ fn propagate(p: P, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         panic!("double-defined class!");
     };
 
-    // TODO call visit_c12 for the now-created constraints.
+    let x = px(p, ctxt.n);
+    let y = py(p, ctxt.n);
+
+    // spawn constraints!
+    {
+        // x*y = e.
+        let (a, b, ba) = (y, x, e);
+        visit_c11(a, b, ba, ctxt);
+    }
 
     for c in cs {
-        progress_c(c, p, e, ctxt)?;
+        progress_c(c, x, y, e, ctxt)?;
     }
     Ok(())
 }
