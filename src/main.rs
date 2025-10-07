@@ -23,6 +23,9 @@ pub use db::*;
 mod parallel;
 pub use parallel::*;
 
+mod present;
+pub use present::*;
+
 fn main() {
     for i in 0..12 {
         println!("Looking for model size {i}:");

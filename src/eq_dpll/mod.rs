@@ -1,11 +1,5 @@
 use crate::*;
 use smallvec::SmallVec;
-use std::collections::HashSet;
-use std::sync::Mutex;
-
-lazy_static::lazy_static! {
-    static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
-}
 
 fn threading_depth(n: usize) -> usize { n+1 }
 
@@ -107,7 +101,7 @@ fn mainloop(mut ctxt: Ctxt) {
 
 fn threaded_forward_step(ctxt: &mut Ctxt) {
     let Some((pos, options)) = next_options(ctxt) else {
-        print_model(ctxt);
+        present_model(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
         ctxt.mode = Mode::Backtracking;
         return;
     };
@@ -128,12 +122,16 @@ fn forward_step(ctxt: &mut Ctxt) {
     }
 
     let Some((pos, options)) = next_options(ctxt) else {
-        print_model(ctxt);
+        submit_model(ctxt);
         ctxt.mode = Mode::Backtracking;
         return;
     };
 
     activate_option(pos, options, ctxt);
+}
+
+fn submit_model(ctxt: &Ctxt) {
+    present_model(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
 }
 
 fn backtrack_step(ctxt: &mut Ctxt) {
@@ -151,27 +149,6 @@ fn backtrack_step(ctxt: &mut Ctxt) {
             None => { ctxt.mode = Mode::Done; break; }
         }
     }
-}
-
-fn print_model(ctxt: &Ctxt) {
-    let magma = MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
-    let magma = magma.canonicalize();
-
-    let mut handle = DB.lock().unwrap();
-    if handle.contains(&magma) {
-        println!("duplicate model found! suboptimal symmetry breaking!");
-        return;
-    }
-
-    handle.insert(magma.clone());
-    drop(handle);
-
-    println!("Model found:");
-    magma.dump();
-    // ctxt.dump();
-
-    assert!(magma.is677());
-    assert!(magma.is255());
 }
 
 fn best_score(ctxt: &Ctxt) -> Option<PosId> {

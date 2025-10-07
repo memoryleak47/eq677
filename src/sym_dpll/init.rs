@@ -79,7 +79,7 @@ fn setup_constraints(ctxt: &mut Ctxt) {
 }
 
 fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
-    if ctxt.n == 1 { return vec![ctxt] }
+    if ctxt.n <= 1 { return vec![ctxt] }
 
     let mut out = Vec::new();
 

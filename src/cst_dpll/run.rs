@@ -24,9 +24,16 @@ fn get_options(p: P, ctxt: &Ctxt) -> Vec<E> {
     (0..(ctxt.n as u8)).collect()
 }
 
+fn submit_model(ctxt: &Ctxt) {
+    present_model(ctxt.n, |x, y| match ctxt.classes[mk_p(x as E, y as E, ctxt.n) as usize] {
+        Class::Decided(e) => e as usize,
+        Class::Pending(_) => unreachable!(),
+    });
+}
+
 fn mainloop(mut ctxt: Ctxt) {
     let Some(p) = select_p(&ctxt) else {
-        println!("model found!");
+        submit_model(&ctxt);
         return;
     };
 

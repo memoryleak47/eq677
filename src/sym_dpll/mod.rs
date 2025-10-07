@@ -9,13 +9,6 @@ pub use api::*;
 mod init;
 pub use init::*;
 
-use std::sync::Mutex;
-use std::collections::HashSet;
-
-lazy_static::lazy_static! {
-    static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
-}
-
 type Map<T, K> = fxhash::FxHashMap<T, K>;
 
 fn threading_depth(n: usize) -> usize { n+1 }
@@ -81,21 +74,8 @@ fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
     Some(best?.0)
 }
 
-fn print_model(ctxt: &Ctxt) {
-    let magma = MatrixMagma::by_fn(ctxt.n, |x, y| ctxt.xyz[&(x, y)]);
-    let magma = magma.canonicalize();
-
-    let mut handle = DB.lock().unwrap();
-    if handle.contains(&magma) { return; }
-
-    handle.insert(magma.clone());
-    drop(handle);
-
-    println!("Model found:");
-    magma.dump();
-
-    assert!(magma.is677());
-    assert!(magma.is255());
+fn submit_model(ctxt: &Ctxt) {
+    present_model(ctxt.n, |x, y| ctxt.xyz[&(x, y)]);
 }
 
 fn infeasible_decision((x, y): (Id, Id), z: Id, ctxt: &Ctxt) -> bool {
@@ -144,7 +124,7 @@ fn backtrack(ctxt: &mut Ctxt) {
 
 fn threaded_forward(ctxt: &mut Ctxt) {
     let Some((x, y)) = choose_branch_id(ctxt) else {
-        print_model(&ctxt);
+        submit_model(&ctxt);
         ctxt.mode = Mode::Backtrack;
         return;
     };
@@ -175,7 +155,7 @@ fn forward(ctxt: &mut Ctxt) {
     }
 
     let Some((x, y)) = choose_branch_id(ctxt) else {
-        print_model(&ctxt);
+        submit_model(&ctxt);
         ctxt.mode = Mode::Backtrack;
         return;
     };
