@@ -32,3 +32,14 @@ pub struct C2M2(/*a*/ E);           // a = ba * ((b*ba) * b)
 #[derive(Clone, Copy)]
 pub struct C2M3(/*a*/ E, /*ba*/ E); // a = ba * (bba * b)
                                     //            x  * y
+
+pub fn tick_c(c: C, p: P, ctxt: &mut Ctxt) -> Result<(), ()> {
+    match c {
+        C::C1M1(c) => tick_c1m1(c, p, ctxt),
+        _ => todo!(),
+    }
+}
+
+fn tick_c1m1(_: C1M1, p: P, ctxt: &mut Ctxt) -> Result<(), ()> {
+    todo!()
+}

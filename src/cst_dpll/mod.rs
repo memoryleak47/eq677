@@ -21,7 +21,7 @@ type P = u16;
 
 #[derive(Clone)]
 enum Class {
-    Evaluated(E),
+    Decided(E),
     Pending(SmallVec<[C; 4]>), // the constraints that currently wait on us.
 }
 
