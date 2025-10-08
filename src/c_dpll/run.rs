@@ -62,18 +62,15 @@ fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
 }
 
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
-    let mut options = Vec::new();
     let mut found_fresh = false;
-    for i in 0..ctxt.n {
-        if infeasible_decision(x, y, i, ctxt) { continue }
-
+    (0..ctxt.n).filter(|&i| {
+        if infeasible_decision(x, y, i, ctxt) { return false; }
         if ctxt.fresh[i as usize] {
-            if found_fresh { continue }
+            if found_fresh { return false; }
             found_fresh = true;
         }
-        options.push(i);
-    }
-    options
+        true
+    }).collect()
 }
 
 fn submit_model(ctxt: &Ctxt) {
