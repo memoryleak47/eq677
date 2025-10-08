@@ -57,8 +57,9 @@ fn submit_model(ctxt: &Ctxt) {
 }
 
 fn defresh(e: E, ctxt: &mut Ctxt) {
-    if ctxt.fresh[e as usize] {
-        ctxt.fresh[e as usize] = false;
+    let f = &mut ctxt.fresh[e as usize];
+    if *f {
+        *f = false;
         ctxt.trail.push(TrailEvent::Defresh(e));
     }
 }
