@@ -56,12 +56,23 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) {
 }
 
 fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) {
-    match &mut ctxt.classes[idx(a, bab, ctxt.n)] {
-        Class::Defined(abab) => ctxt.propagate_queue.push((b, *abab, a)),
+    let i = idx(a, bab, ctxt.n);
+    match &ctxt.classes[i] {
+        Class::Defined(abab) => { ctxt.propagate_queue.push((b, *abab, a)); return; },
         Class::Pending(cs) => {
-            ctxt.trail.push(TrailEvent::PushC(a, bab));
-            cs.push(C::C12(b));
+            // a = b*(a*bab)
+            for z in 0..ctxt.n {
+                if let Class::Defined(a2) = &ctxt.classes[idx(b, z, ctxt.n)] && a == *a2 {
+                    ctxt.propagate_queue.push((a, bab, z));
+                    return;
+                }
+            }
         },
+    }
+
+    if let Class::Pending(cs) = &mut ctxt.classes[i] {
+        ctxt.trail.push(TrailEvent::PushC(a, bab));
+        cs.push(C::C12(b));
     }
 }
 
@@ -77,11 +88,22 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) {
 }
 
 fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) {
-    match &mut ctxt.classes[idx(bba, b, ctxt.n)] {
+    let i = idx(bba, b, ctxt.n);
+    match &ctxt.classes[i] {
         Class::Defined(bbab) => ctxt.propagate_queue.push((ba, *bbab, a)),
         Class::Pending(cs) => {
-            ctxt.trail.push(TrailEvent::PushC(bba, b));
-            cs.push(C::C22(a, ba));
+            // a = ba * (bba * b)
+            for z in 0..ctxt.n {
+                if let Class::Defined(a2) = &ctxt.classes[idx(ba, z, ctxt.n)] && a == *a2 {
+                    ctxt.propagate_queue.push((bba, b, z));
+                    return;
+                }
+            }
         },
+    }
+
+    if let Class::Pending(cs) = &mut ctxt.classes[i] {
+        ctxt.trail.push(TrailEvent::PushC(bba, b));
+        cs.push(C::C22(a, ba));
     }
 }
