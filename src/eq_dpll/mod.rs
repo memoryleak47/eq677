@@ -221,15 +221,15 @@ fn activate_option(pos: PosId, mut options: Vec<ElemId>, ctxt: &mut Ctxt) {
         return;
     };
 
-    if ctxt.fresh[e] {
-        ctxt.fresh[e] = false;
-        ctxt.trail.push(TrailEvent::Defresh(e));
-    }
-
     ctxt.mode = Mode::Forward;
 
     ctxt.trail.push(TrailEvent::DecisionPoint(pos, options));
     ctxt.depth += 1;
+
+    if ctxt.fresh[e] {
+        ctxt.fresh[e] = false;
+        ctxt.trail.push(TrailEvent::Defresh(e));
+    }
 
     if let Err(()) = propagate(pos, e, ctxt) {
         ctxt.mode = Mode::Backtracking;
