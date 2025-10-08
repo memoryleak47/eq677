@@ -76,9 +76,13 @@ fn branch(ctxt: &mut Ctxt) {
 
 fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<(), ()> {
     if let Some(e) = options.pop() {
-        defresh(e, ctxt);
         ctxt.trail.push(TrailEvent::Decision(x, y, options));
         ctxt.propagate_queue.push((x, y, e));
+
+        // note: This defresh has to be after the decision point!
+        // Otherwise it won't get re-freshed on backtracking.
+        defresh(e, ctxt);
+
         Ok(())
     } else {
         Err(())
