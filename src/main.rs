@@ -29,7 +29,7 @@ mod present;
 pub use present::*;
 
 fn main() {
-    for i in 0..10 {
+    for i in 0..11 {
         println!("Looking for model size {i}:");
         c_run(i);
     }
