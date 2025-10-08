@@ -83,7 +83,10 @@ pub fn propagate(ctxt: &mut Ctxt) {
         let cs = match class {
             Class::Defined(e2) => {
                 if e == *e2 { continue }
-                else { become backtrack(ctxt) }
+                else {
+                    ctxt.propagate_queue.clear();
+                    become backtrack(ctxt)
+                }
             },
             Class::Pending(cs) => {
                 let cs = std::mem::take(cs);
