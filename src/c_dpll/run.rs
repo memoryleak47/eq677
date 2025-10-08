@@ -26,11 +26,20 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     Some(best?.0)
 }
 
-// TODO filter infeasible options
+fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
+    for z in 0..ctxt.n {
+        if z == y { continue; }
+        if let Class::Defined(e2) = ctxt.classes[idx(x, z, ctxt.n)] && e2 == e { return true; }
+    }
+    false
+}
+
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
     let mut options = Vec::new();
     let mut found_fresh = false;
     for i in 0..ctxt.n {
+        if infeasible_decision(x, y, i, ctxt) { continue }
+
         if ctxt.fresh[i as usize] {
             if found_fresh { continue }
             found_fresh = true;
@@ -80,6 +89,8 @@ fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<()
 }
 
 fn backtrack(ctxt: &mut Ctxt) {
+    ctxt.propagate_queue.clear();
+
     loop {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
@@ -102,14 +113,13 @@ fn backtrack(ctxt: &mut Ctxt) {
 
 pub fn propagate(ctxt: &mut Ctxt) {
     while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
+        if infeasible_decision(x, y, e, ctxt) { become backtrack(ctxt);}
+
         let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
         let cs = match class {
             Class::Defined(e2) => {
                 if e == *e2 { continue }
-                else {
-                    ctxt.propagate_queue.clear();
-                    become backtrack(ctxt)
-                }
+                else { become backtrack(ctxt) }
             },
             Class::Pending(cs) => {
                 let cs = std::mem::take(cs);
