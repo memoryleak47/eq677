@@ -10,6 +10,7 @@ pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
         ctxt.fresh[0] = false;
         ctxt.fresh[1] = false;
         ctxt.propagate_queue.push((0, 0, 1));
+        assert!(propagate(&mut ctxt).is_ok());
         out.push(ctxt);
     }
 
@@ -18,6 +19,7 @@ pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
         for i in 0..ctxt.n {
             ctxt.propagate_queue.push((i, i, i));
         }
+        assert!(propagate(&mut ctxt).is_ok());
         out.push(ctxt);
     }
 

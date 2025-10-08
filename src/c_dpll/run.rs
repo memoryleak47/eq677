@@ -1,10 +1,38 @@
 use crate::c_dpll::*;
 
+fn threading_depth(n: E) -> E { n + 1 }
+
 pub fn c_run(n: usize) {
     let models = split_models(build_ctxt(n));
     into_par_for_each(models, |mut ctxt| {
-        // We start with propagate to apply the choices made in `split_models`.
-        main_propagate(&mut ctxt);
+        prerun(0, &mut ctxt);
+    });
+}
+
+fn prerun(depth: E, ctxt: &mut Ctxt) {
+    if depth >= threading_depth(ctxt.n) {
+        main_branch(ctxt);
+        return;
+    }
+
+    let Some((x, y)) = select_p(ctxt) else {
+        submit_model(ctxt);
+        return;
+    };
+
+    defresh(x, ctxt);
+    defresh(y, ctxt);
+
+    let options = get_options(x, y, ctxt);
+    into_par_for_each(options, |e| {
+        let c = &mut ctxt.clone();
+
+        c.propagate_queue.push((x, y, e));
+        defresh(e, c);
+
+        if propagate(c).is_ok() {
+            prerun(depth+1, c);
+        }
     });
 }
 
@@ -116,14 +144,21 @@ fn main_backtrack(ctxt: &mut Ctxt) {
 }
 
 pub fn main_propagate(ctxt: &mut Ctxt) {
+    match propagate(ctxt) {
+        Ok(()) => become main_branch(ctxt),
+        Err(()) => become main_backtrack(ctxt),
+    }
+}
+
+pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
-        if infeasible_decision(x, y, e, ctxt) { become main_backtrack(ctxt);}
+        if infeasible_decision(x, y, e, ctxt) { return Err(()); }
 
         let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
         let cs = match class {
             Class::Defined(e2) => {
                 if e == *e2 { continue }
-                else { become main_backtrack(ctxt) }
+                else { return Err(()) }
             },
             Class::Pending(cs) => {
                 let cs = std::mem::take(cs);
@@ -152,5 +187,5 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
         ctxt.trail.push(TrailEvent::DefineClass(x, y, cs));
     }
 
-    become main_branch(ctxt);
+    Ok(())
 }
