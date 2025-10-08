@@ -55,7 +55,6 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 
 fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
     for z in 0..ctxt.n {
-        if z == y { continue; }
         if let Class::Defined(e2) = ctxt.classes[idx(x, z, ctxt.n)] && e2 == e { return true; }
     }
     false
