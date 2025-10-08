@@ -3,7 +3,7 @@ use rayon::prelude::*;
 
 // This flag allows me to turn off multi-thrading globally.
 // Useful for flamegraphs and deterministic debugging.
-const PAR: bool = true;
+const PAR: bool = !cfg!(feature = "flamegraph");
 
 pub fn par_for_each<T>(x: &[T], f: impl Fn(&T) + Send + Sync) where T: Send + Sync + 'static {
     if PAR {
