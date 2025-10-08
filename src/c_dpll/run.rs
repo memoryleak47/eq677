@@ -90,7 +90,6 @@ pub fn propagate(ctxt: &mut Ctxt) {
             },
             Class::Pending(cs) => {
                 let cs = std::mem::take(cs);
-                ctxt.trail.push(TrailEvent::DefineClass(x, y, cs.clone()));
                 *class = Class::Defined(e);
                 cs
             },
@@ -103,9 +102,12 @@ pub fn propagate(ctxt: &mut Ctxt) {
             visit_c11(a, b, ba, ctxt);
         }
 
-        for c in cs {
+        for &c in &cs {
             progress_c(c, x, y, e, ctxt);
         }
+
+        // NOTE: The corresponding `*class = Class::Defined(e);` is a bit away, but I think it should be sound.
+        ctxt.trail.push(TrailEvent::DefineClass(x, y, cs));
     }
 
     become branch(ctxt);
