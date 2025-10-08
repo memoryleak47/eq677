@@ -1,8 +1,8 @@
 use crate::c_dpll::*;
 
 pub fn c_run(n: usize) {
-    let ctxt = build_ctxt(n);
-    mainloop(ctxt);
+    let mut ctxt = build_ctxt(n);
+    branch(&mut ctxt);
 }
 
 // returns None if we are done.
@@ -38,40 +38,72 @@ fn submit_model(ctxt: &Ctxt) {
     });
 }
 
-fn mainloop(mut ctxt: Ctxt) {
+fn branch(ctxt: &mut Ctxt) {
     let Some((x, y)) = select_p(&ctxt) else {
         submit_model(&ctxt);
-        return;
+        become backtrack(ctxt);
     };
 
-    for e in get_options(x, y, &ctxt) {
-        let mut c = ctxt.clone();
-        if propagate(x, y, e, &mut c).is_ok() {
-            mainloop(c);
+    let options = get_options(x, y, ctxt);
+    if branch_options(x, y, options, ctxt).is_ok() { become propagate(ctxt); }
+    else { become backtrack(ctxt); }
+}
+
+fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<(), ()> {
+    if let Some(e) = options.pop() {
+        ctxt.trail.push(TrailEvent::Decision(x, y, options));
+        ctxt.propagate_queue.push((x, y, e));
+        Ok(())
+    } else {
+        Err(())
+    }
+}
+
+fn backtrack(ctxt: &mut Ctxt) {
+    loop {
+        let Some(event) = ctxt.trail.pop() else { return };
+        match event {
+            TrailEvent::Decision(x, y, mut options) => {
+                if branch_options(x, y, options, ctxt).is_ok() { become propagate(ctxt); }
+            },
+            TrailEvent::DefineClass(x, y, cs) => {
+                ctxt.classes[idx(x, y, ctxt.n)] = Class::Pending(cs);
+            },
+            TrailEvent::PushC(x, y) => {
+                let Class::Pending(cs) = &mut ctxt.classes[idx(x, y, ctxt.n)] else { panic!() };
+                cs.pop().unwrap();
+            }
         }
     }
 }
 
-pub fn propagate(x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
-    let cs = match class {
-        Class::Defined(e2) => return if e == *e2 { Ok(()) } else { Err(()) },
-        Class::Pending(cs) => {
-            let cs = std::mem::take(cs);
-            *class = Class::Defined(e);
-            cs
-        },
-    };
+pub fn propagate(ctxt: &mut Ctxt) {
+    while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
+        let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
+        let cs = match class {
+            Class::Defined(e2) => {
+                if e == *e2 { continue }
+                else { become backtrack(ctxt) }
+            },
+            Class::Pending(cs) => {
+                let cs = std::mem::take(cs);
+                ctxt.trail.push(TrailEvent::DefineClass(x, y, cs.clone()));
+                *class = Class::Defined(e);
+                cs
+            },
+        };
 
-    // spawn constraints!
-    {
-        // x*y = e.
-        let (a, b, ba) = (y, x, e);
-        visit_c11(a, b, ba, ctxt)?;
+        // spawn constraints!
+        {
+            // x*y = e.
+            let (a, b, ba) = (y, x, e);
+            visit_c11(a, b, ba, ctxt);
+        }
+
+        for c in cs {
+            progress_c(c, x, y, e, ctxt);
+        }
     }
 
-    for c in cs {
-        progress_c(c, x, y, e, ctxt)?;
-    }
-    Ok(())
+    become branch(ctxt);
 }

@@ -7,6 +7,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
         classes: std::iter::repeat(Class::Pending(SmallVec::new()))
             .take(n*n)
             .collect(),
+        propagate_queue: Vec::new(),
     };
     ctxt
 }

@@ -15,7 +15,7 @@ pub enum C {
                             //            x  * y
 }
 
-pub fn progress_c(c: C, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+pub fn progress_c(c: C, x: E, y: E, e: E, ctxt: &mut Ctxt) {
     match c {
         C::C11(a) => {
             let a = a;
@@ -27,24 +27,28 @@ pub fn progress_c(c: C, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             let a = x;
             let bab = y;
             let abab = e;
-            propagate(b, abab, a, ctxt)
+            ctxt.propagate_queue.push((b, abab, a));
         },
         _ => todo!(),
     }
 }
 
-pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) {
     match &mut ctxt.classes[idx(ba, b, ctxt.n)] {
-        Class::Defined(bab) => return visit_c12(a, b, *bab, ctxt),
-        Class::Pending(cs) => cs.push(C::C11(a)),
+        Class::Defined(bab) => visit_c12(a, b, *bab, ctxt),
+        Class::Pending(cs) => {
+            ctxt.trail.push(TrailEvent::PushC(ba, b));
+            cs.push(C::C11(a));
+        },
     }
-    Ok(())
 }
 
-fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) {
     match &mut ctxt.classes[idx(a, bab, ctxt.n)] {
-        Class::Defined(abab) => return propagate(b, *abab, a, ctxt),
-        Class::Pending(cs) => cs.push(C::C12(b)),
+        Class::Defined(abab) => ctxt.propagate_queue.push((b, *abab, a)),
+        Class::Pending(cs) => {
+            ctxt.trail.push(TrailEvent::PushC(a, bab));
+            cs.push(C::C12(b));
+        },
     }
-    Ok(())
 }

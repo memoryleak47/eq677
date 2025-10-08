@@ -1,3 +1,5 @@
+#![feature(explicit_tail_calls)]
+
 #![allow(unused)] // heh
 #![allow(private_interfaces)]
 #![allow(irrefutable_let_patterns)]

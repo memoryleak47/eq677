@@ -24,10 +24,15 @@ struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Box<[Class]>,
     n: E,
+    propagate_queue: Vec<(E, E, E)>,
 }
 
 #[derive(Clone)]
-enum TrailEvent {}
+enum TrailEvent {
+    Decision(E, E, Vec<E>),
+    DefineClass(E, E, SmallVec<[C; 7]>),
+    PushC(E, E),
+}
 
 fn idx(x: E, y: E, n: E) -> usize {
     (x as usize) + (n as usize) * (y as usize)
