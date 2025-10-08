@@ -139,7 +139,11 @@ pub fn propagate(ctxt: &mut Ctxt) {
             progress_c(c, x, y, e, ctxt);
         }
 
-        // NOTE: The corresponding `*class = Class::Defined(e);` is a bit away, but I think it should be sound.
+        // The corresponding `*class = Class::Defined(e);` is a bit away, but I think it should be sound.
+        // We need the `cs` for the above code though.
+        // Invariant: visit_c11 and progress_c are not allowed to backtrack.
+        //            They can just push stuff into the propagate_queue;
+        //            and create TrailEvent::PushC.
         ctxt.trail.push(TrailEvent::DefineClass(x, y, cs));
     }
 
