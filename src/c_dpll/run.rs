@@ -4,7 +4,7 @@ pub fn c_run(n: usize) {
     let models = split_models(build_ctxt(n));
     into_par_for_each(models, |mut ctxt| {
         // We start with propagate to apply the choices made in `split_models`.
-        propagate(&mut ctxt);
+        main_propagate(&mut ctxt);
     });
 }
 
@@ -63,18 +63,18 @@ fn defresh(e: E, ctxt: &mut Ctxt) {
     }
 }
 
-fn branch(ctxt: &mut Ctxt) {
+fn main_branch(ctxt: &mut Ctxt) {
     let Some((x, y)) = select_p(ctxt) else {
         submit_model(ctxt);
-        become backtrack(ctxt);
+        become main_backtrack(ctxt);
     };
 
     defresh(x, ctxt);
     defresh(y, ctxt);
 
     let options = get_options(x, y, ctxt);
-    if branch_options(x, y, options, ctxt).is_ok() { become propagate(ctxt); }
-    else { become backtrack(ctxt); }
+    if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
+    else { become main_backtrack(ctxt); }
 }
 
 fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<(), ()> {
@@ -92,14 +92,14 @@ fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<()
     }
 }
 
-fn backtrack(ctxt: &mut Ctxt) {
+fn main_backtrack(ctxt: &mut Ctxt) {
     ctxt.propagate_queue.clear();
 
     loop {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
             TrailEvent::Decision(x, y, mut options) => {
-                if branch_options(x, y, options, ctxt).is_ok() { become propagate(ctxt); }
+                if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y, cs) => {
                 ctxt.classes[idx(x, y, ctxt.n)] = Class::Pending(cs);
@@ -115,15 +115,15 @@ fn backtrack(ctxt: &mut Ctxt) {
     }
 }
 
-pub fn propagate(ctxt: &mut Ctxt) {
+pub fn main_propagate(ctxt: &mut Ctxt) {
     while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
-        if infeasible_decision(x, y, e, ctxt) { become backtrack(ctxt);}
+        if infeasible_decision(x, y, e, ctxt) { become main_backtrack(ctxt);}
 
         let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
         let cs = match class {
             Class::Defined(e2) => {
                 if e == *e2 { continue }
-                else { become backtrack(ctxt) }
+                else { become main_backtrack(ctxt) }
             },
             Class::Pending(cs) => {
                 let cs = std::mem::take(cs);
@@ -152,5 +152,5 @@ pub fn propagate(ctxt: &mut Ctxt) {
         ctxt.trail.push(TrailEvent::DefineClass(x, y, cs));
     }
 
-    become branch(ctxt);
+    become main_branch(ctxt);
 }
