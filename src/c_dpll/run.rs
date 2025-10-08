@@ -39,8 +39,8 @@ fn submit_model(ctxt: &Ctxt) {
 }
 
 fn branch(ctxt: &mut Ctxt) {
-    let Some((x, y)) = select_p(&ctxt) else {
-        submit_model(&ctxt);
+    let Some((x, y)) = select_p(ctxt) else {
+        submit_model(ctxt);
         become backtrack(ctxt);
     };
 
