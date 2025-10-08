@@ -24,6 +24,7 @@ struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Box<[Class]>,
     n: E,
+    fresh: Box<[bool]>,
     propagate_queue: Vec<(E, E, E)>,
 }
 
@@ -31,6 +32,7 @@ struct Ctxt {
 enum TrailEvent {
     Decision(E, E, Vec<E>),
     DefineClass(E, E, SmallVec<[C; 7]>),
+    Defresh(E),
     PushC(E, E),
 }
 

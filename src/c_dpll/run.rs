@@ -28,7 +28,16 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 
 // TODO filter infeasible options
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
-    (0..ctxt.n).collect()
+    let mut options = Vec::new();
+    let mut found_fresh = false;
+    for i in 0..ctxt.n {
+        if ctxt.fresh[i as usize] {
+            if found_fresh { continue }
+            found_fresh = true;
+        }
+        options.push(i);
+    }
+    options
 }
 
 fn submit_model(ctxt: &Ctxt) {
@@ -38,11 +47,21 @@ fn submit_model(ctxt: &Ctxt) {
     });
 }
 
+fn defresh(e: E, ctxt: &mut Ctxt) {
+    if ctxt.fresh[e as usize] {
+        ctxt.fresh[e as usize] = false;
+        ctxt.trail.push(TrailEvent::Defresh(e));
+    }
+}
+
 fn branch(ctxt: &mut Ctxt) {
     let Some((x, y)) = select_p(ctxt) else {
         submit_model(ctxt);
         become backtrack(ctxt);
     };
+
+    defresh(x, ctxt);
+    defresh(y, ctxt);
 
     let options = get_options(x, y, ctxt);
     if branch_options(x, y, options, ctxt).is_ok() { become propagate(ctxt); }
@@ -51,6 +70,7 @@ fn branch(ctxt: &mut Ctxt) {
 
 fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<(), ()> {
     if let Some(e) = options.pop() {
+        defresh(e, ctxt);
         ctxt.trail.push(TrailEvent::Decision(x, y, options));
         ctxt.propagate_queue.push((x, y, e));
         Ok(())
@@ -72,6 +92,9 @@ fn backtrack(ctxt: &mut Ctxt) {
             TrailEvent::PushC(x, y) => {
                 let Class::Pending(cs) = &mut ctxt.classes[idx(x, y, ctxt.n)] else { panic!() };
                 cs.pop().unwrap();
+            }
+            TrailEvent::Defresh(x) => {
+                ctxt.fresh[x as usize] = true;
             }
         }
     }
