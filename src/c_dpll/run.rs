@@ -134,6 +134,7 @@ pub fn propagate(ctxt: &mut Ctxt) {
             // x*y = e.
             let (a, b, ba) = (y, x, e);
             visit_c11(a, b, ba, ctxt);
+            visit_c21(a, b, ba, ctxt);
         }
 
         for &c in &cs {
