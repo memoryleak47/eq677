@@ -14,11 +14,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
                 Class::Defined(_) => continue,
                 Class::Pending(cs) => cs.len(),
             };
-            let cond = match best {
-                None => true,
-                Some((_, score2)) => score > score2,
-            };
-            if cond {
+            if best.map(|(_, score2)| score > score2).unwrap_or(true) {
                 best = Some(((x, y), score));
             }
         }
