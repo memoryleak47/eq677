@@ -149,20 +149,20 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
+        let i = idx(x, y, ctxt.n);
+        if let Class::Defined(e2) = ctxt.classes[i] {
+            if e == e2 { continue }
+            else { return Err(()) }
+        }
+
+        // moving the infeasible_decision check down here (below the Class::Defined check),
+        // made it a bit faster. after all infeasible_decision is a bit costly.
         if infeasible_decision(x, y, e, ctxt) { return Err(()); }
 
-        let class = &mut ctxt.classes[idx(x, y, ctxt.n)];
-        let cs = match class {
-            Class::Defined(e2) => {
-                if e == *e2 { continue }
-                else { return Err(()) }
-            },
-            Class::Pending(cs) => {
-                let cs = std::mem::take(cs);
-                *class = Class::Defined(e);
-                cs
-            },
-        };
+        let class = &mut ctxt.classes[i];
+        let Class::Pending(cs) = class else { panic!() };
+        let cs = std::mem::take(cs);
+        *class = Class::Defined(e);
 
         // spawn constraints!
         {
