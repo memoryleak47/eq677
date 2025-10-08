@@ -7,6 +7,9 @@ use init::*;
 mod c;
 use c::*;
 
+mod split;
+use split::*;
+
 mod run;
 pub use run::*;
 

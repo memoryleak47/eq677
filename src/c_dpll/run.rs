@@ -1,8 +1,11 @@
 use crate::c_dpll::*;
 
 pub fn c_run(n: usize) {
-    let mut ctxt = build_ctxt(n);
-    branch(&mut ctxt);
+    let models = split_models(build_ctxt(n));
+    into_par_for_each(models, |mut ctxt| {
+        // We start with propagate to apply the choices made in `split_models`.
+        propagate(&mut ctxt);
+    });
 }
 
 // returns None if we are done.
