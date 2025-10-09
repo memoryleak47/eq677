@@ -17,9 +17,9 @@ pub use run::*;
 type E = u8;
 
 #[derive(Clone)]
-enum Class {
-    Defined(E),
-    Pending(SmallVec<[C; 7]>), // the constraints that currently wait on us.
+struct Class {
+    value: E, // is E::MAX when undecided.
+    cs: SmallVec<[C; 7]>, // the constraints that currently wait on us.
 }
 
 #[derive(Clone)]
@@ -34,7 +34,7 @@ struct Ctxt {
 #[derive(Clone)]
 enum TrailEvent {
     Decision(E, E, Vec<E>),
-    DefineClass(E, E, SmallVec<[C; 7]>),
+    DefineClass(E, E),
     Defresh(E),
     PushC(E, E),
 }

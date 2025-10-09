@@ -41,10 +41,10 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     let mut best = None;
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
-            let score = match &ctxt.classes[idx(x, y, ctxt.n)] {
-                Class::Defined(_) => continue,
-                Class::Pending(cs) => cs.len(),
-            };
+            let class = &ctxt.classes[idx(x, y, ctxt.n)];
+            if class.value != E::MAX { continue }
+
+            let score = class.cs.len();
             if best.map(|(_, score2)| score > score2).unwrap_or(true) {
                 best = Some(((x, y), score));
             }
@@ -55,7 +55,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 
 fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
     for z in 0..ctxt.n {
-        if let Class::Defined(e2) = ctxt.classes[idx(x, z, ctxt.n)] && e2 == e { return true; }
+        if ctxt.classes[idx(x, z, ctxt.n)].value == e { return true; }
     }
     false
 }
@@ -73,10 +73,7 @@ fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n as usize, |x, y| match ctxt.classes[idx(x as E, y as E, ctxt.n)] {
-        Class::Defined(e) => e as usize,
-        Class::Pending(_) => unreachable!(),
-    });
+    present_model(ctxt.n as usize, |x, y| ctxt.classes[idx(x as E, y as E, ctxt.n)].value as usize);
 }
 
 fn defresh(e: E, ctxt: &mut Ctxt) {
@@ -125,12 +122,11 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::Decision(x, y, mut options) => {
                 if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
             },
-            TrailEvent::DefineClass(x, y, cs) => {
-                ctxt.classes[idx(x, y, ctxt.n)] = Class::Pending(cs);
+            TrailEvent::DefineClass(x, y) => {
+                ctxt.classes[idx(x, y, ctxt.n)].value = E::MAX;
             },
             TrailEvent::PushC(x, y) => {
-                let Class::Pending(cs) = &mut ctxt.classes[idx(x, y, ctxt.n)] else { panic!() };
-                cs.pop().unwrap();
+                ctxt.classes[idx(x, y, ctxt.n)].cs.pop().unwrap();
             }
             TrailEvent::Defresh(x) => {
                 ctxt.fresh[x as usize] = true;
@@ -149,8 +145,10 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
         let i = idx(x, y, ctxt.n);
-        if let Class::Defined(e2) = ctxt.classes[i] {
-            if e == e2 { continue }
+
+        let v = ctxt.classes[i].value;
+        if v != E::MAX {
+            if e == v { continue }
             else { return Err(()) }
         }
 
@@ -158,10 +156,7 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         // made it a bit faster. after all infeasible_decision is a bit costly.
         if infeasible_decision(x, y, e, ctxt) { return Err(()); }
 
-        let class = &mut ctxt.classes[i];
-        let Class::Pending(cs) = class else { panic!() };
-        let cs = std::mem::take(cs);
-        *class = Class::Defined(e);
+        ctxt.classes[i].value = e;
 
         // spawn constraints!
         {
@@ -171,16 +166,11 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
             visit_c21(a, b, ba, ctxt);
         }
 
-        for &c in &cs {
+        for c in ctxt.classes[i].cs.clone() {
             progress_c(c, x, y, e, ctxt);
         }
 
-        // The corresponding `*class = Class::Defined(e);` is a bit away, but I think it should be sound.
-        // We need the `cs` for the above code though.
-        // Invariant: visit_c11 and progress_c are not allowed to backtrack.
-        //            They can just push stuff into the propagate_queue;
-        //            and create TrailEvent::PushC.
-        ctxt.trail.push(TrailEvent::DefineClass(x, y, cs));
+        ctxt.trail.push(TrailEvent::DefineClass(x, y));
     }
 
     Ok(())
