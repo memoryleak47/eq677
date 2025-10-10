@@ -163,13 +163,9 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         let i = idx(x, y, ctxt.n);
 
         let v = ctxt.classes[i].value;
-        if v != E::MAX {
-            if e == v { continue }
-            else { return Err(()) }
-        }
+        if v == e { continue }
+        if v != E::MAX { return Err(()) }
 
-        // moving the infeasible_decision check down here (below the Class::Defined check),
-        // made it a bit faster. after all infeasible_decision is a bit costly.
         if infeasible_decision(x, y, e, ctxt) { return Err(()); }
 
         ctxt.classes[i].value = e;
