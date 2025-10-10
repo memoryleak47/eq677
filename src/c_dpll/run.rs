@@ -72,10 +72,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 }
 
 fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
-    for z in 0..ctxt.n {
-        if ctxt.classes[idx(x, z, ctxt.n)].value == e { return true; }
-    }
-    false
+    ctxt.xzy[idx(x, e, ctxt.n)] != E::MAX
 }
 
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
@@ -144,7 +141,8 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                 if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
-                ctxt.classes[idx(x, y, ctxt.n)].value = E::MAX;
+                let z = std::mem::replace(&mut ctxt.classes[idx(x, y, ctxt.n)].value, E::MAX);
+                ctxt.xzy[idx(x, z, ctxt.n)] = E::MAX;
             },
             TrailEvent::PushC(x, y) => {
                 ctxt.classes[idx(x, y, ctxt.n)].cs.pop().unwrap();
@@ -170,10 +168,10 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         let v = ctxt.classes[i].value;
         if v == e { continue }
         if v != E::MAX { return Err(()) }
-
         if infeasible_decision(x, y, e, ctxt) { return Err(()); }
 
         ctxt.classes[i].value = e;
+        ctxt.xzy[idx(x, e, ctxt.n)] = y;
         ctxt.trail.push(TrailEvent::DefineClass(x, y));
 
         // spawn constraints!

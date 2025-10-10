@@ -8,6 +8,9 @@ pub fn build_ctxt(n: usize) -> Ctxt {
     let mut ctxt = Ctxt {
         trail: Vec::new(),
         n: n as E,
+        xzy: std::iter::repeat(E::MAX)
+            .take(n*n)
+            .collect(),
         classes: std::iter::repeat(class)
             .take(n*n)
             .collect(),

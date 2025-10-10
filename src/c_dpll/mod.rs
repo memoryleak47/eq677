@@ -26,6 +26,7 @@ struct Class {
 struct Ctxt {
     trail: Vec<TrailEvent>,
     classes: Box<[Class]>,
+    xzy: Box<[E]>, // indexed by `idx(x,z)`
     n: E,
     fresh: Box<[bool]>,
     propagate_queue: Vec<(E, E, E)>,
