@@ -59,8 +59,7 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let i = idx(a, bab, ctxt.n);
-    let class = &ctxt.classes[i];
+    let class = &mut ctxt.classes[idx(a, bab, ctxt.n)];
     let v = class.value;
     if v == E::MAX {
         // a = b*(a*bab)
@@ -70,7 +69,7 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         }
 
         ctxt.trail.push(TrailEvent::PushC(a, bab));
-        ctxt.classes[i].cs.push(C::C12(b));
+        class.cs.push(C::C12(b));
         Ok(())
     } else {
         let abab = v;
@@ -93,8 +92,8 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let i = idx(bba, b, ctxt.n);
-    let v = ctxt.classes[i].value;
+    let class = &mut ctxt.classes[idx(bba, b, ctxt.n)];
+    let v = class.value;
     if v == E::MAX {
         // a = ba * (bba * b)
         let z = ctxt.xzy[idx(ba, a, ctxt.n)];
@@ -103,7 +102,7 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         }
 
         ctxt.trail.push(TrailEvent::PushC(bba, b));
-        ctxt.classes[i].cs.push(C::C22(a, ba));
+        class.cs.push(C::C22(a, ba));
         Ok(())
     } else {
         let bbab = v;
