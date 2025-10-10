@@ -57,7 +57,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
             let class = &ctxt.classes[idx(x, y, ctxt.n)];
             if class.value != E::MAX { continue }
 
-            let score = class.cs.iter().map(|c| score_c(*c)).sum::<usize>();
+            let score = class.cs.iter().map(|c| score_c(*c)).sum::<usize>() + (x == 0) as usize;
             if best.map(|(_, score2)| score > score2).unwrap_or(true) {
                 best = Some(((x, y), score));
             }
