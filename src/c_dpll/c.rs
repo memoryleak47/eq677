@@ -62,11 +62,11 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) {
     let class = &ctxt.classes[i];
     let v = class.value;
     if v == E::MAX {
-        for z in 0..ctxt.n {
-            if ctxt.classes[idx(b, z, ctxt.n)].value == a {
-                ctxt.propagate_queue.push((a, bab, z));
-                return;
-            }
+        // a = b*(a*bab)
+        let z = ctxt.xzy[idx(b, a, ctxt.n)];
+        if z != E::MAX {
+            ctxt.propagate_queue.push((a, bab, z));
+            return;
         }
 
         ctxt.trail.push(TrailEvent::PushC(a, bab));
@@ -95,11 +95,10 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) {
     let v = ctxt.classes[i].value;
     if v == E::MAX {
         // a = ba * (bba * b)
-        for z in 0..ctxt.n {
-            if ctxt.classes[idx(ba, z, ctxt.n)].value == a {
-                ctxt.propagate_queue.push((bba, b, z));
-                return;
-            }
+        let z = ctxt.xzy[idx(ba, a, ctxt.n)];
+        if z != E::MAX {
+            ctxt.propagate_queue.push((bba, b, z));
+            return;
         }
 
         ctxt.trail.push(TrailEvent::PushC(bba, b));
