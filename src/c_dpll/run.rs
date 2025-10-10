@@ -10,6 +10,9 @@ pub fn c_run(n: usize) {
 }
 
 fn prerun(depth: E, ctxt: &mut Ctxt) {
+    // No need to have a trail, we won't backtrack in the prerun.
+    ctxt.trail.clear();
+
     if depth >= threading_depth(ctxt.n) {
         main_branch(ctxt);
         return;
@@ -20,15 +23,16 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
         return;
     };
 
-    defresh(x, ctxt);
-    defresh(y, ctxt);
+    // We don't use "defresh(x, ctxt)" as the prerun doesn't need to put stuff on the trail.
+    ctxt.fresh[x as usize] = false;
+    ctxt.fresh[y as usize] = false;
 
     let options = get_options(x, y, ctxt);
     into_par_for_each(options, |e| {
         let c = &mut ctxt.clone();
 
         c.propagate_queue.push((x, y, e));
-        defresh(e, c);
+        c.fresh[e as usize] = false;
 
         if propagate(c).is_ok() {
             prerun(depth+1, c);
@@ -73,7 +77,10 @@ fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n as usize, |x, y| ctxt.classes[idx(x as E, y as E, ctxt.n)].value as usize);
+    present_model(ctxt.n as usize, |x, y| {
+        let i = idx(x as E, y as E, ctxt.n);
+        ctxt.classes[i].value as usize
+    });
 }
 
 fn defresh(e: E, ctxt: &mut Ctxt) {
@@ -157,20 +164,18 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         if infeasible_decision(x, y, e, ctxt) { return Err(()); }
 
         ctxt.classes[i].value = e;
+        ctxt.trail.push(TrailEvent::DefineClass(x, y));
 
         // spawn constraints!
-        {
-            // x*y = e.
-            let (a, b, ba) = (y, x, e);
-            visit_c11(a, b, ba, ctxt);
-            visit_c21(a, b, ba, ctxt);
-        }
+        let (a, b, ba) = (y, x, e);
+        visit_c11(a, b, ba, ctxt);
+        visit_c21(a, b, ba, ctxt);
 
-        for c in ctxt.classes[i].cs.clone() {
+        let len = ctxt.classes[i].cs.len();
+        for j in 0..len {
+            let c = ctxt.classes[i].cs[j];
             progress_c(c, x, y, e, ctxt);
         }
-
-        ctxt.trail.push(TrailEvent::DefineClass(x, y));
     }
 
     Ok(())
