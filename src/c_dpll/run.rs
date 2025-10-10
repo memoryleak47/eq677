@@ -51,19 +51,24 @@ fn score_c(c: C) -> usize {
 
 // returns None if we are done.
 fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
-    let mut best = None;
+    let mut best = (E::MAX, E::MAX);
+    let mut best_score = 0;
+
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let class = &ctxt.classes[idx(x, y, ctxt.n)];
             if class.value != E::MAX { continue }
 
-            let score = class.cs.iter().map(|c| score_c(*c)).sum::<usize>() + (x == 0) as usize;
-            if best.map(|(_, score2)| score > score2).unwrap_or(true) {
-                best = Some(((x, y), score));
+            let score = class.cs.iter().map(|c| score_c(*c)).sum::<usize>() + (x == 0) as usize + 1;
+            if score > best_score {
+                best = (x, y);
+                best_score = score;
             }
         }
     }
-    Some(best?.0)
+
+    if best.0 == E::MAX { None }
+    else { Some(best) }
 }
 
 fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
