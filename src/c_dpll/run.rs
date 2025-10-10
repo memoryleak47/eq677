@@ -157,17 +157,16 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let i = idx(x, y, ctxt.n);
-
-    let v = ctxt.classes[i].value;
+    let v_ref = &mut ctxt.classes[idx(x, y, ctxt.n)].value;
+    let v = *v_ref;
     if v == z { return Ok(()) }
     if v != E::MAX { return Err(()) }
 
-    let i_xzy = idx(x, z, ctxt.n);
-    if ctxt.xzy[i_xzy] != E::MAX { return Err(()); }
+    let xzy_ref = &mut ctxt.xzy[idx(x, z, ctxt.n)];
+    if *xzy_ref != E::MAX { return Err(()); }
 
-    ctxt.classes[i].value = z;
-    ctxt.xzy[i_xzy] = y;
+    *v_ref = z;
+    *xzy_ref = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
     ctxt.propagate_queue.push((x, y, z));
     Ok(())
