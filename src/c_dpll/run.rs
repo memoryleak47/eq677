@@ -40,7 +40,7 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     });
 }
 
-fn score_c(c: C) -> usize {
+fn score_c(c: C) -> i32 {
     match c {
         C::C11(..) => 2,
         C::C12(..) => 3,
@@ -52,14 +52,14 @@ fn score_c(c: C) -> usize {
 // returns None if we are done.
 fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     let mut best = (E::MAX, E::MAX);
-    let mut best_score = 0;
+    let mut best_score = -1;
 
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let class = &ctxt.classes[idx(x, y, ctxt.n)];
             if class.value != E::MAX { continue }
 
-            let score = class.cs.iter().map(|c| score_c(*c)).sum::<usize>() + (x == 0) as usize + 1;
+            let score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>() + (x == 0) as i32;
             if score > best_score {
                 best = (x, y);
                 best_score = score;
@@ -67,7 +67,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
         }
     }
 
-    if best.0 == E::MAX { None }
+    if best_score == -1 { None }
     else { Some(best) }
 }
 
