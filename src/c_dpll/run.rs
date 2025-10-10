@@ -31,12 +31,11 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     into_par_for_each(options, |e| {
         let c = &mut ctxt.clone();
 
-        c.propagate_queue.push((x, y, e));
-        c.fresh[e as usize] = false;
+        if prove_triple(x, y, e, c).is_err() { return }
+        if propagate(c).is_err() { return }
 
-        if propagate(c).is_ok() {
-            prerun(depth+1, c);
-        }
+        c.fresh[e as usize] = false;
+        prerun(depth+1, c);
     });
 }
 
@@ -119,7 +118,7 @@ fn main_branch(ctxt: &mut Ctxt) {
 fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<(), ()> {
     if let Some(e) = options.pop() {
         ctxt.trail.push(TrailEvent::Decision(x, y, options));
-        ctxt.propagate_queue.push((x, y, e));
+        prove_triple(x, y, e, ctxt)?;
 
         // note: This defresh has to be after the decision point!
         // Otherwise it won't get re-freshed on backtracking.
@@ -161,28 +160,33 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
     }
 }
 
+pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let i = idx(x, y, ctxt.n);
+
+    let v = ctxt.classes[i].value;
+    if v == z { return Ok(()) }
+    if v != E::MAX { return Err(()) }
+    if infeasible_decision(x, y, z, ctxt) { return Err(()); }
+
+    ctxt.classes[i].value = z;
+    ctxt.xzy[idx(x, z, ctxt.n)] = y;
+    ctxt.trail.push(TrailEvent::DefineClass(x, y));
+    ctxt.propagate_queue.push((x, y, z));
+    Ok(())
+}
+
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
-    while let Some((x, y, e)) = ctxt.propagate_queue.pop() {
-        let i = idx(x, y, ctxt.n);
-
-        let v = ctxt.classes[i].value;
-        if v == e { continue }
-        if v != E::MAX { return Err(()) }
-        if infeasible_decision(x, y, e, ctxt) { return Err(()); }
-
-        ctxt.classes[i].value = e;
-        ctxt.xzy[idx(x, e, ctxt.n)] = y;
-        ctxt.trail.push(TrailEvent::DefineClass(x, y));
-
+    while let Some((x, y, z)) = ctxt.propagate_queue.pop() {
         // spawn constraints!
-        let (a, b, ba) = (y, x, e);
-        visit_c11(a, b, ba, ctxt);
-        visit_c21(a, b, ba, ctxt);
+        let (a, b, ba) = (y, x, z);
+        visit_c11(a, b, ba, ctxt)?;
+        visit_c21(a, b, ba, ctxt)?;
 
+        let i = idx(x, y, ctxt.n);
         let len = ctxt.classes[i].cs.len();
         for j in 0..len {
             let c = ctxt.classes[i].cs[j];
-            progress_c(c, x, y, e, ctxt);
+            progress_c(c, x, y, z, ctxt)?;
         }
     }
 
