@@ -70,14 +70,10 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     else { Some(best) }
 }
 
-fn infeasible_decision(x: E, y: E, e: E, ctxt: &Ctxt) -> bool {
-    ctxt.xzy[idx(x, e, ctxt.n)] != E::MAX
-}
-
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
     let mut found_fresh = false;
     (0..ctxt.n).filter(|&i| {
-        if infeasible_decision(x, y, i, ctxt) { return false; }
+        if ctxt.xzy[idx(x, i, ctxt.n)] != E::MAX { return false; }
         if ctxt.fresh[i as usize] {
             if found_fresh { return false; }
             found_fresh = true;
@@ -166,10 +162,12 @@ pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let v = ctxt.classes[i].value;
     if v == z { return Ok(()) }
     if v != E::MAX { return Err(()) }
-    if infeasible_decision(x, y, z, ctxt) { return Err(()); }
+
+    let i_xzy = idx(x, z, ctxt.n);
+    if ctxt.xzy[i_xzy] != E::MAX { return Err(()); }
 
     ctxt.classes[i].value = z;
-    ctxt.xzy[idx(x, z, ctxt.n)] = y;
+    ctxt.xzy[i_xzy] = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
     ctxt.propagate_queue.push((x, y, z));
     Ok(())
