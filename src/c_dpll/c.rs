@@ -47,11 +47,12 @@ pub fn progress_c(c: C, x: E, y: E, e: E, ctxt: &mut Ctxt) {
 // C1
 pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) {
     let class = &mut ctxt.classes[idx(ba, b, ctxt.n)];
-    if class.value == E::MAX {
+    let v = class.value;
+    if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushC(ba, b));
         class.cs.push(C::C11(a));
     } else {
-        let bab = class.value;
+        let bab = v;
         visit_c12(a, b, bab, ctxt);
     }
 }
@@ -59,7 +60,8 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) {
 fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) {
     let i = idx(a, bab, ctxt.n);
     let class = &ctxt.classes[i];
-    if class.value == E::MAX {
+    let v = class.value;
+    if v == E::MAX {
         for z in 0..ctxt.n {
             if ctxt.classes[idx(b, z, ctxt.n)].value == a {
                 ctxt.propagate_queue.push((a, bab, z));
@@ -70,7 +72,7 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) {
         ctxt.trail.push(TrailEvent::PushC(a, bab));
         ctxt.classes[i].cs.push(C::C12(b));
     } else {
-        let abab = class.value;
+        let abab = v;
         ctxt.propagate_queue.push((b, abab, a));
     }
 }
@@ -78,18 +80,20 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) {
 // C2
 pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) {
     let class = &mut ctxt.classes[idx(b, ba, ctxt.n)];
-    if class.value == E::MAX {
+    let v = class.value;
+    if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushC(b, ba));
         class.cs.push(C::C21(a));
     } else {
-        let bba = class.value;
+        let bba = v;
         visit_c22(a, b, ba, bba, ctxt);
     }
 }
 
 fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) {
     let i = idx(bba, b, ctxt.n);
-    if ctxt.classes[i].value == E::MAX {
+    let v = ctxt.classes[i].value;
+    if v == E::MAX {
         // a = ba * (bba * b)
         for z in 0..ctxt.n {
             if ctxt.classes[idx(ba, z, ctxt.n)].value == a {
@@ -101,7 +105,7 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) {
         ctxt.trail.push(TrailEvent::PushC(bba, b));
         ctxt.classes[i].cs.push(C::C22(a, ba));
     } else {
-        let bbab = ctxt.classes[i].value;
+        let bbab = v;
         ctxt.propagate_queue.push((ba, bbab, a));
     }
 }
