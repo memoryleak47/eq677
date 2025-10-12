@@ -15,9 +15,11 @@ pub fn heap_add_score(x: E, y: E, summand: i32, ctxt: &mut Ctxt) {
 pub fn heap_pop(ctxt: &mut Ctxt) -> Option<(E, E)> {
     if ctxt.heap.is_empty() { return None }
     let (x, y) = ctxt.heap.swap_remove(0);
+    ctxt.classes_xy[idx(x, y, ctxt.n)].heap_index = usize::MAX;
 
     if !ctxt.heap.is_empty() {
         let (x2, y2) = ctxt.heap[0];
+        ctxt.classes_xy[idx(x2, y2, ctxt.n)].heap_index = 0;
         heap_sink(x2, y2, ctxt);
     }
 
