@@ -43,7 +43,8 @@ enum TrailEvent {
     Decision(E, E, Vec<E>),
     DefineClass(E, E),
     Defresh(E),
-    PushC(E, E),
+    PushCXY(E, E),
+    PushCXZ(E, E),
 }
 
 fn idx(x: E, y: E, n: E) -> usize {

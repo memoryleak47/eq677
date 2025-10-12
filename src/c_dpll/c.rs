@@ -16,7 +16,7 @@ pub enum CXY {
 }
 
 #[derive(Clone, Copy)]
-pub struct CXZ(/*a*/ E, /*b*/ E); // z = x * (a * b)
+pub struct CXZ(pub /*a*/ E, pub /*b*/ E); // z = x * (a * b)
 
 pub fn progress_c(c: CXY, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
@@ -52,7 +52,7 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let class = &mut ctxt.classes_xy[idx(ba, b, ctxt.n)];
     let v = class.value;
     if v == E::MAX {
-        ctxt.trail.push(TrailEvent::PushC(ba, b));
+        ctxt.trail.push(TrailEvent::PushCXY(ba, b));
         class.cs.push(CXY::C11(a));
         Ok(())
     } else {
@@ -71,7 +71,7 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             return prove_triple(a, bab, z, ctxt);
         }
 
-        ctxt.trail.push(TrailEvent::PushC(a, bab));
+        ctxt.trail.push(TrailEvent::PushCXY(a, bab));
         class.cs.push(CXY::C12(b));
         Ok(())
     } else {
@@ -85,7 +85,7 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let class = &mut ctxt.classes_xy[idx(b, ba, ctxt.n)];
     let v = class.value;
     if v == E::MAX {
-        ctxt.trail.push(TrailEvent::PushC(b, ba));
+        ctxt.trail.push(TrailEvent::PushCXY(b, ba));
         class.cs.push(CXY::C21(a));
         Ok(())
     } else {
@@ -95,17 +95,22 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class = &mut ctxt.classes_xy[idx(bba, b, ctxt.n)];
-    let v = class.value;
+    let class_xy = &mut ctxt.classes_xy[idx(bba, b, ctxt.n)];
+    let v = class_xy.value;
     if v == E::MAX {
         // a = ba * (bba * b)
-        let z = ctxt.classes_xz[idx(ba, a, ctxt.n)].value;
+        let class_xz = &mut ctxt.classes_xz[idx(ba, a, ctxt.n)];
+        let z = class_xz.value;
         if z != E::MAX {
             return prove_triple(bba, b, z, ctxt);
         }
 
-        ctxt.trail.push(TrailEvent::PushC(bba, b));
-        class.cs.push(CXY::C22(a, ba));
+        ctxt.trail.push(TrailEvent::PushCXY(bba, b));
+        class_xy.cs.push(CXY::C22(a, ba));
+
+        ctxt.trail.push(TrailEvent::PushCXZ(ba, a));
+        class_xz.cs.push(CXZ(bba, b));
+
         Ok(())
     } else {
         let bbab = v;

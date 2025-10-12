@@ -139,8 +139,11 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
             },
-            TrailEvent::PushC(x, y) => {
+            TrailEvent::PushCXY(x, y) => {
                 ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
+            }
+            TrailEvent::PushCXZ(x, z) => {
+                ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
             }
             TrailEvent::Defresh(x) => {
                 ctxt.fresh[x as usize] = true;
@@ -184,6 +187,14 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         for j in 0..len {
             let c = ctxt.classes_xy[i].cs[j];
             progress_c(c, x, y, z, ctxt)?;
+        }
+
+        let i = idx(x, z, ctxt.n);
+        let len = ctxt.classes_xz[i].cs.len();
+        for j in 0..len {
+            let CXZ(a,b) = ctxt.classes_xz[i].cs[j];
+            // z = x*(a*b).
+            prove_triple(a, b, y, ctxt)?;
         }
     }
 
