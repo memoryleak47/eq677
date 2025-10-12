@@ -39,6 +39,8 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     });
 }
 
+// NOTE:
+// let score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>() + (x == 0) as i32;
 fn score_c(c: CXY) -> i32 {
     match c {
         CXY::C11(..) => 2,
@@ -49,25 +51,8 @@ fn score_c(c: CXY) -> i32 {
 }
 
 // returns None if we are done.
-fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
-    let mut best = (E::MAX, E::MAX);
-    let mut best_score = -1;
-
-    for x in 0..ctxt.n {
-        for y in 0..ctxt.n {
-            let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
-            if class.value != E::MAX { continue }
-
-            let score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>() + (x == 0) as i32;
-            if score > best_score {
-                best = (x, y);
-                best_score = score;
-            }
-        }
-    }
-
-    if best_score == -1 { None }
-    else { Some(best) }
+fn select_p(ctxt: &mut Ctxt) -> Option<(E, E)> {
+    heap_pop(ctxt)
 }
 
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {

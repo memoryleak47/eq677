@@ -2,6 +2,11 @@ use crate::c_dpll::*;
 
 // Constraints
 
+const C11_SCORE: i32 = 200;
+const C12_SCORE: i32 = 300;
+const C21_SCORE: i32 = 200;
+const C22_SCORE: i32 = 300;
+
 #[derive(Clone, Copy)]
 pub enum CXY {
     C11(/*a*/ E),           // a = b*(a*(ba*b))
@@ -54,6 +59,7 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushCXY(ba, b));
         class.cs.push(CXY::C11(a));
+        heap_add_score(ba, b, C11_SCORE, ctxt);
         Ok(())
     } else {
         let bab = v;
@@ -78,6 +84,8 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         ctxt.trail.push(TrailEvent::PushCXZ(b, a));
         class_xz.cs.push(CXZ(a, bab));
 
+        heap_add_score(a, bab, C12_SCORE, ctxt);
+
         Ok(())
     } else {
         let abab = v;
@@ -92,6 +100,7 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushCXY(b, ba));
         class.cs.push(CXY::C21(a));
+        heap_add_score(b, ba, C21_SCORE, ctxt);
         Ok(())
     } else {
         let bba = v;
@@ -115,6 +124,8 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 
         ctxt.trail.push(TrailEvent::PushCXZ(ba, a));
         class_xz.cs.push(CXZ(bba, b));
+
+        heap_add_score(bba, b, C22_SCORE, ctxt);
 
         Ok(())
     } else {

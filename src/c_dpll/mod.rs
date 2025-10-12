@@ -10,6 +10,9 @@ use c::*;
 mod split;
 use split::*;
 
+mod heap;
+use heap::*;
+
 mod run;
 pub use run::*;
 
@@ -20,6 +23,8 @@ type E = u8;
 struct ClassXY {
     value: E, // is E::MAX when undecided.
     cs: SmallVec<[CXY; 7]>, // the constraints that currently wait on us.
+    heap_index: usize,
+    score: i32,
 }
 
 #[derive(Clone)]
@@ -36,6 +41,7 @@ struct Ctxt {
     n: E,
     fresh: Box<[bool]>,
     propagate_queue: Vec<(E, E, E)>,
+    heap: Vec<(E, E)>, // x: E, y: E
 }
 
 #[derive(Clone)]
