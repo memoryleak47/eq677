@@ -62,17 +62,22 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class = &mut ctxt.classes_xy[idx(a, bab, ctxt.n)];
-    let v = class.value;
+    let class_xy = &mut ctxt.classes_xy[idx(a, bab, ctxt.n)];
+    let v = class_xy.value;
     if v == E::MAX {
         // a = b*(a*bab)
-        let z = ctxt.classes_xz[idx(b, a, ctxt.n)].value;
+        let class_xz = &mut ctxt.classes_xz[idx(b, a, ctxt.n)];
+        let z = class_xz.value;
         if z != E::MAX {
             return prove_triple(a, bab, z, ctxt);
         }
 
         ctxt.trail.push(TrailEvent::PushCXY(a, bab));
-        class.cs.push(CXY::C12(b));
+        class_xy.cs.push(CXY::C12(b));
+
+        ctxt.trail.push(TrailEvent::PushCXZ(b, a));
+        class_xz.cs.push(CXZ(a, bab));
+
         Ok(())
     } else {
         let abab = v;
