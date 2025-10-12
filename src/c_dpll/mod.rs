@@ -17,16 +17,22 @@ pub use run::*;
 type E = u8;
 
 #[derive(Clone)]
-struct Class {
+struct ClassXY {
     value: E, // is E::MAX when undecided.
-    cs: SmallVec<[C; 7]>, // the constraints that currently wait on us.
+    cs: SmallVec<[CXY; 7]>, // the constraints that currently wait on us.
+}
+
+#[derive(Clone)]
+struct ClassXZ {
+    value: E,
+    cs: SmallVec<[CXZ; 7]>,
 }
 
 #[derive(Clone)]
 struct Ctxt {
     trail: Vec<TrailEvent>,
-    classes: Box<[Class]>,
-    xzy: Box<[E]>, // indexed by `idx(x,z)`
+    classes_xy: Box<[ClassXY]>,
+    classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`
     n: E,
     fresh: Box<[bool]>,
     propagate_queue: Vec<(E, E, E)>,

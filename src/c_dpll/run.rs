@@ -39,12 +39,12 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     });
 }
 
-fn score_c(c: C) -> i32 {
+fn score_c(c: CXY) -> i32 {
     match c {
-        C::C11(..) => 2,
-        C::C12(..) => 3,
-        C::C21(..) => 2,
-        C::C22(..) => 3,
+        CXY::C11(..) => 2,
+        CXY::C12(..) => 3,
+        CXY::C21(..) => 2,
+        CXY::C22(..) => 3,
     }
 }
 
@@ -55,7 +55,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
-            let class = &ctxt.classes[idx(x, y, ctxt.n)];
+            let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
             if class.value != E::MAX { continue }
 
             let score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>() + (x == 0) as i32;
@@ -73,7 +73,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
     let mut found_fresh = false;
     (0..ctxt.n).filter(|&i| {
-        if ctxt.xzy[idx(x, i, ctxt.n)] != E::MAX { return false; }
+        if ctxt.classes_xz[idx(x, i, ctxt.n)].value != E::MAX { return false; }
         if ctxt.fresh[i as usize] {
             if found_fresh { return false; }
             found_fresh = true;
@@ -85,7 +85,7 @@ fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
 fn submit_model(ctxt: &Ctxt) {
     present_model(ctxt.n as usize, |x, y| {
         let i = idx(x as E, y as E, ctxt.n);
-        ctxt.classes[i].value as usize
+        ctxt.classes_xy[i].value as usize
     });
 }
 
@@ -136,11 +136,11 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                 if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
-                let z = std::mem::replace(&mut ctxt.classes[idx(x, y, ctxt.n)].value, E::MAX);
-                ctxt.xzy[idx(x, z, ctxt.n)] = E::MAX;
+                let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
+                ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
             },
             TrailEvent::PushC(x, y) => {
-                ctxt.classes[idx(x, y, ctxt.n)].cs.pop().unwrap();
+                ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
             }
             TrailEvent::Defresh(x) => {
                 ctxt.fresh[x as usize] = true;
@@ -157,16 +157,16 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let v_ref = &mut ctxt.classes[idx(x, y, ctxt.n)].value;
-    let v = *v_ref;
-    if v == z { return Ok(()) }
-    if v != E::MAX { return Err(()) }
+    let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
+    let xy = *xy_ref;
+    if xy == z { return Ok(()) }
+    if xy != E::MAX { return Err(()) }
 
-    let xzy_ref = &mut ctxt.xzy[idx(x, z, ctxt.n)];
-    if *xzy_ref != E::MAX { return Err(()); }
+    let xz_ref = &mut ctxt.classes_xz[idx(x, z, ctxt.n)].value;
+    if *xz_ref != E::MAX { return Err(()); }
 
-    *v_ref = z;
-    *xzy_ref = y;
+    *xy_ref = z;
+    *xz_ref = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
     ctxt.propagate_queue.push((x, y, z));
     Ok(())
@@ -180,9 +180,9 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         visit_c21(a, b, ba, ctxt)?;
 
         let i = idx(x, y, ctxt.n);
-        let len = ctxt.classes[i].cs.len();
+        let len = ctxt.classes_xy[i].cs.len();
         for j in 0..len {
-            let c = ctxt.classes[i].cs[j];
+            let c = ctxt.classes_xy[i].cs[j];
             progress_c(c, x, y, z, ctxt)?;
         }
     }
