@@ -13,7 +13,7 @@ pub fn heap_push(i: XYIdx, ctxt: &mut Ctxt) {
 pub fn heap_remove(i: XYIdx, ctxt: &mut Ctxt) {
     let h = ctxt.classes_xy[i].heap_index;
     ctxt.heap.swap_remove(h);
-    ctxt.classes_xy[i].heap_index = usize::MAX;
+    ctxt.classes_xy[i].heap_index = HeapIdx::MAX;
 
     if h < ctxt.heap.len() {
         let ii = ctxt.heap[h];
