@@ -1,6 +1,6 @@
 use crate::c_dpll::*;
 
-pub fn heap_push(x: E, y: E, score: i32, ctxt: &mut Ctxt) {
+pub fn heap_push(x: E, y: E, ctxt: &mut Ctxt) {
     let i = ctxt.heap.len();
     ctxt.heap.push((x, y));
     ctxt.classes_xy[idx(x, y, ctxt.n)].heap_index = i;

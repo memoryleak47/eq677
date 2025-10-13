@@ -123,8 +123,7 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::DefineClass(x, y) => {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
-                let score = ctxt.classes_xy[idx(x, y, ctxt.n)].score;
-                heap_push(x, y, score, ctxt);
+                heap_push(x, y, ctxt);
             },
             TrailEvent::PushCXY(x, y) => {
                 ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
