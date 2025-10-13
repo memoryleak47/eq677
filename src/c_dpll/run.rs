@@ -51,8 +51,8 @@ fn score_c(c: CXY) -> i32 {
 }
 
 // returns None if we are done.
-fn select_p(ctxt: &mut Ctxt) -> Option<(E, E)> {
-    heap_pop(ctxt)
+fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
+    ctxt.heap.get(0).copied()
 }
 
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
@@ -123,6 +123,8 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::DefineClass(x, y) => {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
+                let score = ctxt.classes_xy[idx(x, y, ctxt.n)].score;
+                heap_push(x, y, score, ctxt);
             },
             TrailEvent::PushCXY(x, y) => {
                 ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
@@ -157,6 +159,7 @@ pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     *xz_ref = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
     ctxt.propagate_queue.push((x, y, z));
+    heap_remove(x, y, ctxt);
     Ok(())
 }
 

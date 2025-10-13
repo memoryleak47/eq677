@@ -12,18 +12,17 @@ pub fn heap_add_score(x: E, y: E, summand: i32, ctxt: &mut Ctxt) {
     heap_swim(x, y, ctxt);
 }
 
-pub fn heap_pop(ctxt: &mut Ctxt) -> Option<(E, E)> {
-    if ctxt.heap.is_empty() { return None }
-    let (x, y) = ctxt.heap.swap_remove(0);
-    ctxt.classes_xy[idx(x, y, ctxt.n)].heap_index = usize::MAX;
+pub fn heap_remove(x: E, y: E, ctxt: &mut Ctxt) {
+    let i = idx(x, y, ctxt.n);
+    let h = ctxt.classes_xy[i].heap_index;
+    let (x, y) = ctxt.heap.swap_remove(h);
+    ctxt.classes_xy[i].heap_index = usize::MAX;
 
-    if !ctxt.heap.is_empty() {
-        let (x2, y2) = ctxt.heap[0];
-        ctxt.classes_xy[idx(x2, y2, ctxt.n)].heap_index = 0;
+    if h < ctxt.heap.len() {
+        let (x2, y2) = ctxt.heap[h];
+        ctxt.classes_xy[idx(x2, y2, ctxt.n)].heap_index = h;
         heap_sink(x2, y2, ctxt);
     }
-
-    Some((x, y))
 }
 
 fn heap_swim(x: E, y: E, ctxt: &mut Ctxt) {
