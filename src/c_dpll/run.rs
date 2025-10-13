@@ -126,7 +126,15 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                 heap_push(x, y, ctxt);
             },
             TrailEvent::PushCXY(x, y) => {
-                ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
+                let c = ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
+                let subtract = match c {
+                    CXY::C11(..) => C11_SCORE,
+                    CXY::C12(..) => C12_SCORE,
+                    CXY::C21(..) => C21_SCORE,
+                    CXY::C22(..) => C22_SCORE,
+                };
+                ctxt.classes_xy[idx(x, y, ctxt.n)].score -= subtract;
+                heap_sink(x, y, ctxt);
             }
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();

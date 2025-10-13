@@ -25,7 +25,7 @@ pub fn heap_remove(x: E, y: E, ctxt: &mut Ctxt) {
     }
 }
 
-fn heap_swim(x: E, y: E, ctxt: &mut Ctxt) {
+pub fn heap_swim(x: E, y: E, ctxt: &mut Ctxt) {
     let i = idx(x, y, ctxt.n);
     let class = &ctxt.classes_xy[i];
     let score = class.score;
@@ -46,7 +46,7 @@ fn heap_swim(x: E, y: E, ctxt: &mut Ctxt) {
     }
 }
 
-fn heap_sink(x: E, y: E, ctxt: &mut Ctxt) {
+pub fn heap_sink(x: E, y: E, ctxt: &mut Ctxt) {
     let i = idx(x, y, ctxt.n);
     let class = &ctxt.classes_xy[i];
     let score = class.score;

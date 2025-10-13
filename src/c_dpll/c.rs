@@ -2,10 +2,10 @@ use crate::c_dpll::*;
 
 // Constraints
 
-const C11_SCORE: i32 = 200;
-const C12_SCORE: i32 = 300;
-const C21_SCORE: i32 = 200;
-const C22_SCORE: i32 = 300;
+pub const C11_SCORE: i32 = 200;
+pub const C12_SCORE: i32 = 300;
+pub const C21_SCORE: i32 = 200;
+pub const C22_SCORE: i32 = 300;
 
 #[derive(Clone, Copy)]
 pub enum CXY {
