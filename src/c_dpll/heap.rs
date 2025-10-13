@@ -1,13 +1,16 @@
 use crate::c_dpll::*;
 
-pub fn heap_push(i: usize, ctxt: &mut Ctxt) {
+pub type HeapIdx = usize; // index into heap[_].
+pub type XYIdx = usize; // output of idx(x, y, ctxt.n).
+
+pub fn heap_push(i: XYIdx, ctxt: &mut Ctxt) {
     let h = ctxt.heap.len();
     ctxt.heap.push(i);
     ctxt.classes_xy[i].heap_index = h;
     heap_swim(i, ctxt);
 }
 
-pub fn heap_remove(i: usize, ctxt: &mut Ctxt) {
+pub fn heap_remove(i: XYIdx, ctxt: &mut Ctxt) {
     let h = ctxt.classes_xy[i].heap_index;
     ctxt.heap.swap_remove(h);
     ctxt.classes_xy[i].heap_index = usize::MAX;
@@ -19,7 +22,7 @@ pub fn heap_remove(i: usize, ctxt: &mut Ctxt) {
     }
 }
 
-pub fn heap_swim(i: usize, ctxt: &mut Ctxt) {
+pub fn heap_swim(i: XYIdx, ctxt: &mut Ctxt) {
     let class = &ctxt.classes_xy[i];
     let score = class.score;
     let mut h = class.heap_index;
@@ -38,7 +41,7 @@ pub fn heap_swim(i: usize, ctxt: &mut Ctxt) {
     }
 }
 
-pub fn heap_sink(i: usize, ctxt: &mut Ctxt) {
+pub fn heap_sink(i: XYIdx, ctxt: &mut Ctxt) {
     let class = &ctxt.classes_xy[i];
     let score = class.score;
     let mut h = class.heap_index;

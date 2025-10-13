@@ -23,7 +23,7 @@ type E = u8;
 struct ClassXY {
     value: E, // is E::MAX when undecided.
     cs: SmallVec<[CXY; 7]>, // the constraints that currently wait on us.
-    heap_index: usize,
+    heap_index: HeapIdx,
     score: i32,
 }
 
@@ -41,7 +41,7 @@ struct Ctxt {
     n: E,
     fresh: Box<[bool]>,
     propagate_queue: Vec<(E, E, E)>,
-    heap: Vec<usize>,
+    heap: Vec<XYIdx>,
 }
 
 #[derive(Clone)]
@@ -53,6 +53,6 @@ enum TrailEvent {
     PushCXZ(E, E),
 }
 
-fn idx(x: E, y: E, n: E) -> usize {
+fn idx(x: E, y: E, n: E) -> XYIdx {
     (x as usize) + (n as usize) * (y as usize)
 }
