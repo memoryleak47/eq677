@@ -52,7 +52,8 @@ fn score_c(c: CXY) -> i32 {
 
 // returns None if we are done.
 fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
-    ctxt.heap.get(0).copied()
+    let n = ctxt.n as usize;
+    ctxt.heap.first().map(|i| ((i%n) as E, (i/n) as E))
 }
 
 fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
@@ -123,7 +124,8 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::DefineClass(x, y) => {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
-                heap_push(x, y, ctxt);
+                let i = idx(x, y, ctxt.n);
+                heap_push(i, ctxt);
             },
             TrailEvent::PushCXY(x, y) => {
                 let c = ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
@@ -133,8 +135,9 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                     CXY::C21(..) => C21_SCORE,
                     CXY::C22(..) => C22_SCORE,
                 };
-                ctxt.classes_xy[idx(x, y, ctxt.n)].score -= subtract;
-                heap_sink(x, y, ctxt);
+                let i = idx(x, y, ctxt.n);
+                ctxt.classes_xy[i].score -= subtract;
+                heap_sink(i, ctxt);
             }
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
@@ -154,7 +157,8 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
+    let i = idx(x, y, ctxt.n);
+    let xy_ref = &mut ctxt.classes_xy[i].value;
     let xy = *xy_ref;
     if xy == z { return Ok(()) }
     if xy != E::MAX { return Err(()) }
@@ -166,7 +170,7 @@ pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     *xz_ref = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
     ctxt.propagate_queue.push((x, y, z));
-    heap_remove(x, y, ctxt);
+    heap_remove(i, ctxt);
     Ok(())
 }
 

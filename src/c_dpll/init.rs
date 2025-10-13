@@ -31,8 +31,9 @@ pub fn build_ctxt(n: usize) -> Ctxt {
         for y in 0..ctxt.n {
             let n = ctxt.n as i32;
             let score = n*n - (x as i32)*n - (y as i32);
-            ctxt.classes_xy[idx(x, y, ctxt.n)].score = score;
-            heap_push(x, y, &mut ctxt);
+            let i = idx(x, y, ctxt.n);
+            ctxt.classes_xy[i].score = score;
+            heap_push(i, &mut ctxt);
         }
     }
 

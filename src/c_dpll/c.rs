@@ -54,12 +54,14 @@ pub fn progress_c(c: CXY, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 
 // C1
 pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class = &mut ctxt.classes_xy[idx(ba, b, ctxt.n)];
+    let i = idx(ba, b, ctxt.n);
+    let class = &mut ctxt.classes_xy[i];
     let v = class.value;
     if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushCXY(ba, b));
         class.cs.push(CXY::C11(a));
-        heap_add_score(ba, b, C11_SCORE, ctxt);
+        class.score += C11_SCORE;
+        heap_swim(i, ctxt);
         Ok(())
     } else {
         let bab = v;
@@ -68,7 +70,8 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class_xy = &mut ctxt.classes_xy[idx(a, bab, ctxt.n)];
+    let i = idx(a, bab, ctxt.n);
+    let class_xy = &mut ctxt.classes_xy[i];
     let v = class_xy.value;
     if v == E::MAX {
         // a = b*(a*bab)
@@ -84,7 +87,8 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         ctxt.trail.push(TrailEvent::PushCXZ(b, a));
         class_xz.cs.push(CXZ(a, bab));
 
-        heap_add_score(a, bab, C12_SCORE, ctxt);
+        class_xy.score += C12_SCORE;
+        heap_swim(i, ctxt);
 
         Ok(())
     } else {
@@ -95,12 +99,15 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 
 // C2
 pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class = &mut ctxt.classes_xy[idx(b, ba, ctxt.n)];
+    let i = idx(b, ba, ctxt.n);
+    let class = &mut ctxt.classes_xy[i];
     let v = class.value;
     if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushCXY(b, ba));
         class.cs.push(CXY::C21(a));
-        heap_add_score(b, ba, C21_SCORE, ctxt);
+        class.score += C21_SCORE;
+
+        heap_swim(i, ctxt);
         Ok(())
     } else {
         let bba = v;
@@ -109,7 +116,8 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let class_xy = &mut ctxt.classes_xy[idx(bba, b, ctxt.n)];
+    let i = idx(bba, b, ctxt.n);
+    let class_xy = &mut ctxt.classes_xy[i];
     let v = class_xy.value;
     if v == E::MAX {
         // a = ba * (bba * b)
@@ -125,7 +133,8 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         ctxt.trail.push(TrailEvent::PushCXZ(ba, a));
         class_xz.cs.push(CXZ(bba, b));
 
-        heap_add_score(bba, b, C22_SCORE, ctxt);
+        class_xy.score += C22_SCORE;
+        heap_swim(i, ctxt);
 
         Ok(())
     } else {

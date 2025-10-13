@@ -1,40 +1,32 @@
 use crate::c_dpll::*;
 
-pub fn heap_push(x: E, y: E, ctxt: &mut Ctxt) {
-    let i = ctxt.heap.len();
-    ctxt.heap.push((x, y));
-    ctxt.classes_xy[idx(x, y, ctxt.n)].heap_index = i;
-    heap_swim(x, y, ctxt);
+pub fn heap_push(i: usize, ctxt: &mut Ctxt) {
+    let h = ctxt.heap.len();
+    ctxt.heap.push(i);
+    ctxt.classes_xy[i].heap_index = h;
+    heap_swim(i, ctxt);
 }
 
-pub fn heap_add_score(x: E, y: E, summand: i32, ctxt: &mut Ctxt) {
-    ctxt.classes_xy[idx(x, y, ctxt.n)].score += summand;
-    heap_swim(x, y, ctxt);
-}
-
-pub fn heap_remove(x: E, y: E, ctxt: &mut Ctxt) {
-    let i = idx(x, y, ctxt.n);
+pub fn heap_remove(i: usize, ctxt: &mut Ctxt) {
     let h = ctxt.classes_xy[i].heap_index;
-    let (x, y) = ctxt.heap.swap_remove(h);
+    ctxt.heap.swap_remove(h);
     ctxt.classes_xy[i].heap_index = usize::MAX;
 
     if h < ctxt.heap.len() {
-        let (x2, y2) = ctxt.heap[h];
-        ctxt.classes_xy[idx(x2, y2, ctxt.n)].heap_index = h;
-        heap_sink(x2, y2, ctxt);
+        let ii = ctxt.heap[h];
+        ctxt.classes_xy[ii].heap_index = h;
+        heap_sink(ii, ctxt);
     }
 }
 
-pub fn heap_swim(x: E, y: E, ctxt: &mut Ctxt) {
-    let i = idx(x, y, ctxt.n);
+pub fn heap_swim(i: usize, ctxt: &mut Ctxt) {
     let class = &ctxt.classes_xy[i];
     let score = class.score;
     let mut h = class.heap_index;
 
     while h > 0 {
         let p_h = (h-1)/2;
-        let (p_x, p_y) = ctxt.heap[p_h];
-        let p_i = idx(p_x, p_y, ctxt.n);
+        let p_i = ctxt.heap[p_h];
         let p_score = ctxt.classes_xy[p_i].score;
         if p_score >= score { break }
 
@@ -46,8 +38,7 @@ pub fn heap_swim(x: E, y: E, ctxt: &mut Ctxt) {
     }
 }
 
-pub fn heap_sink(x: E, y: E, ctxt: &mut Ctxt) {
-    let i = idx(x, y, ctxt.n);
+pub fn heap_sink(i: usize, ctxt: &mut Ctxt) {
     let class = &ctxt.classes_xy[i];
     let score = class.score;
     let mut h = class.heap_index;
@@ -56,14 +47,13 @@ pub fn heap_sink(x: E, y: E, ctxt: &mut Ctxt) {
         let l_h = 2*h+1;
         let r_h = 2*h+2;
 
-        let l_score = ctxt.heap.get(l_h).map(|&(x, y)| ctxt.classes_xy[idx(x, y, ctxt.n)].score).unwrap_or(-1);
-        let r_score = ctxt.heap.get(r_h).map(|&(x, y)| ctxt.classes_xy[idx(x, y, ctxt.n)].score).unwrap_or(-1);
+        let l_score = ctxt.heap.get(l_h).map(|&ii| ctxt.classes_xy[ii].score).unwrap_or(-1);
+        let r_score = ctxt.heap.get(r_h).map(|&ii| ctxt.classes_xy[ii].score).unwrap_or(-1);
 
         if l_score >= r_score {
             if l_score <= score { break }
 
-            let (l_x, l_y) = ctxt.heap[l_h];
-            let l_i = idx(l_x, l_y, ctxt.n);
+            let l_i = ctxt.heap[l_h];
             ctxt.heap.swap(h, l_h);
             ctxt.classes_xy[i].heap_index = l_h;
             ctxt.classes_xy[l_i].heap_index = h;
@@ -71,8 +61,7 @@ pub fn heap_sink(x: E, y: E, ctxt: &mut Ctxt) {
         } else {
             if r_score <= score { break }
 
-            let (r_x, r_y) = ctxt.heap[r_h];
-            let r_i = idx(r_x, r_y, ctxt.n);
+            let r_i = ctxt.heap[r_h];
             ctxt.heap.swap(h, r_h);
             ctxt.classes_xy[i].heap_index = r_h;
             ctxt.classes_xy[r_i].heap_index = h;

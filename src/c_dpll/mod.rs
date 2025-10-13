@@ -41,7 +41,7 @@ struct Ctxt {
     n: E,
     fresh: Box<[bool]>,
     propagate_queue: Vec<(E, E, E)>,
-    heap: Vec<(E, E)>, // x: E, y: E
+    heap: Vec<usize>,
 }
 
 #[derive(Clone)]
