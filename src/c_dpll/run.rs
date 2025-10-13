@@ -122,9 +122,9 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                 if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
-                let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
-                ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
                 let i = idx(x, y, ctxt.n);
+                let z = std::mem::replace(&mut ctxt.classes_xy[i].value, E::MAX);
+                ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
                 heap_push(i, ctxt);
             },
             TrailEvent::PushCXY(x, y) => {
