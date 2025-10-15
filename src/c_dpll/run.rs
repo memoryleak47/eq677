@@ -55,11 +55,6 @@ fn pos_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     ni * ni - xi * ni - yi
 }
 
-pub fn recompute_score(x: E, y: E, ctxt: &mut Ctxt) {
-    let score = compute_score(x, y, ctxt);
-    ctxt.classes_xy[idx(x, y, ctxt.n)].score = score;
-}
-
 pub fn compute_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
     let cs_score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>();
@@ -164,8 +159,9 @@ fn main_backtrack(ctxt: &mut Ctxt) {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
             },
             TrailEvent::PushCXY(x, y) => {
-                ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
-                recompute_score(x, y, ctxt);
+                let class = &mut ctxt.classes_xy[idx(x, y, ctxt.n)];
+                let c = class.cs.pop().unwrap();
+                class.score -= score_c(c);
             }
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();

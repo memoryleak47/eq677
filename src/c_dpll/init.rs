@@ -26,7 +26,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
     };
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
-            recompute_score(x, y, &mut ctxt);
+            ctxt.classes_xy[idx(x, y, ctxt.n)].score = compute_score(x, y, &ctxt);
         }
     }
     ctxt
