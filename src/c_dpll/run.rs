@@ -27,8 +27,7 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     defresh(y, ctxt);
 
     let count = ctxt.n.min(ctxt.nonfresh+1);
-    // TODO fix collect
-    into_par_for_each((0..count).collect(), |e| {
+    range_for_each(count, |e| {
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value != E::MAX { return }
         let c = &mut ctxt.clone();
 

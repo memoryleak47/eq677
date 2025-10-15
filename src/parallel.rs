@@ -20,3 +20,11 @@ pub fn into_par_for_each<T>(x: Vec<T>, f: impl Fn(T) + Send + Sync) where T: Sen
         x.into_iter().for_each(f);
     }
 }
+
+pub fn range_for_each(n: u8, f: impl Fn(u8) + Send + Sync) {
+    if PAR {
+        (0..n).into_par_iter().for_each(f);
+    } else {
+        for x in 0..n { f(x); }
+    }
+}
