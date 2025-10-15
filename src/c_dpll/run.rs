@@ -117,9 +117,9 @@ fn main_branch(ctxt: &mut Ctxt) {
 
 // e is the next thing to try. If that doesn't work, we iterate from there.
 fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let count = ctxt.n.min(ctxt.nonfresh+1);
     loop {
-        if e >= ctxt.n || e > ctxt.nonfresh { return Err(()) }
-
+        if e >= count { return Err(()) }
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value == E::MAX { break }
         e += 1;
     }
