@@ -35,15 +35,15 @@ struct Ctxt {
     classes_xy: Box<[ClassXY]>,
     classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`
     n: E,
-    fresh: Box<[bool]>,
+    nonfresh: E, // The number of nonfresh elems. An element e is fresh, if e >= nonfresh.
     propagate_queue: Vec<(E, E, E)>,
 }
 
 #[derive(Clone)]
 enum TrailEvent {
-    Decision(E, E, Vec<E>),
+    Decision(E, E, E),
     DefineClass(E, E),
-    Defresh(E),
+    Defresh,
     PushCXY(E, E),
     PushCXZ(E, E),
 }

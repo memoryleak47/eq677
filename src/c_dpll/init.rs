@@ -19,9 +19,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
         classes_xy: std::iter::repeat(class_xy)
             .take(n*n)
             .collect(),
-        fresh: std::iter::repeat(true)
-            .take(n)
-            .collect(),
+        nonfresh: 0,
         propagate_queue: Vec::new(),
     };
     for x in 0..ctxt.n {

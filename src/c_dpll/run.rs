@@ -23,18 +23,19 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
         return;
     };
 
-    // We don't use "defresh(x, ctxt)" as the prerun doesn't need to put stuff on the trail.
-    ctxt.fresh[x as usize] = false;
-    ctxt.fresh[y as usize] = false;
+    defresh(x, ctxt);
+    defresh(y, ctxt);
 
-    let options = get_options(x, y, ctxt);
-    into_par_for_each(options, |e| {
+    let count = ctxt.n.min(ctxt.nonfresh+1);
+    // TODO fix collect
+    into_par_for_each((0..count).collect(), |e| {
+        if ctxt.classes_xz[idx(x, e, ctxt.n)].value != E::MAX { return }
         let c = &mut ctxt.clone();
 
         if prove_triple(x, y, e, c).is_err() { return }
         if propagate(c).is_err() { return }
 
-        c.fresh[e as usize] = false;
+        defresh(e, c);
         prerun(depth+1, c);
     });
 }
@@ -87,18 +88,6 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     else { Some(best) }
 }
 
-fn get_options(x: E, y: E, ctxt: &Ctxt) -> Vec<E> {
-    let mut found_fresh = false;
-    (0..ctxt.n).filter(|&i| {
-        if ctxt.classes_xz[idx(x, i, ctxt.n)].value != E::MAX { return false; }
-        if ctxt.fresh[i as usize] {
-            if found_fresh { return false; }
-            found_fresh = true;
-        }
-        true
-    }).collect()
-}
-
 fn submit_model(ctxt: &Ctxt) {
     present_model(ctxt.n as usize, |x, y| {
         let i = idx(x as E, y as E, ctxt.n);
@@ -107,10 +96,10 @@ fn submit_model(ctxt: &Ctxt) {
 }
 
 fn defresh(e: E, ctxt: &mut Ctxt) {
-    let f = &mut ctxt.fresh[e as usize];
-    if *f {
-        *f = false;
-        ctxt.trail.push(TrailEvent::Defresh(e));
+    if e >= ctxt.nonfresh {
+        // assert!(e == ctxt.nonfresh);
+        ctxt.nonfresh += 1;
+        ctxt.trail.push(TrailEvent::Defresh);
     }
 }
 
@@ -123,24 +112,26 @@ fn main_branch(ctxt: &mut Ctxt) {
     defresh(x, ctxt);
     defresh(y, ctxt);
 
-    let options = get_options(x, y, ctxt);
-    if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
+    if branch_options(x, y, 0, ctxt).is_ok() { become main_propagate(ctxt); }
     else { become main_backtrack(ctxt); }
 }
 
-fn branch_options(x: E, y: E, mut options: Vec<E>, ctxt: &mut Ctxt) -> Result<(), ()> {
-    if let Some(e) = options.pop() {
-        ctxt.trail.push(TrailEvent::Decision(x, y, options));
-        prove_triple(x, y, e, ctxt)?;
+// e is the next thing to try. If that doesn't work, we iterate from there.
+fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    loop {
+        if e >= ctxt.n || e > ctxt.nonfresh { return Err(()) }
 
-        // note: This defresh has to be after the decision point!
-        // Otherwise it won't get re-freshed on backtracking.
-        defresh(e, ctxt);
-
-        Ok(())
-    } else {
-        Err(())
+        if ctxt.classes_xz[idx(x, e, ctxt.n)].value == E::MAX { break }
+        e += 1;
     }
+    ctxt.trail.push(TrailEvent::Decision(x, y, e));
+    prove_triple(x, y, e, ctxt)?;
+
+    // note: This defresh has to be after the decision point!
+    // Otherwise it won't get re-freshed on backtracking.
+    defresh(e, ctxt);
+
+    Ok(())
 }
 
 fn main_backtrack(ctxt: &mut Ctxt) {
@@ -149,8 +140,8 @@ fn main_backtrack(ctxt: &mut Ctxt) {
     loop {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
-            TrailEvent::Decision(x, y, mut options) => {
-                if branch_options(x, y, options, ctxt).is_ok() { become main_propagate(ctxt); }
+            TrailEvent::Decision(x, y, e) => {
+                if branch_options(x, y, e+1, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
@@ -164,8 +155,8 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
             }
-            TrailEvent::Defresh(x) => {
-                ctxt.fresh[x as usize] = true;
+            TrailEvent::Defresh => {
+                ctxt.nonfresh -= 1;
             }
         }
     }
