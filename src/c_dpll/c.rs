@@ -2,6 +2,11 @@ use crate::c_dpll::*;
 
 // Constraints
 
+pub const C11_SCORE: i32 = 2000;
+pub const C12_SCORE: i32 = 3000;
+pub const C21_SCORE: i32 = 2000;
+pub const C22_SCORE: i32 = 3000;
+
 #[derive(Clone, Copy)]
 pub enum CXY {
     C11(/*a*/ E),           // a = b*(a*(ba*b))
