@@ -4,6 +4,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
     let class_xy = ClassXY {
         value: E::MAX,
         cs: SmallVec::new(),
+        score: -1,
     };
     let class_xz = ClassXZ {
         value: E::MAX,
@@ -23,5 +24,10 @@ pub fn build_ctxt(n: usize) -> Ctxt {
             .collect(),
         propagate_queue: Vec::new(),
     };
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            recompute_score(x, y, &mut ctxt);
+        }
+    }
     ctxt
 }

@@ -55,7 +55,12 @@ fn pos_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     ni * ni - xi * ni - yi
 }
 
-fn compute_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
+pub fn recompute_score(x: E, y: E, ctxt: &mut Ctxt) {
+    let score = compute_score(x, y, ctxt);
+    ctxt.classes_xy[idx(x, y, ctxt.n)].score = score;
+}
+
+pub fn compute_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
     let cs_score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>();
     let x0_score = 1000 * (x == 0) as i32;
@@ -66,6 +71,9 @@ fn compute_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
 
 // returns None if we are done.
 fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
+    // Should hold here:
+    // check_score(ctxt);
+
     let mut best = (E::MAX, E::MAX);
     let mut best_score = -1;
 
@@ -74,7 +82,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
             let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
             if class.value != E::MAX { continue }
 
-            let score = compute_score(x, y, ctxt);
+            let score = class.score;
             if score > best_score {
                 best = (x, y);
                 best_score = score;
@@ -157,6 +165,7 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             },
             TrailEvent::PushCXY(x, y) => {
                 ctxt.classes_xy[idx(x, y, ctxt.n)].cs.pop().unwrap();
+                recompute_score(x, y, ctxt);
             }
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
@@ -215,4 +224,14 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     }
 
     Ok(())
+}
+
+fn check_score(ctxt: &Ctxt) {
+    for x in 0..ctxt.n {
+        for y in 0..ctxt.n {
+            let actual = compute_score(x, y, ctxt);
+            let stored = ctxt.classes_xy[idx(x, y, ctxt.n)].score;
+            assert_eq!(actual, stored);
+        }
+    }
 }

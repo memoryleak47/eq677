@@ -59,6 +59,8 @@ pub fn visit_c11(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushCXY(ba, b));
         class.cs.push(CXY::C11(a));
+
+        recompute_score(ba, b, ctxt);
         Ok(())
     } else {
         let bab = v;
@@ -83,6 +85,8 @@ fn visit_c12(a: E, b: E, bab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         ctxt.trail.push(TrailEvent::PushCXZ(b, a));
         class_xz.cs.push(CXZ(a, bab));
 
+        recompute_score(a, bab, ctxt);
+
         Ok(())
     } else {
         let abab = v;
@@ -97,6 +101,8 @@ pub fn visit_c21(a: E, b: E, ba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     if v == E::MAX {
         ctxt.trail.push(TrailEvent::PushCXY(b, ba));
         class.cs.push(CXY::C21(a));
+
+        recompute_score(b, ba, ctxt);
         Ok(())
     } else {
         let bba = v;
@@ -120,6 +126,8 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 
         ctxt.trail.push(TrailEvent::PushCXZ(ba, a));
         class_xz.cs.push(CXZ(bba, b));
+
+        recompute_score(bba, b, ctxt);
 
         Ok(())
     } else {
