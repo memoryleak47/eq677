@@ -21,10 +21,11 @@ pub fn build_ctxt(n: usize) -> Ctxt {
             .collect(),
         nonfresh: 0,
         propagate_queue: Vec::new(),
+        chosen_per_row: std::iter::repeat(0).take(n).collect(),
     };
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
-            ctxt.classes_xy[idx(x, y, ctxt.n)].score = compute_score(x, y, &ctxt);
+            ctxt.classes_xy[idx(x, y, ctxt.n)].score = compute_base_score(x, y, &ctxt);
         }
     }
     ctxt

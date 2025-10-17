@@ -55,7 +55,7 @@ fn pos_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     ni * ni - xi * ni - yi
 }
 
-pub fn compute_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
+pub fn compute_base_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
     let cs_score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>();
     let x0_score = 1000 * (x == 0) as i32;
@@ -75,7 +75,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
-            let score = class.score;
+            let score = class.score + 1000 * ctxt.chosen_per_row[x as usize] as i32;
             if (class.value == E::MAX) & (score > best_score) {
                 best = (x, y);
                 best_score = score;
@@ -124,6 +124,7 @@ fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         e += 1;
     }
     ctxt.trail.push(TrailEvent::Decision(x, y, e));
+    ctxt.chosen_per_row[x as usize] += 1;
     prove_triple(x, y, e, ctxt)?;
 
     // note: This defresh has to be after the decision point!
@@ -140,6 +141,7 @@ fn main_backtrack(ctxt: &mut Ctxt) {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
             TrailEvent::Decision(x, y, e) => {
+                ctxt.chosen_per_row[x as usize] -= 1;
                 if branch_options(x, y, e+1, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
@@ -213,7 +215,7 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
 fn check_score(ctxt: &Ctxt) {
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
-            let actual = compute_score(x, y, ctxt);
+            let actual = compute_base_score(x, y, ctxt);
             let stored = ctxt.classes_xy[idx(x, y, ctxt.n)].score;
             assert_eq!(actual, stored);
         }

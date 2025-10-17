@@ -20,7 +20,7 @@ type E = u8;
 struct ClassXY {
     value: E, // is E::MAX when undecided.
     cs: SmallVec<[CXY; 7]>, // the constraints that currently wait on us.
-    score: i32,
+    score: i32, // a cache for the base_score.
 }
 
 #[derive(Clone)]
@@ -37,6 +37,7 @@ struct Ctxt {
     n: E,
     nonfresh: E, // The number of nonfresh elems. An element e is fresh, if e >= nonfresh.
     propagate_queue: Vec<(E, E, E)>,
+    chosen_per_row: Box<[E]>,
 }
 
 #[derive(Clone)]
