@@ -75,7 +75,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {
             let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
-            let score = class.score + 1000 * ctxt.chosen_per_row[x as usize] as i32;
+            let score = class.score + CHOSEN_SCORE * ctxt.chosen_per_row[x as usize] as i32;
             if (class.value == E::MAX) & (score > best_score) {
                 best = (x, y);
                 best_score = score;
