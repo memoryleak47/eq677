@@ -17,7 +17,6 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
     }
 
     handle.insert(magma.clone());
-    drop(handle);
 
     println!("Model found:");
     magma.dump();
