@@ -58,7 +58,7 @@ fn pos_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
 pub fn compute_base_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
     let cs_score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>();
-    let x0_score = 1000 * (x == 0) as i32;
+    let x0_score = X0_SCORE * (x == 0) as i32;
     let pos_score = pos_score(x, y, ctxt);
 
     cs_score + x0_score + pos_score

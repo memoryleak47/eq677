@@ -7,6 +7,7 @@ pub const C12_SCORE: i32 = 3000;
 pub const C21_SCORE: i32 = 2000;
 pub const C22_SCORE: i32 = 3000;
 pub const CHOSEN_SCORE: i32 = 1000;
+pub const X0_SCORE: i32 = 1000;
 
 #[derive(Clone, Copy)]
 pub enum CXY {
