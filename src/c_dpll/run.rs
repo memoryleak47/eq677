@@ -147,6 +147,9 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::DefineClass(x, y) => {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
+                if y == z {
+                    ctxt.yxx[y as usize] = E::MAX;
+                }
             },
             TrailEvent::PushCXY(x, y) => {
                 let class = &mut ctxt.classes_xy[idx(x, y, ctxt.n)];
@@ -178,6 +181,11 @@ pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 
     let xz_ref = &mut ctxt.classes_xz[idx(x, z, ctxt.n)].value;
     if *xz_ref != E::MAX { return Err(()); }
+
+    if y == z {
+        if ctxt.yxx[z as usize] != E::MAX { return Err(()); }
+        ctxt.yxx[z as usize] = x;
+    }
 
     *xy_ref = z;
     *xz_ref = y;

@@ -38,6 +38,7 @@ struct Ctxt {
     nonfresh: E, // The number of nonfresh elems. An element e is fresh, if e >= nonfresh.
     propagate_queue: Vec<(E, E, E)>,
     chosen_per_row: Box<[E]>,
+    yxx: Box<[E]>, // y := yxx[x] where y*x = x, E::MAX means undefined.
 }
 
 #[derive(Clone)]
