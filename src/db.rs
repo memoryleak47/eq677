@@ -216,3 +216,13 @@ fn dbconj_idempotence() {
         assert!(!restrict || idempotent);
     }
 }
+
+#[test]
+fn dbconj_exists_idempotence() {
+    // This effectively states `exists x: x*x = x`.
+
+    for m in db() {
+        if m.n == 0 { continue }
+        assert!(m.f(0, 0) == 0);
+    }
+}
