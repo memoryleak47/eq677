@@ -251,3 +251,24 @@ fn dbconj_exists_idempotence() {
         assert!(m.f(0, 0) == 0);
     }
 }
+
+#[test]
+fn dbconj_diag_orbit_size() {
+    for m in db() {
+        if !m.is_diag_bijective() { continue }
+
+        for x in 0..m.n {
+            let mut y = x;
+            let mut i = 0;
+            // i is the smallest positive number, s.t. S^i x = x, where S x = x*x
+            loop {
+                y = m.f(y, y);
+                i += 1;
+                if x == y { break }
+            }
+            dbg!(i);
+            assert!(i == 1 || i == 6 || i == 4);
+            // It looks like i can not be prime!
+        }
+    }
+}
