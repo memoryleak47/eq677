@@ -141,17 +141,65 @@ fn db_is255() {
     }
 }
 
-#[test]
-fn db_left_cancellative() {
-    for m in db() {
-        for a in 0..m.n {
-            for b in 0..m.n {
-                for c in 0..m.n {
+// Helpers:
+
+impl MatrixMagma {
+    fn is_left_cancellative(&self) -> bool {
+        for a in 0..self.n {
+            for b in 0..self.n {
+                for c in 0..self.n {
                     // a*b = a*c -> b = c.
-                    assert!(m.f(a, b) != m.f(a, c) || b == c);
+                    if !(self.f(a, b) != self.f(a, c) || b == c) { return false }
                 }
             }
         }
+        true
+    }
+
+    fn is_right_cancellative(&self) -> bool {
+        for a in 0..self.n {
+            for b in 0..self.n {
+                for c in 0..self.n {
+                    // b*a = c*a -> b = c
+                    if !(self.f(b, a) != self.f(c, a) || b == c) { return false }
+                }
+            }
+        }
+        true
+    }
+
+    fn is_diag_constant(&self) -> bool {
+        for x in 0..self.n {
+            for y in 0..self.n {
+                if self.f(x, x) != self.f(y, y) { return false }
+            }
+        }
+        true
+    }
+
+    fn is_diag_bijective(&self) -> bool {
+        for x in 0..self.n {
+            for y in 0..self.n {
+                if x == y { continue }
+                if self.f(x, x) == self.f(y, y) { return false }
+            }
+        }
+        true
+    }
+
+    fn is_idempotent(&self) -> bool {
+        for x in 0..self.n {
+            let xx = self.f(x, x);
+            if self.f(xx, xx) != xx { return false }
+        }
+        true
+    }
+}
+
+#[test]
+fn db_left_cancellative() {
+    for m in db() {
+        assert!(m.is_left_cancellative());
     }
 }
 
@@ -159,23 +207,18 @@ fn db_left_cancellative() {
 
 #[test]
 fn dbconj_right_cancellative() {
-    // We know this conjecture is false. But we haven't found a small model for it yet.
+    // We know this conjecture is false.
+    // But we haven't found a small model for it yet.
 
     for m in db() {
-        for a in 0..m.n {
-            for b in 0..m.n {
-                for c in 0..m.n {
-                    // b*a = c*a -> b = c
-                    assert!(m.f(b, a) != m.f(c, a) || b == c);
-                }
-            }
-        }
+        assert!(m.is_right_cancellative());
     }
 }
 
 #[test]
 fn dbconj_odd() {
-    // We know this conjecture is false. But we haven't found a small model for it yet.
+    // We know this conjecture is false.
+    // But we haven't found a small model for it yet.
 
     for m in db() {
         assert!(m.n % 2 == 1 || m.n == 0);
@@ -183,37 +226,19 @@ fn dbconj_odd() {
 }
 
 #[test]
-fn dbconj_bijective_or_all0() {
+fn dbconj_bijective_or_constant() {
     for m in db() {
-        let mut bijective = true;
-        for x in 0..m.n {
-            for y in 0..m.n {
-                if x == y { continue }
-                if m.f(x, x) == m.f(y, y) { bijective = false; }
-            }
-        }
-
-        let mut all_zero = true;
-        for x in 0..m.n {
-            if m.f(x, x) != 0 { all_zero = false; }
-        }
-        assert!(bijective || all_zero);
+        assert!(m.is_diag_bijective() || m.is_diag_constant());
     }
 }
 
 #[test]
 fn dbconj_idempotence() {
     for m in db() {
-        let mut idempotent = true;
-        for x in 0..m.n {
-            let xx = m.f(x, x);
-            if m.f(xx, xx) != xx { idempotent = false; }
-        }
-
         // Is there a more general statement here?
         let restrict = m.n == 5 || m.n == 11;
 
-        assert!(!restrict || idempotent);
+        assert!(!restrict || m.is_idempotent());
     }
 }
 
