@@ -149,7 +149,7 @@ impl MatrixMagma {
             for b in 0..self.n {
                 for c in 0..self.n {
                     // a*b = a*c -> b = c.
-                    if !(self.f(a, b) != self.f(a, c) || b == c) { return false }
+                    if b != c && self.f(a, b) == self.f(a, c) { return false }
                 }
             }
         }
@@ -161,7 +161,7 @@ impl MatrixMagma {
             for b in 0..self.n {
                 for c in 0..self.n {
                     // b*a = c*a -> b = c
-                    if !(self.f(b, a) != self.f(c, a) || b == c) { return false }
+                    if b != c && self.f(b, a) == self.f(c, a) { return false }
                 }
             }
         }
