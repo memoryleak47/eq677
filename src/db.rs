@@ -200,3 +200,19 @@ fn dbconj_bijective_or_all0() {
         assert!(bijective || all_zero);
     }
 }
+
+#[test]
+fn dbconj_idempotence() {
+    for m in db() {
+        let mut idempotent = true;
+        for x in 0..m.n {
+            let xx = m.f(x, x);
+            if m.f(xx, xx) != xx { idempotent = false; }
+        }
+
+        // Is there a more general statement here?
+        let restrict = m.n == 5 || m.n == 11;
+
+        assert!(!restrict || idempotent);
+    }
+}
