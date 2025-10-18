@@ -272,3 +272,5 @@ fn dbconj_diag_orbit_size() {
         }
     }
 }
+
+// TODO add conjecture stating that the size of the automorphism group is dependent only on n.
