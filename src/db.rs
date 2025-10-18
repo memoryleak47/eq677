@@ -155,8 +155,12 @@ fn db_left_cancellative() {
     }
 }
 
+// Conjectures:
+
 #[test]
-fn db_right_cancellative() {
+fn dbconj_right_cancellative() {
+    // We know this conjecture is false. But we haven't found a small model for it yet.
+
     for m in db() {
         for a in 0..m.n {
             for b in 0..m.n {
@@ -166,5 +170,24 @@ fn db_right_cancellative() {
                 }
             }
         }
+    }
+}
+
+#[test]
+fn dbconj_bijective_or_all0() {
+    for m in db() {
+        let mut bijective = true;
+        for x in 0..m.n {
+            for y in 0..m.n {
+                if x == y { continue }
+                if m.f(x, x) == m.f(y, y) { bijective = false; }
+            }
+        }
+
+        let mut all_zero = true;
+        for x in 0..m.n {
+            if m.f(x, x) != 0 { all_zero = false; }
+        }
+        assert!(bijective || all_zero);
     }
 }
