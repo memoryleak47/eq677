@@ -174,6 +174,15 @@ fn dbconj_right_cancellative() {
 }
 
 #[test]
+fn dbconj_odd() {
+    // We know this conjecture is false. But we haven't found a small model for it yet.
+
+    for m in db() {
+        assert!(m.n % 2 == 1 || m.n == 0);
+    }
+}
+
+#[test]
 fn dbconj_bijective_or_all0() {
     for m in db() {
         let mut bijective = true;
