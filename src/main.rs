@@ -28,7 +28,12 @@ pub use parallel::*;
 mod present;
 pub use present::*;
 
+mod linear;
+pub use linear::*;
+
 fn main() {
+    linsearch();
+    return;
     for i in 0..10 {
         println!("Looking for model size {i}:");
         c_run(i);
