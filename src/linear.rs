@@ -32,14 +32,19 @@ fn modpow(mut b: usize, mut e: usize, p: usize) -> usize {
 
 pub fn linsearch() {
     for p in 0..30 {
-        if !is_prime(p) { continue }
-        for b in 1..p {
+        for b in 0..p {
             let b4 = (b + b*b*b)%p;
-            let a = modpow(b4, p-2, p); // by Fermats little theorem.
-            if (a + a*a*b*b + b*b*b)%p != 0 { continue }
+            for a in 0..p {
+                // Optimization via Fermats little theorem.
+                // Only works for `p` prime though!
+                // let a = modpow(b4, p-2, p);
 
-            println!("p={p}");
-            present_model(p, |x, y| (x*a + y*b)%p);
+                if (a*b4)%p != 1 { continue }
+                if (a + a*a*b*b + b*b*b)%p != 0 { continue }
+
+                println!("p={p}");
+                present_model(p, |x, y| (x*a + y*b)%p);
+            }
         }
     }
 }

@@ -35,5 +35,5 @@ mod linmat;
 pub use linmat::*;
 
 fn main() {
-    linmat_search();
+    linsearch();
 }
