@@ -31,11 +31,9 @@ pub use present::*;
 mod linear;
 pub use linear::*;
 
+mod linmat;
+pub use linmat::*;
+
 fn main() {
-    linsearch();
-    return;
-    for i in 0..10 {
-        println!("Looking for model size {i}:");
-        c_run(i);
-    }
+    linmat_search();
 }
