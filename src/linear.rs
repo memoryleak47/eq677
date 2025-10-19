@@ -19,15 +19,14 @@ fn is_prime(p: usize) -> bool {
 }
 
 pub fn linsearch() {
-    for p in 0..10 {
+    for p in 0..20 {
         if !is_prime(p) { continue }
-        for a in 0..p {
-            for b in 0..p {
-                if (a + a*a*b*b + b*b*b)%p != 0 { continue }
-                if (a*b + b*b*b*a)%p != 1 { continue }
+        for b in 1..p {
+            let b4 = (b + b*b*b)%p;
+            let a = b4.pow((p-2) as _)%p; // by Fermats little theorem.
+            if (a + a*a*b*b + b*b*b)%p != 0 { continue }
 
-                present_model(p, |x, y| (x*a + y*b)%p);
-            }
+            present_model(p, |x, y| (x*a + y*b)%p);
         }
     }
 }
