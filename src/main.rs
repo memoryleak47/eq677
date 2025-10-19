@@ -34,6 +34,9 @@ pub use linear::*;
 mod linmat;
 pub use linmat::*;
 
+mod affine;
+pub use affine::*;
+
 fn main() {
-    linsearch();
+    affinesearch();
 }
