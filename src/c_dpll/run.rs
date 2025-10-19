@@ -45,6 +45,8 @@ fn score_c(c: CXY) -> i32 {
         CXY::C12(..) => C12_SCORE,
         CXY::C21(..) => C21_SCORE,
         CXY::C22(..) => C22_SCORE,
+        CXY::C31(..) => C31_SCORE,
+        CXY::C32(..) => C32_SCORE,
     }
 }
 
@@ -200,6 +202,7 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         let (a, b, ba) = (y, x, z);
         visit_c11(a, b, ba, ctxt)?;
         visit_c21(a, b, ba, ctxt)?;
+        visit_c31(z, x, y, ctxt)?; // b*g(b, a) = a.
 
         let i = idx(x, y, ctxt.n);
         let len = ctxt.classes_xy[i].cs.len();

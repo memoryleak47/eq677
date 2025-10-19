@@ -6,20 +6,23 @@ pub const C11_SCORE: i32 = 2000;
 pub const C12_SCORE: i32 = 3000;
 pub const C21_SCORE: i32 = 2000;
 pub const C22_SCORE: i32 = 3000;
+pub const C31_SCORE: i32 = 0;
+pub const C32_SCORE: i32 = 500;
 pub const CHOSEN_SCORE: i32 = 1000;
 pub const X0_SCORE: i32 = 1000;
 
 #[derive(Clone, Copy)]
 pub enum CXY {
-    C11(/*a*/ E),           // a = b*(a*(ba*b))
-                            //            x*y
-    C12(/*b*/ E),           // a = b*(a*bab)
-                            //        x*y
-
-    C21(/*a*/ E),           // a = ba * ((b*ba) * b)
-                            //            x*y
-    C22(/*a*/ E, /*ba*/ E), // a = ba * (bba * b)
-                            //            x  * y
+    C11(/*a*/ E),             // a = b*(a*(ba*b))
+                              //            x*y
+    C12(/*b*/ E),             // a = b*(a*bab)
+                              //        x*y
+    C21(/*a*/ E),             // a = ba * ((b*ba) * b)
+                              //            x*y
+    C22(/*a*/ E, /*ba*/ E),   // a = ba * (bba * b)
+                              //            x  * y
+    C31(/*gba*/ E),           // a = b*(b*(gba*(a*b)))
+    C32(/*a*/ E, /*b*/ E),    // a = b*(b*(gba*ab))
 }
 
 #[derive(Clone, Copy)]
@@ -50,6 +53,16 @@ pub fn progress_c(c: CXY, x: E, y: E, e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             let b = y;
             let bbab = e;
             prove_triple(ba, bbab, a, ctxt)
+        },
+        CXY::C31(gba) => {
+            let a = x;
+            let b = y;
+            let ab = e;
+            visit_c32(a, b, gba, ab, ctxt)
+        },
+        CXY::C32(a, b) => {
+            let gba_ab = e;
+            visit_c22(a, gba_ab, b, b, ctxt)
         },
     }
 }
@@ -132,5 +145,39 @@ fn visit_c22(a: E, b: E, ba: E, bba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     } else {
         let bbab = v;
         prove_triple(ba, bbab, a, ctxt)
+    }
+}
+
+// C3
+pub fn visit_c31(a: E, b: E, gba: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    // b * gba = a
+    // a = b*(b*(gba*(a*b)))
+    let class = &mut ctxt.classes_xy[idx(a, b, ctxt.n)];
+    let v = class.value;
+    if v == E::MAX {
+        ctxt.trail.push(TrailEvent::PushCXY(a, b));
+        class.cs.push(CXY::C31(gba));
+        class.score += C31_SCORE;
+        Ok(())
+    } else {
+        let ab = v;
+        visit_c32(a, b, gba, ab, ctxt)
+    }
+}
+
+pub fn visit_c32(a: E, b: E, gba: E, ab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    // b * gba = a
+    // a = b*(b*(gba*ab))
+    let class = &mut ctxt.classes_xy[idx(gba, ab, ctxt.n)];
+    let v = class.value;
+    if v == E::MAX {
+        ctxt.trail.push(TrailEvent::PushCXY(gba, ab));
+        class.cs.push(CXY::C32(a, b));
+        class.score += C32_SCORE;
+        Ok(())
+    } else {
+        let gba_ab = v;
+        // a = b*(b*(gba_ab))
+        visit_c22(a, gba_ab, b, b, ctxt)
     }
 }
