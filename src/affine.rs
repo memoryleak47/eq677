@@ -1,6 +1,7 @@
 use crate::*;
 
-// Unclear so far: Is this stronger than linsearch, or subsumed by it?
+// This is strictly more expressive than linsearch.
+// It has found a model without idempotent elements (of size 31).
 
 /*
   x*y = (ax + by + c)%p
