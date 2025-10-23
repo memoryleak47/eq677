@@ -37,6 +37,9 @@ pub use linmat::*;
 mod affine;
 pub use affine::*;
 
+mod affmat;
+pub use affmat::*;
+
 fn main() {
-    affinesearch();
+    affmat_search();
 }
