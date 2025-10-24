@@ -1,5 +1,9 @@
 use crate::*;
 
+// TODO it would probably advisable to restart inferring stuff from
+// f(x, y) = M1*x + M2*y + c
+// I'm not sure the stuff from below works in an exactly compatible way.
+
 /*
   f(x, y) = M1*x + M2*y
   => 0 = M1 + M2^2 M1^2 + M2^3
@@ -35,6 +39,8 @@ fn mm(a: Mat, b: Mat, p: usize) -> Mat {
             c[i][j] = (a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j]) % p;
         }
     }
+    // TODO why does this fail?
+    // assert_eq!(c[2], [0, 0, 1]);
     c
 }
 
@@ -44,6 +50,7 @@ fn mv(a: Mat, v: V, p: usize) -> V {
     for i in 0..3 {
         r[i] = (a[i][0] * v[0] + a[i][1] * v[1] + a[i][2] * v[2]) % p;
     }
+    assert_eq!(r[2], 1);
     r
 }
 
@@ -56,6 +63,7 @@ fn mplus(l: Mat, r: Mat, p: usize) -> Mat {
         }
     }
     out[2][2] = 1;
+    assert_eq!(out[2], [0, 0, 1]);
     out
 }
 
@@ -64,7 +72,7 @@ fn vplus(l: V, r: V, p: usize) -> V {
     [
         (l[0] + r[0]) % p,
         (l[1] + r[1]) % p,
-        (l[2] + r[2]) % p,
+        1,
     ]
 }
 
