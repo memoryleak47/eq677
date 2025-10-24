@@ -13,12 +13,12 @@ pub fn conj(m: &MatrixMagma) {
     assert!(m.is_left_cancellative());
 
     conj_idempotence(m);
+    conj_diag_orbit_size(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
     // false_conj_bijective_or_constant(m);
     // false_conj_exists_idempotence(m);
-    // false_conj_diag_orbit_size(m);
 }
 
 // Conjectures:
@@ -58,7 +58,7 @@ fn false_conj_right_cancellative(m: &MatrixMagma) {
     assert!(m.is_right_cancellative());
 }
 
-fn false_conj_diag_orbit_size(m: &MatrixMagma) {
+fn conj_diag_orbit_size(m: &MatrixMagma) {
     if !m.is_diag_bijective() { return }
 
     for x in 0..m.n {
@@ -70,8 +70,8 @@ fn false_conj_diag_orbit_size(m: &MatrixMagma) {
             i += 1;
             if x == y { break }
         }
-        assert!(i == 1 || i == 3 || i == 4 || i == 6 || i == 12 || i == 18);
-        // It looks like i can not be prime! Nvm.
+        // Known values: 1, 3, 4, 6, 12, 18.
+        assert!(i != 5);
     }
 }
 
