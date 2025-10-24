@@ -8,17 +8,15 @@ fn test_db_conj() {
 }
 
 pub fn conj(m: &MatrixMagma) {
-    conj_left_cancellative(m);
+    assert!(m.is677());
+    assert!(m.is255());
+    assert!(m.is_left_cancellative());
+
     conj_idempotence(m);
     conj_diag_orbit_size(m);
 }
 
 // Conjectures:
-
-// This is actually a trivially true conjecture. Just for testing.
-fn conj_left_cancellative(m: &MatrixMagma) {
-    assert!(m.is_left_cancellative());
-}
 
 fn conj_idempotence(m: &MatrixMagma) {
     // Is there a more general statement here?

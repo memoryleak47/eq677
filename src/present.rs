@@ -20,10 +20,7 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
 
     println!("Model found:");
     magma.dump();
-    // ctxt.dump();
 
-    assert!(magma.is677());
-    assert!(magma.is255());
     conj(&magma);
 }
 
