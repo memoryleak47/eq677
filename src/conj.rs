@@ -70,7 +70,6 @@ fn false_conj_diag_orbit_size(m: &MatrixMagma) {
             i += 1;
             if x == y { break }
         }
-        dbg!(i);
         assert!(i == 1 || i == 3 || i == 4 || i == 6 || i == 12 || i == 18);
         // It looks like i can not be prime!
     }
