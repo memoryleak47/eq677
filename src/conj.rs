@@ -70,8 +70,9 @@ fn conj_diag_orbit_size(m: &MatrixMagma) {
             i += 1;
             if x == y { break }
         }
-        // Known values: 1, 3, 4, 6, 12, 18.
-        assert!(i != 5);
+        // Known values: 1, 3, 4, 5, 6, 7, 12, 18.
+        // We know that 2 is impossible. 0*0 = 1 /\ 1*1 = 0 -> 0=1.
+        assert!(i != 8);
     }
 }
 
