@@ -13,7 +13,12 @@ pub fn conj(m: &MatrixMagma) {
     assert!(m.is_left_cancellative());
 
     conj_idempotence(m);
-    conj_diag_orbit_size(m);
+
+    false_conj_bijective_or_constant(m);
+    false_conj_exists_idempotence(m);
+    false_conj_odd(m);
+    false_conj_right_cancellative(m);
+    false_conj_diag_orbit_size(m);
 }
 
 // Conjectures:
@@ -23,24 +28,6 @@ fn conj_idempotence(m: &MatrixMagma) {
     let restrict = m.n == 5 || m.n == 11;
 
     assert!(!restrict || m.is_idempotent());
-}
-
-
-fn conj_diag_orbit_size(m: &MatrixMagma) {
-    if !m.is_diag_bijective() { return }
-
-    for x in 0..m.n {
-        let mut y = x;
-        let mut i = 0;
-        // i is the smallest positive number, s.t. S^i x = x, where S x = x*x
-        loop {
-            y = m.f(y, y);
-            i += 1;
-            if x == y { break }
-        }
-        assert!(i == 1 || i == 6 || i == 4);
-        // It looks like i can not be prime!
-    }
 }
 
 // TODO add conjecture stating that the size of the automorphism group is dependent only on n.
@@ -56,7 +43,11 @@ fn false_conj_exists_idempotence(m: &MatrixMagma) {
     // It is intended to be run with canonicalized input.
 
     if m.n == 0 { return }
-    assert!(m.f(0, 0) == 0);
+
+    for x in 0..m.n {
+        if m.f(x, x) == x { return }
+    }
+    assert!(false);
 }
 
 fn false_conj_odd(m: &MatrixMagma) {
@@ -65,6 +56,24 @@ fn false_conj_odd(m: &MatrixMagma) {
 
 fn false_conj_right_cancellative(m: &MatrixMagma) {
     assert!(m.is_right_cancellative());
+}
+
+fn false_conj_diag_orbit_size(m: &MatrixMagma) {
+    if !m.is_diag_bijective() { return }
+
+    for x in 0..m.n {
+        let mut y = x;
+        let mut i = 0;
+        // i is the smallest positive number, s.t. S^i x = x, where S x = x*x
+        loop {
+            y = m.f(y, y);
+            i += 1;
+            if x == y { break }
+        }
+        dbg!(i);
+        assert!(i == 1 || i == 3 || i == 4 || i == 6 || i == 12 || i == 18);
+        // It looks like i can not be prime!
+    }
 }
 
 // Helpers:
