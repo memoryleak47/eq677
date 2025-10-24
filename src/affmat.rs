@@ -4,6 +4,12 @@ use crate::*;
 // f(x, y) = M1*x + M2*y + c
 // I'm not sure the stuff from below works in an exactly compatible way.
 
+// x = f(y, f(x, f(f(y, x), y)))
+// x = f(y, f(x, f(M1*y + M2*x + c, y)))
+// x = f(y, f(x, M1*M1*y + M1*M2*x + M1*c + M2*y + c))
+// x = f(y, M1*x + M2*M1*M1*y + M2*M1*M2*x + M2*M1*c + M2*M2*y + M2*c + c)
+// x = M1*y + M2*M1*x + M2*M2*M1*M1*y + M2*M2*M1*M2*x + M2*M2*M1*c + M2*M2*M2*y + M2*M2*c + M2*c + c
+
 /*
   f(x, y) = M1*x + M2*y
   => 0 = M1 + M2^2 M1^2 + M2^3
