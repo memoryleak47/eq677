@@ -18,7 +18,7 @@ use crate::*;
   => 1 = bbba + ba
 */
 
-pub fn affinesearch() {
+pub fn affine_search() {
     for p in 0..3000 {
         for a in 0..p {
             for b in 0..p {

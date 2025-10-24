@@ -18,7 +18,7 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
     handle.insert(magma.clone());
 
     println!("Model found:");
-    if n < 100 {
+    if n < 50 {
         magma.dump();
     } else {
         println!("  ...");
