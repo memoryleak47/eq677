@@ -24,5 +24,6 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
 
     assert!(magma.is677());
     assert!(magma.is255());
+    conj(&magma);
 }
 
