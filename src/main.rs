@@ -44,5 +44,5 @@ mod affmat;
 pub use affmat::*;
 
 fn main() {
-    affinesearch();
+    linsearch();
 }

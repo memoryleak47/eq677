@@ -50,7 +50,7 @@ fn vplus([l1, l2]: V, [r1, r2]: V, p: usize) -> V {
 }
 
 pub fn linmat_search() {
-    for p in 0..10 {
+    for p in 0..50 {
         for m1 in p_mats(p) {
             for m2 in p_mats(p) {
                 let m12 = mm(m1, m1, p);

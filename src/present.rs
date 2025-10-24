@@ -8,7 +8,7 @@ lazy_static::lazy_static! {
 
 pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
-    let magma = magma.canonicalize();
+    let magma = if n < 30 { magma.canonicalize() } else { magma };
 
     let mut handle = DB.lock().unwrap();
     if handle.contains(&magma) {
@@ -18,7 +18,11 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
     handle.insert(magma.clone());
 
     println!("Model found:");
-    magma.dump();
+    if n < 100 {
+        magma.dump();
+    } else {
+        println!("  ...");
+    }
 
     conj(&magma);
 }
