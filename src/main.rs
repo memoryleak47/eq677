@@ -35,5 +35,5 @@ mod search;
 pub use search::*;
 
 fn main() {
-    affmat_search();
+    all_search();
 }

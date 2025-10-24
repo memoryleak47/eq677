@@ -11,3 +11,8 @@ pub use affine::*;
 
 mod affmat;
 pub use affmat::*;
+
+pub fn all_search() {
+    let searches = vec![linear_search, linmat_search, affine_search, affmat_search];
+    into_par_for_each(searches, |x| x());
+}
