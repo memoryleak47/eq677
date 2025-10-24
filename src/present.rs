@@ -12,7 +12,6 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
 
     let mut handle = DB.lock().unwrap();
     if handle.contains(&magma) {
-        println!("duplicate model found! suboptimal symmetry breaking!");
         return;
     }
 
