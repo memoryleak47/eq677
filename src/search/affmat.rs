@@ -20,7 +20,7 @@ type Mat = [[usize; 2]; 2];
 type V = [usize; 2];
 
 pub fn affmat_search() {
-    for p in 0..10 {
+    for p in 0.. {
         for m1 in p_mats(p) {
             for m2 in p_mats(p) {
                 for c0 in 0..p {

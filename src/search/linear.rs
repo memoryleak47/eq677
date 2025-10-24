@@ -31,7 +31,7 @@ fn modpow(mut b: usize, mut e: usize, p: usize) -> usize {
 }
 
 pub fn linear_search() {
-    for p in 0..3000 {
+    for p in 0.. {
         for b in 0..p {
             let b4 = (b + b*b*b)%p;
             for a in 0..p {

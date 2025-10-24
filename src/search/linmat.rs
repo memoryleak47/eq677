@@ -6,6 +6,37 @@ use crate::*;
   => I = M2 M1 + M2^2 M1 M2
 */
 
+pub fn linmat_search() {
+    for p in 0.. {
+        for m1 in p_mats(p) {
+            for m2 in p_mats(p) {
+                let m12 = mm(m1, m1, p);
+                let m22 = mm(m2, m2, p);
+
+                // 0 = M1 + M2^2 M1^2 + M2^3
+                let m22_12 = mm(m22, m12, p);
+                let m2_3 = mm(m2, m22, p);
+                let o = mplus(m1, mplus(m22_12, m2_3, p), p);
+                if o != [[0, 0], [0, 0]] { continue }
+
+                // => I = M2 M1 + M2^2 M1 M2
+                let m2m1 = mm(m2, m1, p);
+                let m22_1_2 = mm(m22, mm(m1, m2, p), p);
+                let i = mplus(m2m1, m22_1_2, p);
+                if i != [[1, 0], [0, 1]] { continue }
+
+                println!("p={p}, p^2={}", p*p);
+                present_model(p*p, |x, y| {
+                    let x = [x%p, x/p];
+                    let y = [y%p, y/p];
+                    let v = vplus(mv(m1, x, p), mv(m2, y, p), p);
+                    v[0] + p*v[1]
+                });
+            }
+        }
+    }
+}
+
 type Mat = [[usize; 2]; 2];
 type V = [usize; 2];
 
@@ -47,35 +78,4 @@ fn mplus([[l1, l2], [l3, l4]]: Mat, [[r1, r2], [r3, r4]]: Mat, p: usize) -> Mat 
 
 fn vplus([l1, l2]: V, [r1, r2]: V, p: usize) -> V {
     [(l1 + r1)%p, (l2 + r2)%p]
-}
-
-pub fn linmat_search() {
-    for p in 0..50 {
-        for m1 in p_mats(p) {
-            for m2 in p_mats(p) {
-                let m12 = mm(m1, m1, p);
-                let m22 = mm(m2, m2, p);
-
-                // 0 = M1 + M2^2 M1^2 + M2^3
-                let m22_12 = mm(m22, m12, p);
-                let m2_3 = mm(m2, m22, p);
-                let o = mplus(m1, mplus(m22_12, m2_3, p), p);
-                if o != [[0, 0], [0, 0]] { continue }
-
-                // => I = M2 M1 + M2^2 M1 M2
-                let m2m1 = mm(m2, m1, p);
-                let m22_1_2 = mm(m22, mm(m1, m2, p), p);
-                let i = mplus(m2m1, m22_1_2, p);
-                if i != [[1, 0], [0, 1]] { continue }
-
-                println!("p={p}, p^2={}", p*p);
-                present_model(p*p, |x, y| {
-                    let x = [x%p, x/p];
-                    let y = [y%p, y/p];
-                    let v = vplus(mv(m1, x, p), mv(m2, y, p), p);
-                    v[0] + p*v[1]
-                });
-            }
-        }
-    }
 }
