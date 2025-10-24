@@ -14,11 +14,11 @@ pub fn conj(m: &MatrixMagma) {
 
     conj_idempotence(m);
 
-    false_conj_bijective_or_constant(m);
-    false_conj_exists_idempotence(m);
     false_conj_odd(m);
     false_conj_right_cancellative(m);
-    false_conj_diag_orbit_size(m);
+    // false_conj_bijective_or_constant(m);
+    // false_conj_exists_idempotence(m);
+    // false_conj_diag_orbit_size(m);
 }
 
 // Conjectures:

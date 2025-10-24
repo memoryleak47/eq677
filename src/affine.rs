@@ -19,7 +19,7 @@ use crate::*;
 */
 
 pub fn affinesearch() {
-    for p in 0..30 {
+    for p in 0..3000 {
         for a in 0..p {
             for b in 0..p {
                 let b4 = (b*b*b + b)%p;
