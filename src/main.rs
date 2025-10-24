@@ -22,6 +22,9 @@ pub use c_dpll::*;
 mod db;
 pub use db::*;
 
+mod conj;
+pub use conj::*;
+
 mod parallel;
 pub use parallel::*;
 
