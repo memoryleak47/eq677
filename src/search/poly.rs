@@ -18,23 +18,15 @@ impl<F> Magma for FnMagma<F> where F: Fn(usize, usize) -> usize {
 
 pub fn poly_search() {
     for p in 0.. {
-        for c0 in 0..p {
-            for c1 in 0..p {
-                for c2 in 0..p {
-                    for c3 in 0..p {
-                        for c4 in 0..p {
-                            let f_def = |x, y| ((x*c0)%p + (x*x*c1)%p + (y*c2)%p + (y*y*c3)%p + c4)%p;
-                            let f = FnMagma {
-                                n: p,
-                                f_def,
-                            };
-                            if f.is677() {
-                                println!("p={p}");
-                                present_model(p, f_def);
-                            }
-                        }
-                    }
-                }
+        for (c0, c1, c2, c3, c4) in itertools::iproduct!(0..p, 0..p, 0..p, 0..p, 0..p) {
+            let f_def = |x, y| ((x*c0)%p + (x*x*c1)%p + (y*c2)%p + (y*y*c3)%p + c4)%p;
+            let f = FnMagma {
+                n: p,
+                f_def,
+            };
+            if f.is677() {
+                println!("p={p}");
+                present_model(p, f_def);
             }
         }
     }
