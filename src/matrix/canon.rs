@@ -6,74 +6,22 @@ type Perm = Vec<usize>;
 // c: M2 (canonical) -> M1 (original).
 
 impl MatrixMagma {
-    pub fn transpose(&self) -> Self {
-        let mut m = MatrixMagma::zeros(self.n);
-        for x in 0..self.n {
-            for y in 0..self.n {
-                m.set_f(y, x, self.f(x, y));
-            }
-        }
-        m
-    }
-
-    pub fn permute(&self, c: Perm) -> Self {
-        let mut m = Self::zeros(self.n);
-        for x in 0..self.n {
-            for y in 0..self.n {
-                // recall: f2(x, y) = c^-1(f1(c(x), c(y)))
-                let cx = idx(&c, x);
-                let cy = idx(&c, y);
-
-                assert!(cx < self.n);
-                assert!(cy < self.n);
-
-                let fxy = self.f(cx, cy);
-                let mut z = usize::MAX;
-                if fxy != usize::MAX {
-                    z = idx_rev(&c, fxy);
-                    assert!(z != usize::MAX);
-                }
-                m.set_f(x, y, z);
-            }
-        }
-        m
-    }
-
-     pub fn permute_old(&self, p: Perm) -> Self {
-        let mut c = Self::zeros(self.n);
-        for x in 0..self.n {
-            for y in 0..self.n {
-                // f(x, y) = z
-                // -> f(p[x], p[y]) = p[z]
-                let z = self.f(x, y);
-
-                let mut pz = usize::MAX;
-                if z != usize::MAX {
-                    pz = p[z];
-                    assert!(pz != usize::MAX);
-                }
-                c.set_f(p[x], p[y], pz);
-            }
-        }
-        c
-    }
-
     // This function also works on partial magmas.
     pub fn canonicalize(&self) -> Self {
         let n = self.n;
         let start_perm = vec![usize::MAX; n];
 
         let mut candidates = vec![start_perm];
-        for y in 0..n {
-            // define c(y).
+        for x in 0..n {
+            // define c(x).
             for c in std::mem::take(&mut candidates) {
-                candidates.extend(choose_c(c, y));
+                candidates.extend(choose_c(c, x));
             }
 
-            for x in 0..n {
-                // define c(x).
+            for y in 0..n {
+                // define c(y).
                 for c in std::mem::take(&mut candidates) {
-                    candidates.extend(choose_c(c, x));
+                    candidates.extend(choose_c(c, y));
                 }
 
                 // define c^-1(f1(c(x), c(y))).
@@ -124,8 +72,37 @@ impl MatrixMagma {
         self.permute(candidate)
     }
 
-    pub fn canonicalize_terrible(&self) -> Self {
-        all_perms(self.n).into_iter().map(|p| self.permute_old(p)).min().unwrap()
+    pub fn permute(&self, c: Perm) -> Self {
+        let mut m = Self::zeros(self.n);
+        for x in 0..self.n {
+            for y in 0..self.n {
+                // recall: f2(x, y) = c^-1(f1(c(x), c(y)))
+                let cx = idx(&c, x);
+                let cy = idx(&c, y);
+
+                assert!(cx < self.n);
+                assert!(cy < self.n);
+
+                let fxy = self.f(cx, cy);
+                let mut z = usize::MAX;
+                if fxy != usize::MAX {
+                    z = idx_rev(&c, fxy);
+                    assert!(z != usize::MAX);
+                }
+                m.set_f(x, y, z);
+            }
+        }
+        m
+    }
+
+    pub fn transpose(&self) -> Self {
+        let mut m = MatrixMagma::zeros(self.n);
+        for x in 0..self.n {
+            for y in 0..self.n {
+                m.set_f(y, x, self.f(x, y));
+            }
+        }
+        m
     }
 }
 
@@ -178,42 +155,4 @@ fn choose_c_rev(c: Perm, x: usize) -> Vec<Perm> {
     }
 
     out
-}
-
-pub fn all_perms(n: usize) -> Vec<Perm> {
-    if n == 0 { return vec![Vec::new()]; }
-
-    let mut outs = Vec::new();
-
-    // we decide 'out[0] = a'.
-    for p in all_perms(n-1) {
-        for a in 0..n {
-            let mut out = Vec::new();
-            out.push(a);
-            out.extend(p.iter().copied().map(|x| x + (x >= a) as usize));
-            outs.push(out);
-        }
-    }
-    outs
-}
-
-#[test]
-fn test_canon() {
-    let m = MatrixMagma::parse("
-        3 1 - - -
-        2 3 4 - -
-        3 - 2 - -
-        - - - - -
-        - - - - 2
-    ");
-    m.dump();
-    println!("===================================");
-    m.canonicalize().dump();
-    println!("===================================");
-    m.canonicalize_terrible().dump();
-
-    for p in all_perms(5) {
-        let m = m.permute(p);
-        assert_eq!(m.canonicalize(), m.canonicalize_terrible());
-    }
 }
