@@ -8,7 +8,7 @@ lazy_static::lazy_static! {
 
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let mut magma = MatrixMagma::by_fn(n, f);
-    if n < 30 {
+    if n < 32 {
         magma = magma.canonicalize();
 
         let mut handle = DB.lock().unwrap();
