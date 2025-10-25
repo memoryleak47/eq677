@@ -34,6 +34,9 @@ pub use present::*;
 mod search;
 pub use search::*;
 
+mod kb;
+pub use kb::*;
+
 fn main() {
     bij_plus_search();
 }
