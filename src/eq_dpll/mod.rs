@@ -101,7 +101,7 @@ fn mainloop(mut ctxt: Ctxt) {
 
 fn threaded_forward_step(ctxt: &mut Ctxt) {
     let Some((pos, options)) = next_options(ctxt) else {
-        present_model(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
+        submit_model(ctxt);
         ctxt.mode = Mode::Backtracking;
         return;
     };
@@ -131,7 +131,7 @@ fn forward_step(ctxt: &mut Ctxt) {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n, |x, y| ctxt.table[idx((x, y), ctxt.n)]);
+    present_model(ctxt.n, "eq_dpll", |x, y| ctxt.table[idx((x, y), ctxt.n)]);
 }
 
 fn backtrack_step(ctxt: &mut Ctxt) {

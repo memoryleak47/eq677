@@ -94,7 +94,7 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n as usize, |x, y| {
+    present_model(ctxt.n as usize, "c_dpll", |x, y| {
         let i = idx(x as E, y as E, ctxt.n);
         ctxt.classes_xy[i].value as usize
     });

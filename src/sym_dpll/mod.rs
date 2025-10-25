@@ -75,7 +75,7 @@ fn choose_branch_id(ctxt: &Ctxt) -> Option<(Id, Id)> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n, |x, y| ctxt.xyz[&(x, y)]);
+    present_model(ctxt.n, "sym_dpll", |x, y| ctxt.xyz[&(x, y)]);
 }
 
 fn infeasible_decision((x, y): (Id, Id), z: Id, ctxt: &Ctxt) -> bool {

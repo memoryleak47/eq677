@@ -48,7 +48,7 @@ pub fn affmat_search() {
                         let a = mplus(a, id, p);
                         if a != [[0, 0], [0, 0]] { continue }
 
-                        present_model(p*p, |x, y| {
+                        present_model(p*p, "affmat", |x, y| {
                             let x = [x%p, x/p];
                             let y = [y%p, y/p];
                             let v = vplus(mv(m1, x, p), mv(m2, y, p), p);

@@ -25,7 +25,7 @@ pub fn poly_search() {
                 f_def,
             };
             if f.is677() {
-                present_model(p, f_def);
+                present_model(p, "poly", f_def);
             }
         }
     }

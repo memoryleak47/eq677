@@ -25,7 +25,7 @@ pub fn linmat_search() {
                 let i = mplus(m2m1, m22_1_2, p);
                 if i != [[1, 0], [0, 1]] { continue }
 
-                present_model(p*p, |x, y| {
+                present_model(p*p, "linmat", |x, y| {
                     let x = [x%p, x/p];
                     let y = [y%p, y/p];
                     let v = vplus(mv(m1, x, p), mv(m2, y, p), p);
