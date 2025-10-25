@@ -113,6 +113,19 @@ fn c(m: &MatrixMagma, x: usize, z: usize) -> u32 {
     i
 }
 
+// Finds the minimal (i.e. canonical) element from the C(x, z) cycle.
+fn c_mini(m: &MatrixMagma, x: usize, z: usize) -> usize {
+    let mut zz = z;
+    let mut mini = z;
+
+    loop {
+        zz = m.f(x, zz);
+        if z == zz { break }
+        if zz < mini { mini = zz; }
+    }
+    mini
+}
+
 
 // Helpers:
 
