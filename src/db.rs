@@ -1,5 +1,11 @@
 use crate::*;
 
+pub fn db_search() {
+    for m in db() {
+        present_model(m.n as usize, "db", |x, y| m.f(x, y));
+    }
+}
+
 pub fn db() -> Vec<MatrixMagma> {
     vec![
         MatrixMagma::parse(include_str!("../db/0_0")),
