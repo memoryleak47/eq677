@@ -1,17 +1,16 @@
 use crate::*;
 
+use std::collections::BTreeSet;
+
 mod kbo;
 
 pub type E = u8;
 pub type V = usize;
 
 // typically oriented lhs -> rhs.
-pub type Rule = (Term, Term);
+pub type Rule = (Term, Term, /*oriented*/);
 
-struct ER {
-    e: Vec<Rule>, // unoriented.
-    r: Vec<Rule>,
-}
+struct ER(BTreeSet<Rule>);
 
 #[derive(PartialEq, Eq)]
 pub enum Term {
