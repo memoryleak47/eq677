@@ -14,6 +14,7 @@ pub fn conj(m: &MatrixMagma) {
 
     conj_idempotence(m);
     conj_diag_orbit_size(m);
+    conj_cycle_size(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
@@ -75,6 +76,23 @@ fn conj_diag_orbit_size(m: &MatrixMagma) {
         assert!(i != 8);
     }
 }
+
+fn conj_cycle_size(m: &MatrixMagma) {
+    for x in 0..m.n {
+        for z in 0..m.n {
+            let mut zz = z;
+            let mut i = 0;
+            loop {
+                zz = m.f(x, zz);
+                i += 1;
+                if z == zz { break }
+            }
+            // It seems there are no 3-cycles?
+            assert!(i != 3);
+        }
+    }
+}
+
 
 // Helpers:
 
