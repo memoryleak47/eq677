@@ -84,6 +84,31 @@ impl MatrixMagma {
         }
     }
 
+    // Prints a magma, but displays every row x as the bijection spanned by
+    // `y => x*y` written in cycle notation.
+    pub fn cycle_dump(&self) {
+        let ctxt = self;
+        for x in 0..ctxt.n {
+            print!("{x}: ");
+
+            let mut seen = vec![false; ctxt.n as usize];
+            for i in 0..ctxt.n {
+                if seen[i] { continue }
+                let mut cc = i;
+                print!("(");
+                loop {
+                    print!("{cc} ");
+                    seen[cc] = true;
+                    cc = ctxt.f(x, cc);
+                    if seen[cc] { break }
+                }
+                print!(") ");
+            }
+            println!();
+        }
+    }
+
+
     pub fn is_total(&self) -> bool {
         !self.data.contains(&usize::MAX)
     }

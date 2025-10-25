@@ -21,7 +21,7 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
 
     println!("Model found:");
     if n < 50 {
-        magma.dump();
+        magma.cycle_dump();
     } else {
         println!("  ...");
     }
