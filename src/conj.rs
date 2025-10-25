@@ -80,17 +80,23 @@ fn conj_diag_orbit_size(m: &MatrixMagma) {
 fn conj_cycle_size(m: &MatrixMagma) {
     for x in 0..m.n {
         for z in 0..m.n {
-            let mut zz = z;
-            let mut i = 0;
-            loop {
-                zz = m.f(x, zz);
-                i += 1;
-                if z == zz { break }
-            }
+            let i = c(m, x, z);
             // It seems there are no 3-cycles?
             assert!(i < 3 || i > 5);
         }
     }
+}
+
+// returns how often I need to left-multiply x onto z, until it becomes z again.
+fn c(m: &MatrixMagma, x: usize, z: usize) -> u32 {
+    let mut zz = z;
+    let mut i = 0;
+    loop {
+        zz = m.f(x, zz);
+        i += 1;
+        if z == zz { break }
+    }
+    i
 }
 
 
