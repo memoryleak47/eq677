@@ -53,3 +53,14 @@ enum TrailEvent {
 fn idx(x: E, y: E, n: E) -> usize {
     (x as usize) + (n as usize) * (y as usize)
 }
+
+impl Ctxt {
+    pub fn dump(&self) {
+        let m = MatrixMagma::by_fn(self.n as usize, |x, y| {
+            let i = idx(x as E, y as E, self.n);
+            let v = self.classes_xy[i].value;
+            if v == E::MAX { usize::MAX } else { v as _ }
+        });
+        m.dump();
+    }
+}

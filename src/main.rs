@@ -38,5 +38,8 @@ mod kb;
 pub use kb::*;
 
 fn main() {
-    bij_plus_search();
+    for i in 0..10 {
+        println!("Looking for model size {i}:");
+        c_run(i);
+    }
 }

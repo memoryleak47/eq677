@@ -25,3 +25,42 @@ pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
     out
 }
 
+pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
+    if ctxt.n <= 1 { return vec![ctxt] }
+
+    let mut out = Vec::new();
+
+    for zero_orbit_size in 1..=ctxt.n {
+        let mut ctxt = ctxt.clone();
+        ctxt.nonfresh = ctxt.n;
+        for i in 0..zero_orbit_size {
+            assert!(prove_triple(0, i, (i+1)%zero_orbit_size, &mut ctxt).is_ok());
+        }
+        split_rest(1, zero_orbit_size, ctxt, &mut out);
+    }
+
+    out
+}
+
+
+// We can not build smaller cycles than last_size. last_size is monotonically growing. But not strictly so.
+// next_idx is the next E that is undefined so far.
+fn split_rest(last_size: E, next_idx: E, ctxt: Ctxt, out: &mut Vec<Ctxt>) {
+    assert!(next_idx <= ctxt.n);
+
+    if next_idx == ctxt.n {
+        out.push(ctxt);
+        return
+    }
+
+    let remaining = ctxt.n - next_idx;
+    for next_cycle in last_size..=remaining {
+        let mut ctxt = ctxt.clone();
+        for i in 0..next_cycle {
+            let ii = next_idx + i;
+            let ii_1 = next_idx + (i+1)%next_cycle;
+            assert!(prove_triple(0, ii, ii_1, &mut ctxt).is_ok());
+        }
+        split_rest(next_cycle, next_idx + next_cycle, ctxt, out)
+    }
+}
