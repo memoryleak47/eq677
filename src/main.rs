@@ -38,5 +38,7 @@ mod kb;
 pub use kb::*;
 
 fn main() {
+    setup_panic_hook();
+
     all_search();
 }
