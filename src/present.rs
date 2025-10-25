@@ -19,11 +19,14 @@ pub fn present_model(n: usize, f: impl Fn(usize, usize) -> usize) {
         handle.insert(magma.clone());
     }
 
-    println!("Model found:");
     if n < 50 {
+        // Locking the handle prevents scrambling of stdout.
+        let handle = DB.lock().unwrap();
+        println!("Model of size {n} found:");
         magma.cycle_dump();
     } else {
-        println!("  ...");
+        let handle = DB.lock().unwrap();
+        println!("Model found of size {n} found");
     }
 
     conj(&magma);

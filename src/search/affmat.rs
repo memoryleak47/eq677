@@ -48,7 +48,6 @@ pub fn affmat_search() {
                         let a = mplus(a, id, p);
                         if a != [[0, 0], [0, 0]] { continue }
 
-                        println!("p={p}, p^2={}", p*p);
                         present_model(p*p, |x, y| {
                             let x = [x%p, x/p];
                             let y = [y%p, y/p];

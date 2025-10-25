@@ -38,7 +38,6 @@ fn bij_search(op: impl Fn(usize, usize) -> usize) {
                         f_def,
                     };
                     if f.is677() {
-                        println!("p={p}");
                         present_model(p, f_def);
                     }
                 }

@@ -28,7 +28,6 @@ pub fn affine_search() {
                     if (a + a*a*b*b + b*b*b)%p != 0 { continue }
                     if ((b*b*a + b*b + b + 1)*c)%p != 0 { continue }
 
-                    println!("p={p}");
                     present_model(p, |x, y| (x*a + y*b + c)%p);
                 }
             }
