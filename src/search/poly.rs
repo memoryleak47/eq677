@@ -4,9 +4,9 @@ use crate::*;
     f(x, y) = x*c[0] + x^2*c[1] + y*c[2] + y^2*c[3] + c[4]
 */
 
-struct FnMagma<F> {
-    n: usize,
-    f_def: F,
+pub struct FnMagma<F> {
+    pub n: usize,
+    pub f_def: F,
 }
 
 impl<F> Magma for FnMagma<F> where F: Fn(usize, usize) -> usize {

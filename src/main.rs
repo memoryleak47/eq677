@@ -35,5 +35,5 @@ mod search;
 pub use search::*;
 
 fn main() {
-    poly_search();
+    bij_plus_search();
 }
