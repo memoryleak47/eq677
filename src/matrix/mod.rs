@@ -97,10 +97,11 @@ impl MatrixMagma {
                 let mut cc = i;
                 print!("(");
                 loop {
-                    print!("{cc} ");
+                    print!("{cc}");
                     seen[cc] = true;
                     cc = ctxt.f(x, cc);
                     if seen[cc] { break }
+                    print!(" ");
                 }
                 print!(") ");
             }
