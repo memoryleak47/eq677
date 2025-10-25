@@ -16,11 +16,25 @@ pub fn conj(m: &MatrixMagma) {
     conj_diag_orbit_size(m);
     conj_cycle_size(m);
     conj_cycle2(m);
+    conj_cycles_divide_n(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
     // false_conj_bijective_or_constant(m);
     // false_conj_exists_idempotence(m);
+}
+
+fn conj_cycles_divide_n(m: &MatrixMagma) {
+    // We have one counter example of size 7, but nothing else?
+    if m.n == 0 || m.n == 7 { return }
+
+    let mut s = 0;
+    for x in 0..m.n {
+        for z in 0..m.n {
+            s += (c_mini(m, x, z) == z) as usize;
+        }
+    }
+    assert!(s % m.n == 0);
 }
 
 // Conjectures:
