@@ -15,7 +15,7 @@ pub type E = u8;
 pub type V = usize;
 
 // typically oriented lhs -> rhs.
-pub type Rule = (Term, Term, /*oriented*/);
+pub type Rule = (Term, Term, /*oriented*/ bool);
 
 struct ER(BTreeSet<Rule>);
 
