@@ -3,6 +3,13 @@ use crate::*;
 use std::collections::BTreeSet;
 
 mod kbo;
+use kbo::*;
+
+mod simplify;
+use simplify::*;
+
+mod cps;
+use cps::*;
 
 pub type E = u8;
 pub type V = usize;
@@ -24,13 +31,4 @@ pub fn completion(er: &mut ER) {
         simplify(er);
         if !compute_cps(er) { break }
     }
-}
-
-// Returns false, if no new CPs were added.
-fn compute_cps(er: &mut ER) -> bool {
-    todo!()
-}
-
-fn simplify(er: &mut ER) {
-    todo!()
 }
