@@ -92,7 +92,7 @@ impl MatrixMagma {
             print!("{x}: ");
 
             let mut seen = vec![false; ctxt.n as usize];
-            for i in 0..ctxt.n {
+            for i in (x..ctxt.n).chain(0..x) {
                 if seen[i] { continue }
                 let mut cc = i;
                 print!("(");
