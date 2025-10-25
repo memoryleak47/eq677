@@ -9,6 +9,12 @@ pub fn c_run(n: usize) {
     });
 }
 
+pub fn c_search() {
+    for i in 0.. {
+        c_run(i);
+    }
+}
+
 fn prerun(depth: E, ctxt: &mut Ctxt) {
     // No need to have a trail, we won't backtrack in the prerun.
     ctxt.trail.clear();

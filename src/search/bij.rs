@@ -27,7 +27,6 @@ fn all_perms(n: usize) -> Vec<Vec<usize>> {
 
 fn bij_search(op: impl Fn(usize, usize) -> usize) {
     for p in 0.. {
-        dbg!(p);
         let perms = all_perms(p);
         let pi3_perms = if PI3 { &perms } else { &vec![(0..p).collect()] };
         for pi1 in &perms {

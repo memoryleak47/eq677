@@ -88,7 +88,7 @@ fn conj_cycle_size(m: &MatrixMagma) {
                 if z == zz { break }
             }
             // It seems there are no 3-cycles?
-            assert!(i != 3);
+            assert!(i < 3 || i > 5);
         }
     }
 }
