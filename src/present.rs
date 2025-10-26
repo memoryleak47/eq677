@@ -10,8 +10,12 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     let mut magma = MatrixMagma::by_fn(n, f);
     if n < 32 {
         magma = magma.canonicalize();
+    }
 
-        let mut handle = DB.lock().unwrap();
+    // Locking the handle prevents scrambling of stdout.
+    let mut handle = DB.lock().unwrap();
+
+    if n < 32 {
         if handle.contains(&magma) {
             return;
         }
@@ -20,12 +24,9 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     }
 
     if n < 50 {
-        // Locking the handle prevents scrambling of stdout.
-        let handle = DB.lock().unwrap();
         println!("Model of size {n} found by {finder}:");
         magma.cycle_dump();
     } else {
-        let handle = DB.lock().unwrap();
         println!("Model found of size {n} found by {finder}");
     }
 

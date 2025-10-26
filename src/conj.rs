@@ -18,12 +18,15 @@ pub fn conj(m: &MatrixMagma) {
     conj_cycle2(m);
     conj_cycles_divide_n(m);
     conj_cycles_summary(m);
+    conj_unique_cycle_size(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
     // false_conj_bijective_or_constant(m);
     // false_conj_exists_idempotence(m);
 }
+
+// Conjectures:
 
 // conj_cycles_summary is a stronger version of this.
 fn conj_cycles_divide_n(m: &MatrixMagma) {
@@ -48,7 +51,19 @@ fn conj_cycles_summary(m: &MatrixMagma) {
     }
 }
 
-// Conjectures:
+// This property seems often true, but not always true.
+fn conj_unique_cycle_size(m: &MatrixMagma) {
+    if m.n % 7 == 0 || m.n >= 95 { return } // Why %7?
+
+    let mut out = Vec::new();
+    for x in 0..m.n {
+        out.extend(c_summary(m, x));
+    }
+    out.sort();
+    out.retain(|x| *x >= 3);
+    out.dedup();
+    assert!(out.len() <= 1);
+}
 
 fn conj_idempotence(m: &MatrixMagma) {
     // Is there a more general statement here?
