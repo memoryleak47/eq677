@@ -19,10 +19,10 @@ pub fn conj(m: &MatrixMagma) {
     conj_cycles_divide_n(m);
     conj_cycles_summary(m);
     conj_unique_cycle_size(m);
+    conj_bijective_or_constant(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
-    // false_conj_bijective_or_constant(m);
     // false_conj_exists_idempotence(m);
 }
 
@@ -76,7 +76,10 @@ fn conj_idempotence(m: &MatrixMagma) {
 
 // Falsified conjectures:
 
-fn false_conj_bijective_or_constant(m: &MatrixMagma) {
+fn conj_bijective_or_constant(m: &MatrixMagma) {
+    // only applies to primitive models.
+    if decompose(&m).len() > 0 { return }
+
     assert!(m.is_diag_bijective() || m.is_diag_constant());
 }
 
