@@ -42,7 +42,7 @@ pub fn linear_search() {
                 if (a*b4)%p != 1 { continue }
                 if (a + a*a*b*b + b*b*b)%p != 0 { continue }
 
-                present_model(p, "linear", |x, y| (x*a + y*b)%p);
+                present_model(p, &format!("linear: f(x, y) = (x*{a} + y*{b})%{p}"), |x, y| (x*a + y*b)%p);
             }
         }
     }
