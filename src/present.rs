@@ -30,6 +30,16 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
         println!("Model found of size {n} found by {finder}");
     }
 
+    let ms = decompose(&magma);
+    if ms.len() > 0 {
+        println!("decomposable into:");
+        for m in ms {
+            println!("---");
+            m.cycle_dump();
+        }
+        println!("---");
+    }
+
     conj(&magma);
 }
 

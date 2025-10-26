@@ -19,6 +19,9 @@ pub use sym_dpll::*;
 mod c_dpll;
 pub use c_dpll::*;
 
+mod composite;
+pub use composite::*;
+
 mod db;
 pub use db::*;
 
