@@ -16,16 +16,17 @@ pub fn conj(m: &MatrixMagma) {
     conj_diag_orbit_size(m);
     conj_cycle_size(m);
     conj_cycle2(m);
-    conj_cycles_divide_n(m);
 
+    // false_conj_cycles_divide_n(m);
+    // false_conj_cycles_summary(m);
     false_conj_odd(m);
     false_conj_right_cancellative(m);
     // false_conj_bijective_or_constant(m);
     // false_conj_exists_idempotence(m);
 }
 
-fn conj_cycles_divide_n(m: &MatrixMagma) {
-    // We have one counter example of size 7, but nothing else?
+fn false_conj_cycles_divide_n(m: &MatrixMagma) {
+    // Takes really high counter examples (other than the 7)!
     if m.n == 0 || m.n == 7 { return }
 
     let mut s = 0;
@@ -35,6 +36,22 @@ fn conj_cycles_divide_n(m: &MatrixMagma) {
         }
     }
     assert!(s % m.n == 0);
+}
+
+fn false_conj_cycles_summary(m: &MatrixMagma) {
+    // Takes really high counter examples (other than the 7)!
+    if m.n == 0 || m.n == 7 { return }
+
+    let mut std = None;
+    let mut s = 0;
+    for x in 0..m.n {
+        let v = c_summary(m, x);
+
+        match &std {
+            None => { std = Some(v.clone()); },
+            Some(s) => { assert_eq!(s, &v); },
+        }
+    }
 }
 
 // Conjectures:
@@ -115,6 +132,8 @@ fn conj_cycle2(m: &MatrixMagma) {
     }
 }
 
+// Helpers:
+
 // returns how often I need to left-multiply x onto z, until it becomes z again.
 fn c(m: &MatrixMagma, x: usize, z: usize) -> u32 {
     let mut zz = z;
@@ -140,8 +159,17 @@ fn c_mini(m: &MatrixMagma, x: usize, z: usize) -> usize {
     mini
 }
 
-
-// Helpers:
+fn c_summary(m: &MatrixMagma, x: usize) -> Vec<u32> {
+    let mut v = Vec::new();
+    for z in 0..m.n {
+        // We only consider the representatives of each cycle!
+        if c_mini(m, x, z) == z {
+            v.push(c(m, x, z));
+        }
+    }
+    v.sort();
+    v
+}
 
 impl MatrixMagma {
     fn is_left_cancellative(&self) -> bool {
