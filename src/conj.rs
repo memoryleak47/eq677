@@ -41,15 +41,10 @@ fn conj_cycles_divide_n(m: &MatrixMagma) {
 fn conj_cycles_summary(m: &MatrixMagma) {
     if m.n % 7 == 0 { return } // Why %7?
 
-    let mut std = None;
-    let mut s = 0;
-    for x in 0..m.n {
-        let v = c_summary(m, x);
-
-        match &std {
-            None => { std = Some(v.clone()); },
-            Some(s) => { assert_eq!(s, &v); },
-        }
+    let a = c_summary(m, 0);
+    for x in 1..m.n {
+        let b = c_summary(m, x);
+        assert_eq!(a, b);
     }
 }
 
