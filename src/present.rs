@@ -6,6 +6,8 @@ lazy_static::lazy_static! {
     static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
 }
 
+const CHECK_COMPOSITE: bool = true;
+
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let mut magma = MatrixMagma::by_fn(n, f);
     if n < 32 {
@@ -28,6 +30,18 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
         magma.cycle_dump();
     } else {
         println!("Model found of size {n} found by {finder}");
+    }
+
+    if CHECK_COMPOSITE {
+        let ms = decompose(&magma);
+        if ms.len() > 0 {
+            println!("decomposable into:");
+            for m in ms {
+                println!("---");
+                m.cycle_dump();
+            }
+            println!("---");
+        }
     }
 
     drop(handle);
