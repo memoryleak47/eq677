@@ -16,18 +16,18 @@ pub fn conj(m: &MatrixMagma) {
     conj_diag_orbit_size(m);
     conj_cycle_size(m);
     conj_cycle2(m);
+    conj_cycles_divide_n(m);
+    conj_cycles_summary(m);
 
-    // false_conj_cycles_divide_n(m);
-    // false_conj_cycles_summary(m);
     false_conj_odd(m);
     false_conj_right_cancellative(m);
     // false_conj_bijective_or_constant(m);
     // false_conj_exists_idempotence(m);
 }
 
-fn false_conj_cycles_divide_n(m: &MatrixMagma) {
-    // Takes really high counter examples (other than the 7)!
-    if m.n == 0 || m.n == 7 { return }
+// conj_cycles_summary is a stronger version of this.
+fn conj_cycles_divide_n(m: &MatrixMagma) {
+    if m.n % 7 == 0 { return } // Why %7?
 
     let mut s = 0;
     for x in 0..m.n {
@@ -38,9 +38,8 @@ fn false_conj_cycles_divide_n(m: &MatrixMagma) {
     assert!(s % m.n == 0);
 }
 
-fn false_conj_cycles_summary(m: &MatrixMagma) {
-    // Takes really high counter examples (other than the 7)!
-    if m.n == 0 || m.n == 7 { return }
+fn conj_cycles_summary(m: &MatrixMagma) {
+    if m.n % 7 == 0 { return } // Why %7?
 
     let mut std = None;
     let mut s = 0;
