@@ -114,3 +114,13 @@ impl MatrixMagma {
         !self.data.contains(&usize::MAX)
     }
 }
+
+pub fn cartesian(m0: &MatrixMagma, m1: &MatrixMagma) -> MatrixMagma {
+    MatrixMagma::by_fn(m0.n * m1.n, |x, y| {
+        let (x0, x1) = (x%m0.n, x/m0.n);
+        let (y0, y1) = (y%m0.n, y/m0.n);
+
+        let (z0, z1) = (m0.f(x0, y0), m1.f(x1, y1));
+        z0 + z1*m0.n
+    })
+}
