@@ -12,7 +12,7 @@ const CHECK_COMPOSITE: bool = false;
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
 
-    if n <= 41 {
+    if n <= 31 {
         let canon = magma.canonicalize2();
 
         let mut handle = DB.lock().unwrap();
