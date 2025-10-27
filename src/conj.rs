@@ -76,9 +76,22 @@ fn conj_idempotence(m: &MatrixMagma) {
 
 // Falsified conjectures:
 
+fn is_prime(n: usize) -> bool {
+    if n < 2 { return false }
+
+    for i in 2.. {
+        if n%i == 0 { return false }
+        if i*i > n { break }
+    }
+    true
+}
+
 fn conj_bijective_or_constant(m: &MatrixMagma) {
     // only applies to primitive models.
-    if decompose(&m).len() > 0 { return }
+    // if decompose(&m).len() > 0 { return }
+
+    // This is a much cheaper check though:
+    if !is_prime(m.n) { return }
 
     assert!(m.is_diag_bijective() || m.is_diag_constant());
 }
