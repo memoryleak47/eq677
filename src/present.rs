@@ -4,26 +4,26 @@ use std::sync::Mutex;
 
 lazy_static::lazy_static! {
     static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
+    static ref PRINT_MUTEX: Mutex<()> = Mutex::new(());
 }
 
 const CHECK_COMPOSITE: bool = true;
 
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
-    let mut magma = MatrixMagma::by_fn(n, f);
-    if n < 32 {
-        magma = magma.canonicalize2();
-    }
+    let magma = MatrixMagma::by_fn(n, f);
 
-    // Locking the handle prevents scrambling of stdout.
-    let mut handle = DB.lock().unwrap();
+    if n < 50 {
+        let canon = magma.canonicalize2();
 
-    if n < 32 {
-        if handle.contains(&magma) {
+        let mut handle = DB.lock().unwrap();
+        if handle.contains(&canon) {
             return;
         }
 
-        handle.insert(magma.clone());
+        handle.insert(canon);
     }
+
+    let mut print_handle = PRINT_MUTEX.lock().unwrap();
 
     if n < 50 {
         println!("Model of size {n} found by {finder}:");
@@ -44,7 +44,7 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
         }
     }
 
-    drop(handle);
+    drop(print_handle);
 
     conj(&magma);
 }
