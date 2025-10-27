@@ -12,7 +12,7 @@ const CHECK_COMPOSITE: bool = false;
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
 
-    if n <= 31 {
+    if n < 100 {
         let canon = magma.canonicalize2();
 
         let mut handle = DB.lock().unwrap();
@@ -25,7 +25,7 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
 
     let mut print_handle = PRINT_MUTEX.lock().unwrap();
 
-    if n < 50 {
+    if n < 52 {
         println!("Model of size {n} found by {finder}:");
         magma.cycle_dump();
     } else {

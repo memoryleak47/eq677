@@ -1,9 +1,10 @@
 use crate::*;
 use nauty_pet::prelude::*;
+use nauty_pet::canon::*;
 use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 
-type Graph = petgraph::Graph<NodeType, EdgeType>;
+type Graph = petgraph::graph::UnGraph<NodeType, EdgeType>;
 
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum NodeType {
@@ -18,14 +19,14 @@ enum EdgeType {
 impl MatrixMagma {
     pub fn canonicalize2(&self) -> MatrixMagma {
         let g = graphify(self);
-        let g = g.into_canon();
+        let g = g.into_canon_traces();
         let m = de_graphify(&g);
         m
     }
 }
 
 fn graphify(m: &MatrixMagma) -> Graph {
-    let mut g = Graph::new();
+    let mut g = Graph::new_undirected();
     let mut nodes = Vec::new();
     for x in 0..m.n {
         nodes.push(g.add_node(NodeType::Elem));
