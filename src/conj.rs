@@ -20,6 +20,7 @@ pub fn conj(m: &MatrixMagma) {
     conj_cycles_summary(m);
     conj_unique_cycle_size(m);
     conj_bijective_or_constant(m);
+    conj_not_rigid(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
@@ -73,6 +74,8 @@ fn conj_idempotence(m: &MatrixMagma) {
 }
 
 // TODO add conjecture stating that the size of the automorphism group is dependent only on n.
+// TODO add conjecture stating that all elements share an orbit in the automorphism group,
+//      except if 7_0 is part of your decomposition.
 
 // Falsified conjectures:
 
@@ -84,6 +87,15 @@ fn is_prime(n: usize) -> bool {
         if i*i > n { break }
     }
     true
+}
+
+fn conj_not_rigid(m: &MatrixMagma) {
+    if m.n < 2 { return }
+
+    // for performance
+    if m.n > 80 { return }
+
+    assert!(m.autom_stats().grpsize() > 1.5);
 }
 
 fn conj_bijective_or_constant(m: &MatrixMagma) {

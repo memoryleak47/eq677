@@ -1,6 +1,8 @@
 use crate::*;
 use nauty_pet::prelude::*;
 use nauty_pet::canon::*;
+use nauty_pet::autom::AutomStats;
+use nauty_pet::autom::TryIntoAutomStatsTraces;
 use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 
@@ -22,6 +24,10 @@ impl MatrixMagma {
         let g = g.into_canon_traces();
         let m = de_graphify(&g);
         m
+    }
+
+    pub fn autom_stats(&self) -> AutomStats {
+        graphify(self).try_into_autom_stats_traces().unwrap()
     }
 }
 
