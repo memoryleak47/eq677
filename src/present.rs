@@ -11,7 +11,7 @@ const CHECK_COMPOSITE: bool = true;
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let mut magma = MatrixMagma::by_fn(n, f);
     if n < 32 {
-        magma = magma.canonicalize();
+        magma = magma.canonicalize2();
     }
 
     // Locking the handle prevents scrambling of stdout.
