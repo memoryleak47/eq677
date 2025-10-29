@@ -41,7 +41,10 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
         out.push(ctxt);
     }
 
-    for zero_orbit_size in 2..=ctxt.n {
+    // zero_orbit_size = 1 is covered by the case above;
+    // zero_orbit_size in [2, 3] can't be, as no self-producing cycles are of length 2 or 3.
+    // See atp directory.
+    for zero_orbit_size in 4..=ctxt.n {
         let mut ctxt = ctxt.clone();
 
         ctxt.nonfresh = ctxt.n;
