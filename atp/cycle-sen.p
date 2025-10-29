@@ -11,6 +11,20 @@ cnf(a,axiom, f(a,a) = s).
 cnf(a,axiom, f(a,n) = e).
 cnf(a,axiom, f(a,e) = a).
 
-% Goals:
-% cnf(a,axiom, f(s,a) != n).
-% cnf(a,axiom, f(e,s) != n).
+% We assume it is not a singleton cycle, otherwise stuff is boring anyways.
+cnf(a,axiom, a != f(a,a)).
+
+% Goals I:
+cnf(a,conjecture, f(s,a) = n).
+cnf(a,conjecture, f(e,s) = n).
+
+% Goals II:
+% a, s, e, n are all distinct.
+cnf(a,conjecture, a != s).
+cnf(a,conjecture, a != e).
+cnf(a,conjecture, a != n).
+
+cnf(a,conjecture, s != e).
+cnf(a,conjecture, s != n).
+
+cnf(a,conjecture, e != n).
