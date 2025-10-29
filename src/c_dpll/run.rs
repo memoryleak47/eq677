@@ -3,7 +3,7 @@ use crate::c_dpll::*;
 fn threading_depth(n: E) -> E { n + 1 }
 
 pub fn c_run(n: usize) {
-    let models = split_models(build_ctxt(n));
+    let models = split_models_via_row(build_ctxt(n));
     into_par_for_each(models, |mut ctxt| {
         prerun(0, &mut ctxt);
     });

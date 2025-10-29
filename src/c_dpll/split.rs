@@ -30,14 +30,19 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
 
     let mut out = Vec::new();
 
-    for zero_orbit_size in 1..=ctxt.n {
+    // We choose 0 to maximize |C(0,0)|, thus if 0*0 = 0, then x*x = x holds generally.
+    // Further, in this case we can still assume freshness.
+    {
         let mut ctxt = ctxt.clone();
-        if zero_orbit_size == 1 {
-            // We choose 0 to maximize |C(0,0)|.
-            for i in 0..ctxt.n {
-                assert!(prove_triple(i, i, i, &mut ctxt).is_ok());
-            }
+        for i in 0..ctxt.n {
+            assert!(prove_triple(i, i, i, &mut ctxt).is_ok());
         }
+        assert!(propagate(&mut ctxt).is_ok());
+        out.push(ctxt);
+    }
+
+    for zero_orbit_size in 2..=ctxt.n {
+        let mut ctxt = ctxt.clone();
 
         ctxt.nonfresh = ctxt.n;
         for i in 0..zero_orbit_size {
