@@ -32,6 +32,13 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
 
     for zero_orbit_size in 1..=ctxt.n {
         let mut ctxt = ctxt.clone();
+        if zero_orbit_size == 1 {
+            // We choose 0 to maximize |C(0,0)|.
+            for i in 0..ctxt.n {
+                assert!(prove_triple(i, i, i, &mut ctxt).is_ok());
+            }
+        }
+
         ctxt.nonfresh = ctxt.n;
         for i in 0..zero_orbit_size {
             assert!(prove_triple(0, i, (i+1)%zero_orbit_size, &mut ctxt).is_ok());
@@ -54,12 +61,12 @@ fn split_rest(last_size: E, next_idx: E, ctxt: Ctxt, out: &mut Vec<Ctxt>) {
     }
 
     let remaining = ctxt.n - next_idx;
-    for next_cycle in last_size..=remaining {
+    'outer: for next_cycle in last_size..=remaining {
         let mut ctxt = ctxt.clone();
         for i in 0..next_cycle {
             let ii = next_idx + i;
             let ii_1 = next_idx + (i+1)%next_cycle;
-            assert!(prove_triple(0, ii, ii_1, &mut ctxt).is_ok());
+            if prove_triple(0, ii, ii_1, &mut ctxt).is_err() { continue 'outer; }
         }
         split_rest(next_cycle, next_idx + next_cycle, ctxt, out)
     }

@@ -43,5 +43,8 @@ pub use kb::*;
 fn main() {
     setup_panic_hook();
 
-    all_search();
+    for i in 0..10 {
+        println!("Looking for models of size {i}:");
+        c_run(i);
+    }
 }
