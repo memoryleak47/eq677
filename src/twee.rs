@@ -3,6 +3,18 @@ use crate::*;
 use std::process::Command;
 use std::fmt::Write;
 
+pub fn twee_propagate(mut m: MatrixMagma) -> Option<MatrixMagma> {
+    let out = twee_analyze(&m);
+    for e in &out {
+        if let (GTerm::E(_), GTerm::E(_)) = e { return None }
+
+        if let (GTerm::F(b), GTerm::E(z)) = e && let [GTerm::E(x), GTerm::E(y)] = &**b {
+            m.set_f(*x, *y, *z);
+        }
+    }
+    Some(m)
+}
+
 pub fn twee_analyze(m: &MatrixMagma) -> Vec<(GTerm, GTerm)> {
     let f = "/tmp/eq677.p";
 

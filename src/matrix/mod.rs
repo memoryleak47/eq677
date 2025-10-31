@@ -71,6 +71,16 @@ impl MatrixMagma {
         x + n * y
     }
 
+    pub fn count_defined(&self) -> usize {
+        let mut c = 0;
+        for x in 0..self.n {
+            for y in 0..self.n {
+                c += (self.f(x, y) != usize::MAX) as usize;
+            }
+        }
+        c
+    }
+
     pub fn dump(&self) {
         let div = self.n/10 + 2;
         for x in 0..self.n {
