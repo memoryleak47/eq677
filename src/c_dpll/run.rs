@@ -3,7 +3,17 @@ use crate::c_dpll::*;
 fn threading_depth(n: E) -> E { n + 1 }
 
 pub fn c_run(n: usize) {
-    let models = split_models(build_ctxt(n));
+    let models = split_models_via_row(build_ctxt(n));
+
+/*
+    // TODO remove:
+    for m in &models {
+        dbg!(&m.cycle_class);
+        m.cycle_dump();
+    }
+    println!("--");
+*/
+
     into_par_for_each(models, |mut ctxt| {
         prerun(0, &mut ctxt);
     });
@@ -32,8 +42,12 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     defresh(x, ctxt);
     defresh(y, ctxt);
 
-    let count = ctxt.n.min(ctxt.nonfresh+1);
-    range_for_each(count, |e| {
+    range_for_each(ctxt.n, |e| {
+        let eu = e as usize;
+        let ce = ctxt.cycle_class[eu];
+        // if your predecessor has the same cycle class, then you should prefer that one.
+        if ce != 0 && ctxt.cycle_class[eu-1] == ce { return }
+
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value != E::MAX { return }
         let c = &mut ctxt.clone();
 
@@ -101,10 +115,13 @@ fn submit_model(ctxt: &Ctxt) {
 }
 
 fn defresh(e: E, ctxt: &mut Ctxt) {
-    if e >= ctxt.nonfresh {
-        // assert!(e == ctxt.nonfresh);
-        ctxt.nonfresh += 1;
-        ctxt.trail.push(TrailEvent::Defresh);
+    let ce = ctxt.cycle_class[e as usize];
+    if ce == 0 { return }
+
+    ctxt.trail.push(TrailEvent::Defresh(e, ce));
+
+    for h in e..(e+ce) {
+        ctxt.cycle_class[h as usize] = 0;
     }
 }
 
@@ -123,9 +140,15 @@ fn main_branch(ctxt: &mut Ctxt) {
 
 // e is the next thing to try. If that doesn't work, we iterate from there.
 fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let count = ctxt.n.min(ctxt.nonfresh+1);
+    let n = ctxt.n;
     loop {
-        if e >= count { return Err(()) }
+        if e >= n { return Err(()) }
+
+        let eu = e as usize;
+        let ce = ctxt.cycle_class[eu];
+        // if your predecessor has the same cycle class, then you should prefer that one.
+        if ce != 0 && ctxt.cycle_class[eu-1] == ce { e += 1; continue }
+
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value == E::MAX { break }
         e += 1;
     }
@@ -165,8 +188,10 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
             }
-            TrailEvent::Defresh => {
-                ctxt.nonfresh -= 1;
+            TrailEvent::Defresh(e, c) => {
+                for h in e..(e+c) {
+                    ctxt.cycle_class[h as usize] = c;
+                }
             }
         }
     }

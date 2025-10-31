@@ -19,7 +19,7 @@ pub fn build_ctxt(n: usize) -> Ctxt {
         classes_xy: std::iter::repeat(class_xy)
             .take(n*n)
             .collect(),
-        nonfresh: 0,
+        cycle_class: std::iter::repeat(0).take(n).collect(),
         propagate_queue: Vec::new(),
         chosen_per_row: std::iter::repeat(0).take(n).collect(),
         yxx: std::iter::repeat(E::MAX).take(n).collect(),

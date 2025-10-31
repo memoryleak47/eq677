@@ -38,8 +38,12 @@ struct Ctxt {
     classes_xy: Box<[ClassXY]>,
     classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`
     n: E,
-    nonfresh: E, // The number of nonfresh elems. An element e is fresh, if e >= nonfresh.
     propagate_queue: Vec<(E, E, E)>,
+
+    // contains the size of your 0-produced cycle for fresh elements.
+    // contains 0 for nonfresh elements.
+    cycle_class: Box<[E]>,
+
     chosen_per_row: Box<[E]>,
     yxx: Box<[E]>, // y := yxx[x] where y*x = x, E::MAX means undefined.
 }
@@ -48,7 +52,7 @@ struct Ctxt {
 enum TrailEvent {
     Decision(E, E, E),
     DefineClass(E, E),
-    Defresh,
+    Defresh(E /* elem */, E /* cycle len */),
     PushCXY(E, E),
     PushCXZ(E, E),
 }
@@ -58,12 +62,14 @@ fn idx(x: E, y: E, n: E) -> usize {
 }
 
 impl Ctxt {
-    pub fn dump(&self) {
-        let m = MatrixMagma::by_fn(self.n as usize, |x, y| {
+    pub fn matrix(&self) -> MatrixMagma {
+        MatrixMagma::by_fn(self.n as usize, |x, y| {
             let i = idx(x as E, y as E, self.n);
             let v = self.classes_xy[i].value;
             if v == E::MAX { usize::MAX } else { v as _ }
-        });
-        m.dump();
+        })
     }
+
+    pub fn dump(&self) { self.matrix().dump() }
+    pub fn cycle_dump(&self) { self.matrix().cycle_dump() }
 }

@@ -1,30 +1,5 @@
 use crate::c_dpll::*;
 
-pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
-    if ctxt.n <= 1 { return vec![ctxt] }
-
-    let mut out = Vec::new();
-
-    {
-        let mut ctxt = ctxt.clone();
-        ctxt.nonfresh = 2;
-        assert!(prove_triple(0, 0, 1, &mut ctxt).is_ok());
-        assert!(propagate(&mut ctxt).is_ok());
-        out.push(ctxt);
-    }
-
-    {
-        let mut ctxt = ctxt.clone();
-        for i in 0..ctxt.n {
-            assert!(prove_triple(i, i, i, &mut ctxt).is_ok());
-        }
-        assert!(propagate(&mut ctxt).is_ok());
-        out.push(ctxt);
-    }
-
-    out
-}
-
 pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
     if ctxt.n <= 1 { return vec![ctxt] }
 
@@ -32,6 +7,8 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
 
     // We choose 0 to maximize |C(0,0)|, thus if 0*0 = 0, then x*x = x holds generally.
     // Further, in this case we can still assume freshness.
+    // TODO re-add:
+/*
     {
         let mut ctxt = ctxt.clone();
         for i in 0..ctxt.n {
@@ -40,6 +17,7 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
         assert!(propagate(&mut ctxt).is_ok());
         out.push(ctxt);
     }
+*/
 
     // zero_orbit_size = 1 is covered by the case above;
     // zero_orbit_size in [2, 3] can't be, as no self-producing cycles are of length 2 or 3.
@@ -47,7 +25,6 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
     for zero_orbit_size in 4..=ctxt.n {
         let mut ctxt = ctxt.clone();
 
-        ctxt.nonfresh = ctxt.n;
         for i in 0..zero_orbit_size {
             assert!(prove_triple(0, i, (i+1)%zero_orbit_size, &mut ctxt).is_ok());
         }
@@ -74,6 +51,7 @@ fn split_rest(last_size: E, next_idx: E, ctxt: Ctxt, out: &mut Vec<Ctxt>) {
         for i in 0..next_cycle {
             let ii = next_idx + i;
             let ii_1 = next_idx + (i+1)%next_cycle;
+            ctxt.cycle_class[ii as usize] = next_cycle;
             if prove_triple(0, ii, ii_1, &mut ctxt).is_err() { continue 'outer; }
         }
         split_rest(next_cycle, next_idx + next_cycle, ctxt, out)
