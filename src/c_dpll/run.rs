@@ -1,6 +1,7 @@
 use crate::c_dpll::*;
 
-fn threading_depth(n: E) -> E { n + 1 }
+// We need tiny threading depth, as model splitting has already blown up a lot!
+fn threading_depth(n: E) -> E { 3 }
 
 pub fn c_run(n: usize) {
     let models = split_models_via_row(build_ctxt(n));
