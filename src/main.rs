@@ -46,12 +46,8 @@ pub use twee::*;
 fn main() {
     setup_panic_hook();
 
-    let m = MatrixMagma::parse("
-        0 2 1 - -
-        - - - - -
-        - - - - -
-        - - - - -
-        - - - - -
-    ");
-    twee(&m);
+    for i in 0..12 {
+        println!("Looking for models of size {i}:");
+        c_run(i);
+    }
 }

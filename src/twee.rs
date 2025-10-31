@@ -30,30 +30,73 @@ fn twee_input(m: &MatrixMagma) -> String {
     s
 }
 
-pub fn twee(m: &MatrixMagma) -> MatrixMagma {
-    let f = run(&["mktemp", "-d"]);
-    let f = f.trim();
-    let f = format!("{f}/file.p");
+pub fn twee(mut m: MatrixMagma) -> Option<MatrixMagma> {
+    let f = "/tmp/eq677.p";
 
-    let input = twee_input(m);
-    std::fs::write(&f, input).unwrap();
+    let input = twee_input(&m);
+    std::fs::write(f, input).unwrap();
 
-    let out = run(&["twee", &f, "--max-term-size", "20"]);
-    let out = out.split("Here is the final rewrite system:\n").last().unwrap();
-    let out = out.split("RESULT: GaveUp").next().unwrap();
+    let out = run(&["twee", f, "--max-term-size", "20"]);
+    let out = twee_parse(&out);
 
-    println!("{out}");
+    for e in &out {
+        if let (GTerm::E(_), GTerm::E(_)) = e { return None }
 
-    todo!()
+        if let (GTerm::F(b), GTerm::E(z)) = e && let [GTerm::E(x), GTerm::E(y)] = &**b {
+            m.set_f(*x, *y, *z);
+        }
+    }
+
+    Some(m)
 }
 
-pub fn twee_testing() {
-    let m = MatrixMagma::parse("
-        0 2 1 - -
-        - - - - -
-        - - - - -
-        - - - - -
-        - - - - -
-    ");
-    twee(&m);
+#[derive(Debug)]
+enum GTerm {
+    F(Box<[GTerm; 2]>),
+    E(usize),
+}
+
+fn twee_parse(s: &str) -> Vec<(GTerm, GTerm)> {
+    let s = s.split("Here is the final rewrite system:\n").last().unwrap();
+    let s = s.split("RESULT: GaveUp").next().unwrap();
+
+    let mut out = Vec::new();
+
+    for line in s.split("\n") {
+        if line.contains("X") { continue }
+        if line.trim().is_empty() { continue }
+
+        let mut it = line.split("->");
+        let a = parse_gterm(it.next().unwrap());
+        let b = parse_gterm(it.next().unwrap());
+        out.push((a, b));
+    }
+
+    out
+}
+
+fn parse_gterm(s: &str) -> GTerm {
+    let s = s.replace(",", " , ").replace("(", " ( ").replace(")", " ) ");
+    let toks = s.trim().split(" ").filter(|x| x.trim() != "").collect::<Vec<_>>();
+    let (t, []) = assemble_gterm(&toks) else { panic!() };
+    t
+}
+
+fn assemble_gterm<'a>(toks: &'a [&'a str]) -> (GTerm, &'a [&'a str]) {
+    let t0 = toks[0];
+
+    if t0.starts_with("e") {
+        let e: usize = t0[1..].parse().unwrap();
+        return (GTerm::E(e), &toks[1..]);
+    }
+
+    if let ["f", "(", toks@..] = toks {
+        let (t1, toks) = assemble_gterm(toks);
+        let [",", toks@..] = toks else { panic!() };
+        let (t2, toks) = assemble_gterm(toks);
+        let [")", toks@..] = toks else { panic!() };
+        return (GTerm::F(Box::new([t1, t2])), toks);
+    }
+
+    panic!()
 }
