@@ -3,7 +3,17 @@ use crate::*;
 use std::process::Command;
 use std::fmt::Write;
 
-fn run(elems: &[&str]) -> String {
+pub fn twee_analyze(m: &MatrixMagma) -> Vec<(GTerm, GTerm)> {
+    let f = "/tmp/eq677.p";
+
+    let input = twee_input(m);
+    std::fs::write(f, input).unwrap();
+
+    let out = run_command(&["twee", f, "--max-term-size", "20"]);
+    twee_parse(&out)
+}
+
+fn run_command(elems: &[&str]) -> String {
     let a = Command::new(&elems[0]).args(&elems[1..])
         .output()
         .unwrap()
@@ -28,26 +38,6 @@ fn twee_input(m: &MatrixMagma) -> String {
         }
     }
     s
-}
-
-pub fn twee(mut m: MatrixMagma) -> Option<MatrixMagma> {
-    let f = "/tmp/eq677.p";
-
-    let input = twee_input(&m);
-    std::fs::write(f, input).unwrap();
-
-    let out = run(&["twee", f, "--max-term-size", "20"]);
-    let out = twee_parse(&out);
-
-    for e in &out {
-        if let (GTerm::E(_), GTerm::E(_)) = e { return None }
-
-        if let (GTerm::F(b), GTerm::E(z)) = e && let [GTerm::E(x), GTerm::E(y)] = &**b {
-            m.set_f(*x, *y, *z);
-        }
-    }
-
-    Some(m)
 }
 
 #[derive(Debug)]
