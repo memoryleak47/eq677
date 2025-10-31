@@ -53,7 +53,7 @@ fn twee_input(m: &MatrixMagma) -> String {
 }
 
 #[derive(Debug)]
-enum GTerm {
+pub enum GTerm {
     F(Box<[GTerm; 2]>),
     E(usize),
 }
