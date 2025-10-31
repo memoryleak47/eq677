@@ -1,7 +1,8 @@
 use crate::*;
 
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::fmt::Write;
+use std::io::Write as IoWrite;
 
 pub fn twee_propagate(mut m: MatrixMagma) -> Option<MatrixMagma> {
     let out = twee_analyze(&m);
@@ -16,22 +17,21 @@ pub fn twee_propagate(mut m: MatrixMagma) -> Option<MatrixMagma> {
 }
 
 pub fn twee_analyze(m: &MatrixMagma) -> Vec<(GTerm, GTerm)> {
-    let f = "/tmp/eq677.p";
-
     let input = twee_input(m);
-    std::fs::write(f, input).unwrap();
 
-    let out = run_command(&["twee", f, "--max-term-size", "20"]);
+    let mut cmd = Command::new("twee").args(&["-", "--max-term-size", "20"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    let mut stdin = cmd.stdin.take().unwrap();
+    write!(stdin, "{}", input).unwrap();
+    drop(stdin);
+
+    let out = cmd.wait_with_output().unwrap();
+    let out = String::from_utf8_lossy(&out.stdout);
     twee_parse(&out)
-}
-
-fn run_command(elems: &[&str]) -> String {
-    let a = Command::new(&elems[0]).args(&elems[1..])
-        .output()
-        .unwrap()
-        .stdout;
-    let a = String::from_utf8(a).unwrap();
-    a
 }
 
 fn twee_input(m: &MatrixMagma) -> String {
