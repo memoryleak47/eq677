@@ -38,7 +38,7 @@ fn twee_input(m: &MatrixMagma) -> String {
     let mut s = String::from("
         cnf(a,axiom, X = f(Y, f(X, f(f(Y, X), Y)))).
         cnf(a,axiom, X = f(f(Y, X), f(f(Y, f(Y, X)), Y))).
-        cnf(eq677,axiom, aaa != bbb). % looper
+        cnf(a,axiom, aaa != bbb). % looper
 
     ");
     for x in 0..m.n {
