@@ -22,6 +22,11 @@ mod tinv;
 pub use tinv::*;
 
 pub fn all_search() {
-    let searches = vec![linear_search, linmat_search, affine_search, affmat_search, poly_search, bij_plus_search, bij_mul_search, c_search, db_search, tinv_search];
-    into_par_for_each(searches, |x| x());
+    let mut handles = Vec::new();
+    for s in [linear_search, linmat_search, affine_search, affmat_search, poly_search, bij_plus_search, bij_mul_search, c_search, db_search, tinv_search] {
+        handles.push(std::thread::spawn(s));
+    }
+    for h in handles {
+        h.join().unwrap();
+    }
 }
