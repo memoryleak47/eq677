@@ -28,6 +28,18 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
         for i in 0..zero_orbit_size {
             assert!(prove_triple(0, i, (i+1)%zero_orbit_size, &mut ctxt).is_ok());
         }
+
+        // NOTE: This free knowledge makes it significantly slower;
+        // maybe as it leads the heuristic astray. That's wild.
+        /*
+            // see atp/cycle-sen.p
+            let s = 1;
+            let e = zero_orbit_size-1;
+            let n = zero_orbit_size-2;
+            assert!(prove_triple(e, s, n, &mut ctxt).is_ok());
+            assert!(prove_triple(s, 0, n, &mut ctxt).is_ok());
+        */
+
         split_rest(1, zero_orbit_size, ctxt, &mut out);
     }
 
