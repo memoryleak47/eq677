@@ -22,6 +22,7 @@ pub fn conj(m: &MatrixMagma) {
     conj_bijective_or_constant(m);
     conj_not_rigid(m);
     conj_singleton_cycle(m);
+    conj_2_orbit(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
@@ -29,6 +30,18 @@ pub fn conj(m: &MatrixMagma) {
 }
 
 // Conjectures:
+
+fn conj_2_orbit(m: &MatrixMagma) {
+    if m.n > 60 { return } // for performance
+
+    if !is_prime(m.n) { return }
+
+    let grp = m.autom_group();
+    let mut orbits = orbits(&grp);
+    orbits.sort();
+    orbits.dedup();
+    assert!(orbits.len() <= 2);
+}
 
 fn false_conj_autom(m: &MatrixMagma) {
     let expected = match m.n {
