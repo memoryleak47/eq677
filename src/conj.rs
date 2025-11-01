@@ -37,10 +37,21 @@ fn conj_2_orbit(m: &MatrixMagma) {
     if !is_prime(m.n) { return }
 
     let grp = m.autom_group();
-    let mut orbits = orbits(&grp);
-    orbits.sort();
-    orbits.dedup();
-    assert!(orbits.len() <= 2);
+    let orbits = orbits(&grp);
+    let mut orbit_sizes = vec![0; m.n];
+    for x in 0..m.n {
+       orbit_sizes[orbits[x]] += 1;
+    }
+    orbit_sizes.sort();
+    orbit_sizes.reverse();
+
+    // either all in one orbit
+    if orbit_sizes[0] == m.n { return }
+
+    // or one singleton element.
+    assert_eq!(orbit_sizes[0], m.n - 1);
+    assert_eq!(orbit_sizes[1], 1);
+    assert!(orbit_sizes[2..].iter().all(|x| *x == 0));
 }
 
 fn false_conj_autom(m: &MatrixMagma) {

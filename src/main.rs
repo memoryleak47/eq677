@@ -46,7 +46,7 @@ pub use twee::*;
 mod timer;
 pub use timer::*;
 
-const ACTION: fn() = c;
+const ACTION: fn() = all;
 
 fn c() {
     for i in 0..10 {

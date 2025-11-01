@@ -44,7 +44,5 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
         }
     }
 
-    drop(print_handle);
-
     conj(&magma);
 }
