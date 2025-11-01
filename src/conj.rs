@@ -103,11 +103,8 @@ fn conj_singleton_cycle(m: &MatrixMagma) {
     if m.n == 0 { return }
 
     for x in 0..m.n {
-        for y in 0..m.n {
-            if m.f(y, x) == x { return }
-        }
+        assert!((0..m.n).any(|y| m.f(y, x) == x));
     }
-    assert!(false);
 }
 
 fn conj_bijective_or_constant(m: &MatrixMagma) {
