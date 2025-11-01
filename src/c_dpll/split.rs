@@ -13,7 +13,10 @@ pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
             assert!(prove_triple(i, i, i, &mut ctxt).is_ok());
         }
         assert!(propagate(&mut ctxt).is_ok());
-        split_rest(1, 1, ctxt, &mut out);
+
+        // We set last_size to 2, as singleton cycles 0*a = 0
+        // are incompatible with a*a = a.
+        split_rest(2, 1, ctxt, &mut out);
     }
 
     // zero_orbit_size = 1 is covered by the case above;
@@ -43,14 +46,13 @@ fn split_rest(last_size: E, next_idx: E, ctxt: Ctxt, out: &mut Vec<Ctxt>) {
     }
 
     let remaining = ctxt.n - next_idx;
-    'outer: for next_cycle in last_size..=remaining {
+    for next_cycle in last_size..=remaining {
         let mut ctxt = ctxt.clone();
         for i in 0..next_cycle {
             let ii = next_idx + i;
             let ii_1 = next_idx + (i+1)%next_cycle;
             ctxt.cycle_class[ii as usize] = next_cycle;
-            // TODO learn when this can fail
-            if prove_triple(0, ii, ii_1, &mut ctxt).is_err() { continue 'outer; }
+            assert!(prove_triple(0, ii, ii_1, &mut ctxt).is_ok());
         }
         split_rest(next_cycle, next_idx + next_cycle, ctxt, out)
     }
