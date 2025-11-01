@@ -43,10 +43,13 @@ pub use kb::*;
 mod twee;
 pub use twee::*;
 
-const ACTION: fn() = all;
+mod timer;
+pub use timer::*;
+
+const ACTION: fn() = c;
 
 fn c() {
-    for i in 0..12 {
+    for i in 0..10 {
         println!("Looking for models of size {i}:");
         c_run(i);
     }
@@ -54,6 +57,8 @@ fn c() {
 
 fn main() {
     setup_panic_hook();
+
+    let _timer = Timer::new();
 
     ACTION();
 }
