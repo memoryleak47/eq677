@@ -99,6 +99,8 @@ fn conj_not_rigid(m: &MatrixMagma) {
     assert!(m.autom_stats().grpsize() > 1.5);
 }
 
+// Note: This is equivalent to 255, as you can see here:
+// https://teorth.github.io/equational_theories/blueprint/677-chapter.html
 fn conj_singleton_cycle(m: &MatrixMagma) {
     if m.n == 0 { return }
 
