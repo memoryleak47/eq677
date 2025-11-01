@@ -43,11 +43,17 @@ pub use kb::*;
 mod twee;
 pub use twee::*;
 
-fn main() {
-    setup_panic_hook();
+const ACTION: fn() = all;
 
+fn c() {
     for i in 0..12 {
         println!("Looking for models of size {i}:");
         c_run(i);
     }
+}
+
+fn main() {
+    setup_panic_hook();
+
+    ACTION();
 }
