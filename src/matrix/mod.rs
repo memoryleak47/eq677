@@ -112,6 +112,10 @@ impl MatrixMagma {
                     print!("{cc}");
                     seen[cc] = true;
                     cc = ctxt.f(x, cc);
+                    if cc == usize::MAX {
+                        print!(" ...");
+                        break
+                    }
                     if seen[cc] { break }
                     print!(" ");
                 }

@@ -21,6 +21,7 @@ pub fn conj(m: &MatrixMagma) {
     conj_unique_cycle_size(m);
     conj_bijective_or_constant(m);
     conj_not_rigid(m);
+    conj_singleton_cycle(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
@@ -96,6 +97,17 @@ fn conj_not_rigid(m: &MatrixMagma) {
     if m.n > 80 { return }
 
     assert!(m.autom_stats().grpsize() > 1.5);
+}
+
+fn conj_singleton_cycle(m: &MatrixMagma) {
+    if m.n == 0 { return }
+
+    for x in 0..m.n {
+        for y in 0..m.n {
+            if m.f(y, x) == x { return }
+        }
+    }
+    assert!(false);
 }
 
 fn conj_bijective_or_constant(m: &MatrixMagma) {
