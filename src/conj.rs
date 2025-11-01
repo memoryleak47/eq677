@@ -30,6 +30,37 @@ pub fn conj(m: &MatrixMagma) {
 
 // Conjectures:
 
+fn false_conj_autom(m: &MatrixMagma) {
+    let expected = match m.n {
+        0 => return,
+        1 => 1,
+        5 => 20,
+        7 => 6,
+        9 => 8,
+        11 => 110,
+        13 => 12,
+        19 => 18,
+        25 => return, // sometimes 500, sometimes 12000
+        31 => return, // sometimes 30, sometimes 930
+        // ...
+        _ => return,
+    };
+    let real = m.autom_group().len();
+    assert_eq!(expected, real);
+}
+
+fn false_conj_one_orbit(m: &MatrixMagma) {
+    if m.n % 7 == 0 { return }
+    let grp = m.autom_group();
+    let orbits = orbits(&grp);
+    if orbits.iter().any(|x| *x != 0) {
+        println!("wrong:");
+        m.cycle_dump();
+        dbg!(&orbits);
+        assert!(false);
+    }
+}
+
 // conj_cycles_summary is a stronger version of this.
 fn conj_cycles_divide_n(m: &MatrixMagma) {
     if m.n % 7 == 0 { return } // Why %7?
@@ -73,10 +104,6 @@ fn conj_idempotence(m: &MatrixMagma) {
 
     assert!(!restrict || m.is_idempotent());
 }
-
-// TODO add conjecture stating that the size of the automorphism group is dependent only on n.
-// TODO add conjecture stating that all elements share an orbit in the automorphism group,
-//      except if 7_0 is part of your decomposition.
 
 // Falsified conjectures:
 

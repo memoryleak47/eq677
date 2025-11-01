@@ -3,6 +3,7 @@ use crate::*;
 mod canon;
 
 mod canon2;
+pub use canon2::*;
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
 // This magma might be partial; we use usize::MAX to encoding missing entries.

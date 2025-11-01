@@ -38,6 +38,20 @@ impl MatrixMagma {
     }
 }
 
+pub fn orbits(autom: &[Vec<usize>]) -> Vec<usize> {
+    let n = autom[0].len();
+    let mut orbits: Vec<usize> = (0..n).collect();
+    for aut in autom {
+        for i in 0..n {
+            let j = aut[i];
+            if j < orbits[i] {
+                orbits[i] = j;
+            }
+        }
+    }
+    orbits
+}
+
 fn graphify(m: &MatrixMagma) -> Graph {
     let mut g = Graph::new_undirected();
     let mut nodes = Vec::new();
