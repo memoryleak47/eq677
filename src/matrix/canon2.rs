@@ -1,8 +1,7 @@
 use crate::*;
 use nauty_pet::prelude::*;
 use nauty_pet::canon::*;
-use nauty_pet::autom::AutomStats;
-use nauty_pet::autom::TryIntoAutomStatsTraces;
+use nauty_pet::autom::{AutomStats, TryIntoAutomStatsTraces, AutomGroup, TryIntoAutomGroupNautyDense};
 use petgraph::visit::EdgeRef;
 use std::collections::HashMap;
 
@@ -28,6 +27,14 @@ impl MatrixMagma {
 
     pub fn autom_stats(&self) -> AutomStats {
         graphify(self).try_into_autom_stats_traces().unwrap()
+    }
+
+    pub fn autom_group(&self) -> Vec<Vec<usize>> {
+        let mut a = graphify(self).try_into_autom_group_nauty_dense().unwrap().0;
+        for x in &mut a {
+            x.truncate(self.n);
+        }
+        a
     }
 }
 
