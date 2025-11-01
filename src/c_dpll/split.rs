@@ -25,6 +25,29 @@ pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
     out
 }
 
+pub fn split_models_via_cycle_end(ctxt: Ctxt) -> Vec<Ctxt> {
+    let n = ctxt.n;
+
+    let mut cs = vec![ctxt];
+    // For each x, we choose the y, s.t. x*y = x.
+    for x in 0..n {
+        let t = std::mem::take(&mut cs);
+        for mut ctxt in t {
+            // mark x as nonfresh.
+            ctxt.nonfresh = ctxt.nonfresh.max(x+1);
+
+            let count = n.min(ctxt.nonfresh+1);
+            for y in 0..count {
+                let mut ctxt = ctxt.clone();
+                if prove_triple(x, y, x, &mut ctxt).is_err() { continue }
+                cs.push(ctxt);
+            }
+        }
+    }
+
+    cs
+}
+
 pub fn split_models_via_row(ctxt: Ctxt) -> Vec<Ctxt> {
     if ctxt.n <= 1 { return vec![ctxt] }
 
