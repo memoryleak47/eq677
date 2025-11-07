@@ -46,8 +46,6 @@ pub use twee::*;
 mod timer;
 pub use timer::*;
 
-const ACTION: fn() = all;
-
 fn c() {
     for i in 0..10 {
         println!("Looking for models of size {i}:");
@@ -57,8 +55,7 @@ fn c() {
 
 fn main() {
     setup_panic_hook();
-
     let _timer = Timer::new();
 
-    ACTION();
+    fakelin_search3();
 }
