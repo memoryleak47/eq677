@@ -23,7 +23,8 @@ fn all_perms(n: usize) -> Vec<Vec<usize>> {
 }
 
 pub fn tinv_search() {
-    for p in 0.. {
+    for p in 1.. {
+        dbg!(p);
         for h in all_perms(p) {
             let f_def = |x, y| (x + h[(y + p - x)%p])%p;
             let f = FnMagma {
@@ -31,7 +32,13 @@ pub fn tinv_search() {
                 f_def,
             };
             if f.is677() {
-                present_model(p, "tinv", f_def);
+                let mut s = String::from("tinv: f(x, y) = x + h(y-x) with h: ");
+                for d in 0..p {
+                    use std::fmt::Write;
+                    write!(&mut s, "{}->{}", d, h[d]).unwrap();
+                    if d != p-1 { write!(&mut s, ", ").unwrap(); }
+                }
+                present_model(p, &s, f_def);
             }
         }
     }
