@@ -214,6 +214,11 @@ fn conj_cycle_size(m: &MatrixMagma) {
             let i = c(m, x, z);
             // It seems there are no 3-cycles?
             assert!(i < 3 || i > 5);
+
+            // Known values:
+            // assert!(i == 1 || i == 2 || i == 6 || i == 7 || i == 8 || i == 9
+            //     || i == 10 || i == 12 || i == 14 || i == 15 || i == 18
+            //     || i == 21 || i == 36 || i == 42 || i == 48 || i == 49);
         }
     }
 }
