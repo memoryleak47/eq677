@@ -24,6 +24,9 @@ pub use tinv::*;
 mod fakelin;
 pub use fakelin::*;
 
+mod complex;
+pub use complex::*;
+
 pub fn all() {
     let mut handles = Vec::new();
     for s in [linear_search, linmat_search, affine_search, affmat_search, poly_search, bij_plus_search, bij_mul_search, c_search, db_search, tinv_search] {

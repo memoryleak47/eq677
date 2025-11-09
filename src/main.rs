@@ -57,5 +57,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    tinv_search();
+    complex_search();
 }
