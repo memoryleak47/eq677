@@ -29,7 +29,7 @@ pub use complex::*;
 
 pub fn all() {
     let mut handles = Vec::new();
-    for s in [linear_search, linmat_search, affine_search, affmat_search, poly_search, bij_plus_search, bij_mul_search, c_search, db_search, tinv_search] {
+    for s in [linear_search, linmat_search, affine_search, affmat_search, poly_search, bij_plus_search, bij_mul_search, c_search, db_search, tinv_search, complex_search] {
         handles.push(std::thread::spawn(s));
     }
     for h in handles {
