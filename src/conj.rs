@@ -23,6 +23,7 @@ pub fn conj(m: &MatrixMagma) {
     conj_not_rigid(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
+    conj_d_bij(m);
 
     false_conj_odd(m);
     false_conj_right_cancellative(m);
@@ -30,6 +31,19 @@ pub fn conj(m: &MatrixMagma) {
 }
 
 // Conjectures:
+
+fn conj_d_bij(m: &MatrixMagma) {
+    // claim: for any x, {f(f(y,x),y) | y in M} = M.
+    let n = m.n;
+    for x in 0..n {
+        let mut opts = vec![false; n];
+        for y in 0..n {
+            let z = m.f(m.f(y, x), y);
+            opts[z] = true;
+        }
+        assert!(opts.iter().all(|x| *x));
+    }
+}
 
 fn conj_2_orbit(m: &MatrixMagma) {
     if m.n > 60 { return } // for performance
