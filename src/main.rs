@@ -46,6 +46,9 @@ pub use twee::*;
 mod timer;
 pub use timer::*;
 
+mod fo;
+pub use fo::*;
+
 fn c() {
     for i in 0..10 {
         println!("Looking for models of size {i}:");
