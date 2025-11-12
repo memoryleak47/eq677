@@ -6,11 +6,15 @@ fn run(n: usize) {
 }
 
 fn mainloop(st: State) {
+    let st = propagate(st);
     let f = heur(&st);
     for x in branch(&st, &f) {
         mainloop(x);
     }
 }
+
+// will run some theorem prover, and filter the results it proved.
+fn propagate(st: State) -> State { todo!() }
  
 fn initial(n: usize) -> State { todo!() }
 
