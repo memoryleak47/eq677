@@ -203,10 +203,19 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
     }
 }
 
+fn upd(x: E, o: E, n: E) -> E {
+    if x == 0 { return 0 }
+    let mut x = (x+o);
+    if x >= n {
+        x -= n-1;
+    }
+    return x
+}
+
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let n = ctxt.n;
     for o in 0..n {
-        prove_triple_impl((x+o)%n, (y+o)%n, (z+o)%n, ctxt)?;
+        prove_triple_impl(upd(x, o, n), upd(y, o, n), upd(z, o, n), ctxt)?;
     }
     Ok(())
 }

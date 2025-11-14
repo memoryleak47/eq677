@@ -194,7 +194,7 @@ fn false_conj_exists_idempotence(m: &MatrixMagma) {
 }
 
 fn false_conj_odd(m: &MatrixMagma) {
-    assert!(m.n % 2 == 1 || m.n == 0);
+    // assert!(m.n % 2 == 1 || m.n == 0);
 }
 
 fn false_conj_right_cancellative(m: &MatrixMagma) {
@@ -224,7 +224,7 @@ fn conj_cycle_size(m: &MatrixMagma) {
         for z in 0..m.n {
             let i = c(m, x, z);
             // It seems there are no 3-cycles?
-            assert!(i < 3 || i > 5);
+            assert!(i != 3 && i != 4);
 
             // Known values:
             // assert!(i == 1 || i == 2 || i == 6 || i == 7 || i == 8 || i == 9
