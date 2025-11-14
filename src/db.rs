@@ -1,5 +1,7 @@
 use crate::*;
 
+include!(concat!(env!("OUT_DIR"), "/db_sources.rs"));
+
 pub fn db_search() {
     for m in db() {
         present_model(m.n as usize, "db", |x, y| m.f(x, y));
@@ -7,24 +9,11 @@ pub fn db_search() {
 }
 
 pub fn db() -> Vec<MatrixMagma> {
-    vec![
-        MatrixMagma::parse(include_str!("../db/0_0")),
-        MatrixMagma::parse(include_str!("../db/1_0")),
-        MatrixMagma::parse(include_str!("../db/5_0")),
-        MatrixMagma::parse(include_str!("../db/7_0")),
-        MatrixMagma::parse(include_str!("../db/7_1")),
-        MatrixMagma::parse(include_str!("../db/9_0")),
-        MatrixMagma::parse(include_str!("../db/11_0")),
-        MatrixMagma::parse(include_str!("../db/11_1")),
-        MatrixMagma::parse(include_str!("../db/11_2")),
-        MatrixMagma::parse(include_str!("../db/11_3")),
-        MatrixMagma::parse(include_str!("../db/13_0")),
-        MatrixMagma::parse(include_str!("../db/16_0")),
-        MatrixMagma::parse(include_str!("../db/16_1")),
-        MatrixMagma::parse(include_str!("../db/19_0")),
-        MatrixMagma::parse(include_str!("../db/19_1")),
-        MatrixMagma::parse(include_str!("../db/21_0")),
-    ]
+    let mut out = Vec::new();
+    for x in DB_SOURCES {
+        out.push(MatrixMagma::parse(x));
+    }
+    out
 }
 
 #[test]
