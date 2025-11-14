@@ -45,18 +45,11 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
         }
     }
     if SHOW_AUTOM && magma.n > 1 {
-        println!("----");
+        println!("AUTOM:");
         for x in magma.autom_group() {
-            for i in 0..magma.n {
-                print!("{} → {}", i, x[i]);
-                if i != magma.n -1 {
-                    print!(", ");
-                } else {
-                    println!();
-                }
-            }
+            draw_cycle(0, magma.n, |i| x[i]);
         }
-        println!("----");
+        println!();
     }
 
     conj(&magma);

@@ -103,26 +103,7 @@ impl MatrixMagma {
         let ctxt = self;
         for x in 0..ctxt.n {
             print!("{x}: ");
-
-            let mut seen = vec![false; ctxt.n as usize];
-            for i in (x..ctxt.n).chain(0..x) {
-                if seen[i] { continue }
-                let mut cc = i;
-                print!("(");
-                loop {
-                    print!("{cc}");
-                    seen[cc] = true;
-                    cc = ctxt.f(x, cc);
-                    if cc == usize::MAX {
-                        print!(" ...");
-                        break
-                    }
-                    if seen[cc] { break }
-                    print!(" ");
-                }
-                print!(") ");
-            }
-            println!();
+            draw_cycle(x, ctxt.n, |i| ctxt.f(x, i));
         }
     }
 
@@ -130,6 +111,28 @@ impl MatrixMagma {
     pub fn is_total(&self) -> bool {
         !self.data.contains(&usize::MAX)
     }
+}
+
+pub fn draw_cycle(x: usize, n: usize, f: impl Fn(usize) -> usize) {
+    let mut seen = vec![false; n];
+    for i in (x..n).chain(0..x) {
+        if seen[i] { continue }
+        let mut cc = i;
+        print!("(");
+        loop {
+            print!("{cc}");
+            seen[cc] = true;
+            cc = f(cc);
+            if cc == usize::MAX {
+                print!(" ...");
+                break
+            }
+            if seen[cc] { break }
+            print!(" ");
+        }
+        print!(") ");
+    }
+    println!();
 }
 
 pub fn cartesian(m0: &MatrixMagma, m1: &MatrixMagma) -> MatrixMagma {
