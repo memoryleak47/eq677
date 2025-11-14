@@ -185,9 +185,6 @@ fn conj_bijective_or_constant(m: &MatrixMagma) {
 }
 
 fn false_conj_exists_idempotence(m: &MatrixMagma) {
-    // This effectively states `exists x: x*x = x`.
-    // It is intended to be run with canonicalized input.
-
     if m.n == 0 { return }
 
     for x in 0..m.n {
