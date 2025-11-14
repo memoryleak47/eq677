@@ -10,10 +10,9 @@ static RUNS_STARTED: AtomicUsize = AtomicUsize::new(0);
 static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn c_run(n: usize) {
-    let models = split_models(build_ctxt(n));
-    into_par_for_each(models, |mut ctxt| {
-        prerun(0, &mut ctxt);
-    });
+    let mut ctxt = build_ctxt(n);
+    ctxt.nonfresh = ctxt.n;
+    prerun(0, &mut ctxt);
 }
 
 pub fn c_search() {
@@ -205,6 +204,14 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let n = ctxt.n;
+    for o in 0..n {
+        prove_triple_impl((x+o)%n, (y+o)%n, (z+o)%n, ctxt)?;
+    }
+    Ok(())
+}
+
+pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
     let xy = *xy_ref;
     if xy == z { return Ok(()) }
