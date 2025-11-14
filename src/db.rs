@@ -18,6 +18,12 @@ pub fn db() -> Vec<MatrixMagma> {
         MatrixMagma::parse(include_str!("../db/11_1")),
         MatrixMagma::parse(include_str!("../db/11_2")),
         MatrixMagma::parse(include_str!("../db/11_3")),
+        MatrixMagma::parse(include_str!("../db/13_0")),
+        MatrixMagma::parse(include_str!("../db/16_0")),
+        MatrixMagma::parse(include_str!("../db/16_1")),
+        MatrixMagma::parse(include_str!("../db/19_0")),
+        MatrixMagma::parse(include_str!("../db/19_1")),
+        MatrixMagma::parse(include_str!("../db/21_0")),
     ]
 }
 
