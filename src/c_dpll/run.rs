@@ -1,6 +1,13 @@
 use crate::c_dpll::*;
 
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+const USE_COUNTER: bool = true;
+
 fn threading_depth(n: E) -> E { n + 1 }
+
+static RUNS_STARTED: AtomicUsize = AtomicUsize::new(0);
+static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn c_run(n: usize) {
     let models = split_models(build_ctxt(n));
@@ -15,12 +22,29 @@ pub fn c_search() {
     }
 }
 
+fn inc_counter(ctr: &AtomicUsize) {
+    if !USE_COUNTER { return }
+
+    let t = PRINT_MUTEX.lock().unwrap();
+    ctr.fetch_add(1, Ordering::SeqCst);
+
+    let started = RUNS_STARTED.load(Ordering::SeqCst);
+    let finished = RUNS_FINISHED.load(Ordering::SeqCst);
+
+    let running = started - finished;
+    println!("running: {running}, finished: {finished}");
+}
+
 fn prerun(depth: E, ctxt: &mut Ctxt) {
     // No need to have a trail, we won't backtrack in the prerun.
     ctxt.trail.clear();
 
     if depth >= threading_depth(ctxt.n) {
+        inc_counter(&RUNS_STARTED);
+
         main_branch(ctxt);
+
+        inc_counter(&RUNS_FINISHED);
         return;
     }
 

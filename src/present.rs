@@ -4,7 +4,7 @@ use std::sync::Mutex;
 
 lazy_static::lazy_static! {
     static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
-    static ref PRINT_MUTEX: Mutex<()> = Mutex::new(());
+    pub static ref PRINT_MUTEX: Mutex<()> = Mutex::new(());
 }
 
 const CHECK_COMPOSITE: bool = false;

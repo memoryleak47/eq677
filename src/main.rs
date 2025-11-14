@@ -49,16 +49,11 @@ pub use timer::*;
 mod fo;
 pub use fo::*;
 
-fn c() {
-    for i in 0..10 {
-        println!("Looking for models of size {i}:");
-        c_run(i);
-    }
-}
-
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    affine_search();
+    for i in 0..12 {
+        c_run(12);
+    }
 }
