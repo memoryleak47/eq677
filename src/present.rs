@@ -8,6 +8,7 @@ lazy_static::lazy_static! {
 }
 
 const CHECK_COMPOSITE: bool = false;
+const SHOW_AUTOM: bool = true;
 
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
@@ -42,6 +43,20 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
             }
             println!("---");
         }
+    }
+    if SHOW_AUTOM && magma.n > 1 {
+        println!("----");
+        for x in magma.autom_group() {
+            for i in 0..magma.n {
+                print!("{} → {}", i, x[i]);
+                if i != magma.n -1 {
+                    print!(", ");
+                } else {
+                    println!();
+                }
+            }
+        }
+        println!("----");
     }
 
     conj(&magma);
