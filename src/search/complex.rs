@@ -12,7 +12,6 @@ fn add(x: Complex, y: Complex, p: usize) -> Complex {
 
 pub fn complex_search() {
     for p in 0.. {
-        dbg!(p);
         for (c0, c1, c2, c3, c4, c5) in itertools::iproduct!(0..p, 0..p, 0..p, 0..p, 0..p, 0..p) {
             let f_def = |x: Complex, y: Complex| -> Complex {
                 add(mul(x, (c0, c1), p), mul(y, (c2, c3), p), p)

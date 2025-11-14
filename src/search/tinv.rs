@@ -24,7 +24,6 @@ fn all_perms(n: usize) -> Vec<Vec<usize>> {
 
 pub fn tinv_search() {
     for p in 1.. {
-        dbg!(p);
         for h in all_perms(p) {
             let f_def = |x, y| (x + h[(y + p - x)%p])%p;
             let f = FnMagma {
