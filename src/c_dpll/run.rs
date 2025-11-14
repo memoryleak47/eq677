@@ -2,7 +2,7 @@ use crate::c_dpll::*;
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-const USE_COUNTER: bool = true;
+const USE_COUNTER: bool = false;
 
 fn threading_depth(n: E) -> E { n + 1 }
 

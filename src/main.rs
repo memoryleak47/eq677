@@ -54,6 +54,6 @@ fn main() {
     let _timer = Timer::new();
 
     for i in 0..12 {
-        c_run(12);
+        c_run(i);
     }
 }
