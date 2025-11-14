@@ -60,5 +60,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    complex_search();
+    affine_search();
 }
