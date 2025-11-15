@@ -57,7 +57,9 @@ fn main() {
     let _timer = Timer::new();
 
     for (n, x) in db() {
+        if x.n < 2 { continue }
         println!("{n}:");
         analyze(&x);
+        return;
     }
 }

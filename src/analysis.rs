@@ -7,8 +7,9 @@ type EGraph = egg::EGraph<MagmaLang, ()>;
 define_language! {
     enum MagmaLang {
         "f" = F([Id; 2]),
-        "var" = Var(Id),
         E(usize),
+        "X" = X,
+        "Y" = Y,
     }
 }
 
@@ -18,10 +19,8 @@ pub fn analyze(m: &MatrixMagma) {
     let mut eg = eggify(m);
     let mut out = None;
 
-    let xg = eg.lookup(MagmaLang::E(0)).unwrap();
-    let yg = eg.lookup(MagmaLang::E(1)).unwrap();
-    let xv = eg.add(MagmaLang::Var(xg));
-    let yv = eg.add(MagmaLang::Var(yg));
+    let xv = eg.add(MagmaLang::X);
+    let yv = eg.add(MagmaLang::Y);
 
     for x in 0..m.n {
         for y in 0..m.n {
@@ -38,11 +37,17 @@ pub fn analyze(m: &MatrixMagma) {
     }
 
     let eg = out.unwrap();
-    let ex = Extractor::new(&eg, AstSize);
+    let ex = Extractor::new(&eg, MySize);
     for c in eg.classes() {
+        if !c.nodes.contains(&MagmaLang::X) { continue }
         println!("{}", ex.find_best(c.id).1);
+        let mut terms = Vec::new();
         for n in &c.nodes {
             let e = n.join_recexprs(|x| ex.find_best(x).1);
+            terms.push(e);
+        }
+        terms.sort_by_cached_key(|x| MySize.cost_rec(x));
+        for e in terms {
             println!("= {e}");
         }
         println!();
@@ -67,4 +72,19 @@ fn eggify(m: &MatrixMagma) -> EGraph {
     assert_eq!(eg.classes().len(), m.n);
 
     eg
+}
+
+struct MySize;
+
+impl CostFunction<MagmaLang> for MySize {
+    type Cost = usize;
+
+    fn cost<C>(&mut self, enode: &MagmaLang, mut costs: C) -> usize where C: FnMut(Id) -> usize {
+        match *enode {
+            MagmaLang::F([a, b]) => costs(a) + costs(b) + 1,
+            MagmaLang::E(_) => 2,
+            MagmaLang::X => 1,
+            MagmaLang::Y => 1,
+        }
+    }
 }
