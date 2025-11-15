@@ -4,7 +4,7 @@ use egg::*;
 
 use std::collections::HashSet;
 
-const FILTER_THRESHOLD: usize = 10;
+const FILTER_THRESHOLD: usize = 5;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
 type RecExpr = egg::RecExpr<MagmaLang>;
