@@ -37,12 +37,21 @@ pub fn db() -> Vec<(&'static str, MatrixMagma)> {
 }
 
 #[test]
+fn db_canon() {
+    use std::collections::HashSet;
+
+    for (_, m) in db() {
+        assert!(m.canonicalize2() == m);
+    }
+}
+
+#[test]
 fn db_unique() {
     use std::collections::HashSet;
 
     let db = db();
     let n = db.len();
-    let s: HashSet<_> = db.iter().map(|(_, x)| x.canonicalize2()).collect();
+    let s: HashSet<_> = db.iter().cloned().collect();
     assert_eq!(n, s.len());
 }
 

@@ -37,8 +37,7 @@ fn conj_db_complete_21(m: &MatrixMagma) {
 
     let m = m.canonicalize2();
     for (_, m2) in db() {
-        // TODO this is super inefficient.
-        if m == m2.canonicalize2() { return }
+        if m == m2 { return }
     }
     assert!(false);
 }
