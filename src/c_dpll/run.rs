@@ -204,12 +204,8 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 fn upd(x: E, o: E, n: E) -> E {
-    if x == 0 { return 0 }
-    let mut x = (x+o);
-    if x >= n {
-        x -= n-1;
-    }
-    return x
+    if x == n-1 { return n-1 }
+    (x+o)%(n-1)
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
