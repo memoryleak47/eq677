@@ -2,10 +2,10 @@ use crate::*;
 
 use egg::*;
 
+const COUNT: usize = 100;
+
 type EGraph = egg::EGraph<MagmaLang, ()>;
 type RecExpr = egg::RecExpr<MagmaLang>;
-
-const THRESHOLD: usize = 17;
 
 define_language! {
     enum MagmaLang {
@@ -83,8 +83,8 @@ pub fn analyze(m: &MatrixMagma) {
     }
     equations.sort_by_cached_key(|(i, j)| MySize.cost_rec(i) + MySize.cost_rec(j));
     equations.dedup();
+    equations.truncate(COUNT);
     for (lhs, rhs) in equations {
-        if MySize.cost_rec(&lhs) + MySize.cost_rec(&rhs) > THRESHOLD { break }
         println!("{lhs} = {rhs}");
     }
 }
