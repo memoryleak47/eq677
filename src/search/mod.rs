@@ -21,6 +21,9 @@ pub use bij::*;
 mod tinv;
 pub use tinv::*;
 
+mod semitinv;
+pub use semitinv::*;
+
 mod fakelin;
 pub use fakelin::*;
 

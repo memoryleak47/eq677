@@ -56,5 +56,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    db_analyze();
+    linear_semitinv_search();
 }
