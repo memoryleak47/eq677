@@ -21,7 +21,7 @@ define_language! {
 pub fn db_analyze() {
     for (n, x) in db() {
         println!("{n}:");
-        analyze(&x, 10);
+        analyze(&x, 20);
         println!();
     }
 }
@@ -112,6 +112,9 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
             let rhs = n.join_recexprs(|x| ex.find_best(x).1);
             if lhs.to_string() == rhs.to_string() { continue }
             let (lhs, rhs) = normalize_equation(&lhs, &rhs);
+
+            if !format!("{lhs} {rhs}").contains('X') { continue }
+
             equations.insert((lhs, rhs));
         }
     }
@@ -150,8 +153,8 @@ impl CostFunction<MagmaLang> for MySize {
 
     fn cost<C>(&mut self, enode: &MagmaLang, mut costs: C) -> usize where C: FnMut(Id) -> usize {
         match *enode {
-            MagmaLang::F([a, b]) => costs(a) + costs(b) + 1,
-            MagmaLang::E(_) => 5,
+            MagmaLang::F([a, b]) => costs(a) + costs(b),
+            MagmaLang::E(_) => 3,
             MagmaLang::X => 1,
             MagmaLang::Y => 1,
         }
