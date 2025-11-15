@@ -1,7 +1,5 @@
 use crate::*;
 
-use std::collections::HashMap;
-
 use egg::*;
 
 const COUNT: usize = 100;
@@ -51,14 +49,11 @@ fn normalize_equation(lhs: &RecExpr, rhs: &RecExpr) -> (RecExpr, RecExpr) {
 fn filter_graph(eg: EGraph) -> EGraph {
     let ex = Extractor::new(&eg, MySize);
 
-    let mut m = HashMap::new();
-
     let mut new = EGraph::new(());
     for c in eg.classes() {
         let (cost, term) = ex.find_best(c.id);
         if cost > FILTER_THRESHOLD { continue }
         let new_id = new.add_expr(&term);
-        m.insert(c.id, new_id);
 
         for n in &c.nodes {
             let rhs = n.join_recexprs(|x| ex.find_best(x).1);
