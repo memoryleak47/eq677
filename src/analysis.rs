@@ -2,6 +2,8 @@ use crate::*;
 
 use egg::*;
 
+use std::collections::HashSet;
+
 const FILTER_THRESHOLD: usize = 10;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
@@ -103,18 +105,18 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
     let eg = out.unwrap();
     let ex = Extractor::new(&eg, MySize);
 
-    let mut equations: Vec<(RecExpr, RecExpr)> = Vec::new();
+    let mut equations = HashSet::new();
     for c in eg.classes() {
         let lhs = ex.find_best(c.id).1;
         for n in &c.nodes {
             let rhs = n.join_recexprs(|x| ex.find_best(x).1);
             if lhs.to_string() == rhs.to_string() { continue }
             let (lhs, rhs) = normalize_equation(&lhs, &rhs);
-            equations.push((lhs, rhs));
+            equations.insert((lhs, rhs));
         }
     }
+    let mut equations: Vec<_> = equations.into_iter().collect();
     equations.sort_by_cached_key(|(i, j)| MySize.cost_rec(i) + MySize.cost_rec(j));
-    equations.dedup();
     equations.truncate(count);
     for (lhs, rhs) in equations {
         println!("{lhs} = {rhs}");
