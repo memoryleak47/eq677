@@ -9,7 +9,7 @@ use crate::*;
 //       Also because it runs out of RAM real quick.
 
 
-fn all_perms(n: usize) -> Vec<Vec<usize>> {
+pub fn all_perms(n: usize) -> Vec<Vec<usize>> {
     if n == 0 { return vec![Vec::new()]; }
     let mut outs = Vec::new();
 

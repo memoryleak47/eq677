@@ -36,3 +36,31 @@ pub fn linear_semitinv_search() {
     }
 }
 
+
+pub fn general_semitinv_search() {
+    for n in 2.. {
+        let r = n-1;
+        for (a, b) in itertools::iproduct!(0..r, 0..r) {
+            for perm in all_perms(r) {
+                let h = |i| {
+                    let t = perm[i];
+                    if t == a { r } else { t }
+                };
+                let f_def = |x, y| {
+                    if (x, y) == (r, r) { return r }
+                    if y == r { return (a + x)%r }
+                    if x == r { return (b + y)%r }
+                    return h((y + r - x)%r)
+                };
+                let f = FnMagma {
+                    n,
+                    f_def,
+                };
+                if f.is677() {
+                    present_model(n, "general-semitinv", f_def);
+                }
+            }
+        }
+    }
+}
+
