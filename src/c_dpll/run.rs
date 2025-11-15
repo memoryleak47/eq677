@@ -137,8 +137,13 @@ fn submit_model(ctxt: &Ctxt) {
         for i in 0..n {
             assert_eq!(h.contains(&i), i != a);
         }
+        assert!(f(0, r) == a);
+        assert!(f((r-a)%r, r) == 0);
+
+        assert!(f(r, 0) == b);
+        assert!(f(r, (r-b)%r) == 0);
+
         assert!(f(0, c) == r);
-        assert!(f(1, (c+1)%r) == r);
         assert!(f((r-c)%r, 0) == r);
 
         for x in 0..n {
