@@ -82,7 +82,7 @@ impl CostFunction<MagmaLang> for MySize {
     fn cost<C>(&mut self, enode: &MagmaLang, mut costs: C) -> usize where C: FnMut(Id) -> usize {
         match *enode {
             MagmaLang::F([a, b]) => costs(a) + costs(b) + 1,
-            MagmaLang::E(_) => 2,
+            MagmaLang::E(_) => 5,
             MagmaLang::X => 1,
             MagmaLang::Y => 1,
         }
