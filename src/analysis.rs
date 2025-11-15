@@ -1,8 +1,11 @@
 use crate::*;
 
+use std::collections::HashMap;
+
 use egg::*;
 
 const COUNT: usize = 100;
+const FILTER_THRESHOLD: usize = 10;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
 type RecExpr = egg::RecExpr<MagmaLang>;
@@ -45,25 +48,52 @@ fn normalize_equation(lhs: &RecExpr, rhs: &RecExpr) -> (RecExpr, RecExpr) {
     (lhs, rhs)
 }
 
+fn filter_graph(eg: EGraph) -> EGraph {
+    let ex = Extractor::new(&eg, MySize);
+
+    let mut m = HashMap::new();
+
+    let mut new = EGraph::new(());
+    for c in eg.classes() {
+        let (cost, term) = ex.find_best(c.id);
+        if cost > FILTER_THRESHOLD { continue }
+        let new_id = new.add_expr(&term);
+        m.insert(c.id, new_id);
+
+        for n in &c.nodes {
+            let rhs = n.join_recexprs(|x| ex.find_best(x).1);
+            if MySize.cost_rec(&rhs) > FILTER_THRESHOLD { continue }
+            let r = new.add_expr(&rhs);
+            new.union(r, new_id);
+        }
+    }
+    new
+}
+
 pub fn analyze(m: &MatrixMagma) {
     if m.n < 2 { return }
 
     let mut eg = eggify(m);
     let mut out = None;
 
-    let xv = eg.add(MagmaLang::X);
-    let yv = eg.add(MagmaLang::Y);
+    eg.add(MagmaLang::X);
+    eg.add(MagmaLang::Y);
 
     for x in 0..m.n {
         for y in 0..m.n {
             let mut eg = eg.clone();
-            let xl = eg.lookup(MagmaLang::E(x)).unwrap();
-            let yl = eg.lookup(MagmaLang::E(y)).unwrap();
-            eg.union(xv, xl);
-            eg.union(yv, yl);
+
+            let x_elem = eg.lookup(MagmaLang::E(x)).unwrap();
+            let x_var = eg.lookup(MagmaLang::X).unwrap();
+            eg.union(x_elem, x_var);
+
+            let y_elem = eg.lookup(MagmaLang::E(y)).unwrap();
+            let y_var = eg.lookup(MagmaLang::Y).unwrap();
+            eg.union(y_elem, y_var);
+
             match out {
                 None => out = Some(eg),
-                Some(o) => out = Some(eg.egraph_intersect(&o, ())),
+                Some(o) => out = Some(filter_graph(eg.egraph_intersect(&o, ()))),
             }
         }
     }
