@@ -34,7 +34,7 @@ fn normalize_equation(lhs: &RecExpr, rhs: &RecExpr) -> (RecExpr, RecExpr) {
 
     let s = format!("{lhs} {rhs}");
     let should_flip = match (s.find("X"), s.find("Y")) {
-        (Some(i), Some(j)) if i > j => true,
+        (Some(i), Some(j)) => i > j,
         (_, Some(_)) => true,
         _ => false,
     };
