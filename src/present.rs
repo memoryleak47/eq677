@@ -44,7 +44,7 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
             println!("---");
         }
     }
-    if SHOW_AUTOM && magma.n > 1 {
+    if SHOW_AUTOM && magma.n > 1 && magma.n < 25 {
         println!("AUTOM:");
         for x in magma.autom_group_mini() {
             draw_cycle(0, magma.n, |i| x[i]);
