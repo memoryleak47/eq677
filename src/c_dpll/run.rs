@@ -130,6 +130,9 @@ fn submit_model(ctxt: &Ctxt) {
         for i in 0..r {
             h[i as usize] = f(0, i);
         }
+        for i in 0..n {
+            assert_eq!(h.contains(&i), i != a);
+        }
 
         for x in 0..n {
             for y in 0..n {
@@ -138,11 +141,9 @@ fn submit_model(ctxt: &Ctxt) {
                 if x == r && y != r { assert!(z == (b+y)%r); }
                 if x != r && y == r { assert!(z == (a+x)%r); }
                 if x != r && y != r {
-                    let t = h[((y+r-x)%r) as usize];
-                    if t == a { assert!(z == r); }
-
-                    // TODO: this should hold, but it doesn't. 
-                    // else { assert!(z == t); }
+                    let ht = h[((y+r-x)%r) as usize];
+                    let t = if ht == r { r } else { (x+ht)%r };
+                    assert!(z == t);
                 }
             }
         }
