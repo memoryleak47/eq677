@@ -23,7 +23,8 @@ pub fn linear_semitinv_search() {
                 if (x, y) == (r, r) { return r }
                 if y == r { return (a + x)%r }
                 if x == r { return (b + y)%r }
-                return h((y + r - x)%r)
+                let ht = h((y + r - x)%r);
+                if ht == r { r } else { (x+ht)%r }
             };
             let f = FnMagma {
                 n,
@@ -60,7 +61,8 @@ pub fn general_semitinv_search() {
                     if (x, y) == (r, r) { return r }
                     if y == r { return (a + x)%r }
                     if x == r { return (b + y)%r }
-                    return h((y + r - x)%r)
+                    let ht = h((y + r - x)%r);
+                    if ht == r { r } else { (x+ht)%r }
                 };
                 let f = FnMagma {
                     n,
