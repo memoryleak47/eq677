@@ -8,7 +8,7 @@ lazy_static::lazy_static! {
 }
 
 const CHECK_COMPOSITE: bool = false;
-const SHOW_AUTOM: bool = false;
+const SHOW_AUTOM: bool = true;
 
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
@@ -46,7 +46,7 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     }
     if SHOW_AUTOM && magma.n > 1 {
         println!("AUTOM:");
-        for x in magma.autom_group() {
+        for x in magma.autom_group_mini() {
             draw_cycle(0, magma.n, |i| x[i]);
         }
         println!();

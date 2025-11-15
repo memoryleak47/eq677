@@ -3,9 +3,11 @@ use nauty_pet::prelude::*;
 use nauty_pet::canon::*;
 use nauty_pet::autom::{AutomStats, TryIntoAutomStatsTraces, AutomGroup, TryIntoAutomGroupNautyDense};
 use petgraph::visit::EdgeRef;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 type Graph = petgraph::graph::UnGraph<NodeType, EdgeType>;
+type Group = Vec<Perm>;
+type Perm = Vec<usize>;
 
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum NodeType {
@@ -29,13 +31,44 @@ impl MatrixMagma {
         graphify(self).try_into_autom_stats_traces().unwrap()
     }
 
-    pub fn autom_group(&self) -> Vec<Vec<usize>> {
+    pub fn autom_group(&self) -> Group {
         let mut a = graphify(self).try_into_autom_group_nauty_dense().unwrap().0;
         for x in &mut a {
             x.truncate(self.n);
         }
         a
     }
+
+    pub fn autom_group_mini(&self) -> Group {
+        minimize(self.autom_group())
+    }
+}
+
+// produces perm^k
+fn compose_rep(perm: &[usize], k: usize) -> Perm {
+    let n = perm.len();
+    (0..n).map(|mut x| {
+        for _ in 0..k {
+            x = perm[x];
+        }
+        x
+    }).collect()
+}
+
+pub fn minimize(mut group: Group) -> Group {
+    let n = group[0].len();
+    let mut set: HashSet<Perm> = group.iter().cloned().collect();
+    for a in group.iter() {
+        if set.contains(a) {
+            for k in 2..n {
+                let rep = compose_rep(&a, k);
+                if &rep == a { break }
+
+                set.remove(&rep);
+            }
+        }
+    }
+    set.into_iter().collect()
 }
 
 pub fn orbits(autom: &[Vec<usize>]) -> Vec<usize> {
