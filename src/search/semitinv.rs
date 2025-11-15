@@ -36,6 +36,16 @@ pub fn linear_semitinv_search() {
     }
 }
 
+/*
+    f(r, r) = r
+    f(i, r) = a + i
+    f(r, j) = b + j
+    f(i, j) = i + h(j-i)
+
+    h(i) := (t=a)? r : t, where t := perm[i]
+
+*/
+// Should have models..
 
 pub fn general_semitinv_search() {
     for n in 2.. {
