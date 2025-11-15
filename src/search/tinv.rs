@@ -34,7 +34,7 @@ pub fn tinv_search() {
                 f_def,
             };
             if f.is677() {
-                let mut s = String::from("tinv: f(x, y) = x + h(y-x) with h: ");
+                let mut s = String::from("tinv: f(x,y) = x + h(y-x) with h: ");
                 for d in 0..p {
                     use std::fmt::Write;
                     write!(&mut s, "{}->{}", d, h[d]).unwrap();
