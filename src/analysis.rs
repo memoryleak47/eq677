@@ -16,6 +16,35 @@ define_language! {
     }
 }
 
+fn flip_re(t: &mut RecExpr) {
+    for i in 0..t.len() {
+        let i = i.into();
+
+        match t[i] {
+            MagmaLang::X => t[i] = MagmaLang::Y,
+            MagmaLang::Y => t[i] = MagmaLang::X,
+            _ => {},
+        }
+    }
+}
+
+fn normalize_equation(lhs: &RecExpr, rhs: &RecExpr) -> (RecExpr, RecExpr) {
+    let mut lhs = lhs.clone();
+    let mut rhs = rhs.clone();
+
+    let s = format!("{lhs} {rhs}");
+    let should_flip = match (s.find("X"), s.find("Y")) {
+        (Some(i), Some(j)) if i > j => true,
+        (_, Some(_)) => true,
+        _ => false,
+    };
+    if should_flip {
+        flip_re(&mut lhs);
+        flip_re(&mut rhs);
+    }
+    (lhs, rhs)
+}
+
 pub fn analyze(m: &MatrixMagma) {
     if m.n < 2 { return }
 
@@ -47,11 +76,13 @@ pub fn analyze(m: &MatrixMagma) {
         let lhs = ex.find_best(c.id).1;
         for n in &c.nodes {
             let rhs = n.join_recexprs(|x| ex.find_best(x).1);
-            if lhs == rhs { continue }
-            equations.push((lhs.clone(), rhs));
+            if lhs.to_string() == rhs.to_string() { continue }
+            let (lhs, rhs) = normalize_equation(&lhs, &rhs);
+            equations.push((lhs, rhs));
         }
     }
     equations.sort_by_cached_key(|(i, j)| MySize.cost_rec(i) + MySize.cost_rec(j));
+    equations.dedup();
     for (lhs, rhs) in equations {
         if MySize.cost_rec(&lhs) + MySize.cost_rec(&rhs) > THRESHOLD { break }
         println!("{lhs} = {rhs}");
