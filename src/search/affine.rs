@@ -24,9 +24,6 @@ pub fn affine_search() {
             for b in 0..p {
                 let b4 = (b*b*b + b)%p;
                 for c in 0..p {
-                    // This would just be a linear model:
-                    if c == 0 { continue }
-
                     if (a*b4)%p != 1 { continue }
                     if (a + a*a*b*b + b*b*b)%p != 0 { continue }
                     if ((b*b*a + b*b + b + 1)*c)%p != 0 { continue }
