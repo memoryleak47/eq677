@@ -56,5 +56,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    analyze(&db_get("21_0"));
+    db_analyze();
 }

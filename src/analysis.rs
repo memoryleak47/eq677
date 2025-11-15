@@ -2,7 +2,6 @@ use crate::*;
 
 use egg::*;
 
-const COUNT: usize = 100;
 const FILTER_THRESHOLD: usize = 10;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
@@ -14,6 +13,14 @@ define_language! {
         E(usize),
         "X" = X,
         "Y" = Y,
+    }
+}
+
+pub fn db_analyze() {
+    for (n, x) in db() {
+        println!("{n}:");
+        analyze(&x, 10);
+        println!();
     }
 }
 
@@ -65,7 +72,7 @@ fn filter_graph(eg: EGraph) -> EGraph {
     new
 }
 
-pub fn analyze(m: &MatrixMagma) {
+pub fn analyze(m: &MatrixMagma, count: usize) {
     if m.n < 2 { return }
 
     let mut eg = eggify(m);
@@ -108,7 +115,7 @@ pub fn analyze(m: &MatrixMagma) {
     }
     equations.sort_by_cached_key(|(i, j)| MySize.cost_rec(i) + MySize.cost_rec(j));
     equations.dedup();
-    equations.truncate(COUNT);
+    equations.truncate(count);
     for (lhs, rhs) in equations {
         println!("{lhs} = {rhs}");
     }
