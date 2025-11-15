@@ -34,6 +34,7 @@ pub fn minimize_gap(group: Group) -> Group {
     use std::io::Write;
 
     // dbg!(&group);
+    let n = group[0].len();
     let mut input = String::from("MinimalGeneratingSet(Group([");
     for x in &group {
         input.push_str("PermList([");
@@ -65,7 +66,7 @@ pub fn minimize_gap(group: Group) -> Group {
     let cycle_sets = parse_gap_permutations_cycles(out);
     cycle_sets
         .into_iter()
-        .map(cycles_to_full_perm)
+        .map(|x| cycles_to_full_perm(n, x))
         .collect()
 }
 
@@ -124,15 +125,7 @@ fn parse_gap_permutations_cycles(input: &str) -> Vec<Vec<Vec<usize>>> {
     perms
 }
 
-fn cycles_to_full_perm(cycles: Vec<Vec<usize>>) -> Vec<usize> {
-    // determine max point occurring in any cycle
-    let n = cycles
-        .iter()
-        .flatten()
-        .copied()
-        .max()
-        .unwrap_or(0);
-
+fn cycles_to_full_perm(n: usize, cycles: Vec<Vec<usize>>) -> Vec<usize> {
     // identity permutation
     let mut perm: Vec<usize> = (1..=n).collect();
 
