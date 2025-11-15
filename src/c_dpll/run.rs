@@ -127,16 +127,19 @@ fn submit_model(ctxt: &Ctxt) {
         let a = f(0, r);
         let b = f(r, 0);
 
-        let mut c = usize::MAX;
+        let mut c = E::MAX;
         let mut h = vec![0; r as _];
         for i in 0..r {
             let t = f(0, i);
             h[i as usize] = t;
-            if t == r { c = i as usize; }
+            if t == r { c = i; }
         }
         for i in 0..n {
             assert_eq!(h.contains(&i), i != a);
         }
+        assert!(f(0, c) == r);
+        assert!(f(1, (c+1)%r) == r);
+        assert!(f((r-c)%r, 0) == r);
 
         for x in 0..n {
             for y in 0..n {
