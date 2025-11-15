@@ -118,6 +118,35 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
+    // check model properties:
+    {
+        let f = |x, y| ctxt.classes_xy[idx(x, y, ctxt.n)].value;
+
+        let n = ctxt.n;
+        let r = n-1;
+        let a = f(0, r);
+        let b = f(r, 0);
+        let mut h = vec![0; r as _];
+        for i in 0..r {
+            h[i as usize] = f(0, i);
+        }
+
+        for x in 0..n {
+            for y in 0..n {
+                let z = f(x, y);
+                if x == r && y == r { assert!(z == r); }
+                if x == r && y != r { assert!(z == (b+y)%r); }
+                if x != r && y == r { assert!(z == (a+x)%r); }
+                if x != r && y != r {
+                    let t = h[((y+r-x)%r) as usize];
+                    if t == a { assert!(z == r); }
+
+                    // TODO: this should hold, but it doesn't. 
+                    // else { assert!(z == t); }
+                }
+            }
+        }
+    }
     present_model(ctxt.n as usize, "c_dpll", |x, y| {
         let i = idx(x as E, y as E, ctxt.n);
         ctxt.classes_xy[i].value as usize

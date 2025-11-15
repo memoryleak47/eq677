@@ -53,7 +53,7 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for i in 0..30 {
+    for i in 2..30 {
         println!("Looking for models of size {i}:");
         c_run(i);
     }
