@@ -126,9 +126,13 @@ fn submit_model(ctxt: &Ctxt) {
         let r = n-1;
         let a = f(0, r);
         let b = f(r, 0);
+
+        let mut c = usize::MAX;
         let mut h = vec![0; r as _];
         for i in 0..r {
-            h[i as usize] = f(0, i);
+            let t = f(0, i);
+            h[i as usize] = t;
+            if t == r { c = i as usize; }
         }
         for i in 0..n {
             assert_eq!(h.contains(&i), i != a);
