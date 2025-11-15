@@ -46,7 +46,7 @@ pub fn linear_semitinv_search() {
     h(i) := (t=a)? r : t, where t := perm[i]
 
 */
-// Should have models..
+// has models.
 
 pub fn general_semitinv_search() {
     for n in 2.. {
