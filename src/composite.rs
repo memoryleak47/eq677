@@ -36,7 +36,7 @@ pub fn decompose(m: &MatrixMagma) -> HashSet<MatrixMagma> {
     out
 }
 
-fn eggify(m: &MatrixMagma) -> EGraph {
+pub fn eggify(m: &MatrixMagma) -> EGraph {
     let mut eg = EGraph::new(());
     for x in 0..m.n {
         eg.add(MagmaLang::E(x));

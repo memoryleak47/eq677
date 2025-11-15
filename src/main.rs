@@ -49,9 +49,15 @@ pub use timer::*;
 mod fo;
 pub use fo::*;
 
+mod analysis;
+pub use analysis::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    all();
+    for (n, x) in db() {
+        println!("{n}:");
+        analyze(&x);
+    }
 }
