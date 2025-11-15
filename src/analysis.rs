@@ -4,6 +4,9 @@ use egg::*;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
 
+const CLASS_THRESHOLD: usize = 5;
+const NODE_THRESHOLD: usize = 17;
+
 define_language! {
     enum MagmaLang {
         "f" = F([Id; 2]),
@@ -38,17 +41,22 @@ pub fn analyze(m: &MatrixMagma) {
 
     let eg = out.unwrap();
     let ex = Extractor::new(&eg, MySize);
-    for c in eg.classes() {
-        if !c.nodes.contains(&MagmaLang::X) { continue }
-        println!("{}", ex.find_best(c.id).1);
+
+    let mut classes: Vec<_> = eg.classes().map(|x| x.id).filter(|i| ex.find_best_cost(*i) < CLASS_THRESHOLD).collect();
+    classes.sort_by_cached_key(|i| ex.find_best_cost(*i));
+    for i in classes {
+        let c = &eg[i];
+        println!("{}", ex.find_best(i).1);
         let mut terms = Vec::new();
         for n in &c.nodes {
             let e = n.join_recexprs(|x| ex.find_best(x).1);
             terms.push(e);
         }
         terms.sort_by_cached_key(|x| MySize.cost_rec(x));
-        for e in terms {
-            println!("= {e}");
+        for e in &terms[1..] {
+            if MySize.cost_rec(&e) < NODE_THRESHOLD {
+                println!("= {e}");
+            }
         }
         println!();
     }
