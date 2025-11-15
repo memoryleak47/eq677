@@ -24,12 +24,24 @@ pub fn conj(m: &MatrixMagma) {
     conj_2_orbit(m);
     conj_d_bij(m);
     conj_unique_cycle_size(m);
+    conj_db_complete_21(m);
 
     false_conj_right_cancellative(m);
     // false_conj_exists_idempotence(m);
 }
 
 // Conjectures:
+
+fn conj_db_complete_21(m: &MatrixMagma) {
+    if m.n > 21 { return }
+
+    let m = m.canonicalize2();
+    for (_, m2) in db() {
+        // TODO this is super inefficient.
+        if m == m2.canonicalize2() { return }
+    }
+    assert!(false);
+}
 
 fn conj_d_bij(m: &MatrixMagma) {
     // claim: for any x, {f(f(y,x),y) | y in M} = M.
