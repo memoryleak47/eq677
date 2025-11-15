@@ -129,9 +129,13 @@ fn submit_model(ctxt: &Ctxt) {
 
         let mut c = E::MAX;
         let mut h = vec![0; r as _];
+
+        let mut is255 = b == 0;
+
         for i in 0..r {
             let t = f(0, i);
             h[i as usize] = t;
+            if t == i { is255 = true; }
             if t == r { c = i; }
         }
         for i in 0..n {
@@ -145,6 +149,8 @@ fn submit_model(ctxt: &Ctxt) {
 
         assert!(f(0, c) == r);
         assert!(f((r-c)%r, 0) == r);
+
+        assert!(is255);
 
         for x in 0..n {
             for y in 0..n {
