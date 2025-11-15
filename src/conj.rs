@@ -2,8 +2,8 @@ use crate::*;
 
 #[test]
 fn test_db_conj() {
-    for m in db() {
-        conj(&m)
+    for (_, m) in db() {
+        conj(&m);
     }
 }
 
