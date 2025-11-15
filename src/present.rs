@@ -8,7 +8,7 @@ lazy_static::lazy_static! {
 }
 
 const CHECK_COMPOSITE: bool = false;
-const SHOW_AUTOM: bool = true;
+const SHOW_AUTOM: bool = false;
 
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
@@ -30,7 +30,7 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
         println!("Model of size {n} found by {finder}:");
         magma.cycle_dump();
     } else {
-        println!("Model found of size {n} found by {finder}");
+        println!("Model of size {n} found by {finder}");
     }
 
     if CHECK_COMPOSITE {

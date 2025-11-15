@@ -53,7 +53,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for i in 0..12 {
-        c_run(i);
-    }
+    all();
 }

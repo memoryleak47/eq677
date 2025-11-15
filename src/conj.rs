@@ -18,12 +18,12 @@ pub fn conj(m: &MatrixMagma) {
     conj_cycle2(m);
     conj_cycles_divide_n(m);
     conj_cycles_summary(m);
-    conj_unique_cycle_size(m);
     conj_bijective_or_constant(m);
     conj_not_rigid(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
     conj_d_bij(m);
+    conj_unique_cycle_size(m);
 
     false_conj_right_cancellative(m);
     // false_conj_exists_idempotence(m);
@@ -123,7 +123,7 @@ fn conj_cycles_summary(m: &MatrixMagma) {
 
 // This property seems often true, but not always true.
 fn conj_unique_cycle_size(m: &MatrixMagma) {
-    if m.n % 7 == 0 || m.n >= 95 { return } // Why %7?
+    if !is_prime(m.n) { return }
 
     let mut out = Vec::new();
     for x in 0..m.n {

@@ -8,6 +8,16 @@ pub fn db_search() {
     }
 }
 
+pub fn db_cart_search() {
+    for m1 in db() {
+        for m2 in db() {
+            let m = cartesian(&m1, &m2);
+            present_model(m.n, "db-cartesian", |x, y| m.f(x, y));
+        }
+    }
+}
+
+
 pub fn db() -> Vec<MatrixMagma> {
     let mut out = Vec::new();
     for x in DB_SOURCES {

@@ -5,6 +5,9 @@ use crate::*;
     f(x, y) = x + h(y - x)
 */
 
+// NOTE: this searches is deprecated due to the better https://github.com/memoryleak47/eq677/tree/tinv_cdpll.
+//       Also because it runs out of RAM real quick.
+
 
 fn all_perms(n: usize) -> Vec<Vec<usize>> {
     if n == 0 { return vec![Vec::new()]; }
