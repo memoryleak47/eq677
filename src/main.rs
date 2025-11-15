@@ -56,10 +56,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for (n, x) in db() {
-        if x.n < 2 { continue }
-        println!("{n}:");
-        analyze(&x);
-        return;
-    }
+    analyze(&db_get("5_0"));
 }
