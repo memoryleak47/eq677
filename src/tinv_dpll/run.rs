@@ -4,7 +4,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 const USE_COUNTER: bool = false;
 
-fn threading_depth(n: E) -> E { n + 1 }
+fn threading_depth(n: E) -> E { 4 }
 
 static RUNS_STARTED: AtomicUsize = AtomicUsize::new(0);
 static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
