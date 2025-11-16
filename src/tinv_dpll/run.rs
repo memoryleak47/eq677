@@ -11,7 +11,6 @@ static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn tinv_run(n: usize) {
     let mut ctxt = build_ctxt(n);
-    ctxt.nonfresh = ctxt.n;
     prerun(0, &mut ctxt);
 }
 
@@ -52,18 +51,13 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
         return;
     };
 
-    defresh(x, ctxt);
-    defresh(y, ctxt);
-
-    let count = ctxt.n.min(ctxt.nonfresh+1);
-    range_for_each(count, |e| {
+    range_for_each(ctxt.n, |e| {
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value != E::MAX { return }
         let c = &mut ctxt.clone();
 
         if prove_triple(x, y, e, c).is_err() { return }
         if propagate(c).is_err() { return }
 
-        defresh(e, c);
         prerun(depth+1, c);
     });
 }
@@ -124,22 +118,11 @@ fn submit_model(ctxt: &Ctxt) {
     });
 }
 
-pub fn defresh(e: E, ctxt: &mut Ctxt) {
-    if e >= ctxt.nonfresh {
-        // assert!(e == ctxt.nonfresh);
-        ctxt.nonfresh += 1;
-        ctxt.trail.push(TrailEvent::Defresh);
-    }
-}
-
 fn main_branch(ctxt: &mut Ctxt) {
     let Some((x, y)) = select_p(ctxt) else {
         submit_model(ctxt);
         become main_backtrack(ctxt);
     };
-
-    defresh(x, ctxt);
-    defresh(y, ctxt);
 
     if branch_options(x, y, 0, ctxt).is_ok() { become main_propagate(ctxt); }
     else { become main_backtrack(ctxt); }
@@ -147,19 +130,14 @@ fn main_branch(ctxt: &mut Ctxt) {
 
 // e is the next thing to try. If that doesn't work, we iterate from there.
 fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let count = ctxt.n.min(ctxt.nonfresh+1);
     loop {
-        if e >= count { return Err(()) }
+        if e >= ctxt.n { return Err(()) }
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value == E::MAX { break }
         e += 1;
     }
     ctxt.trail.push(TrailEvent::Decision(x, y, e));
     ctxt.chosen_per_row[x as usize] += 1;
     prove_triple(x, y, e, ctxt)?;
-
-    // note: This defresh has to be after the decision point!
-    // Otherwise it won't get re-freshed on backtracking.
-    defresh(e, ctxt);
 
     Ok(())
 }
@@ -188,9 +166,6 @@ fn main_backtrack(ctxt: &mut Ctxt) {
             }
             TrailEvent::PushCXZ(x, z) => {
                 ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
-            }
-            TrailEvent::Defresh => {
-                ctxt.nonfresh -= 1;
             }
         }
     }
