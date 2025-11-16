@@ -42,6 +42,8 @@ fn run(ctxt: &mut Ctxt) {
     assert!(ctxt.h[x as usize] == E::MAX);
 
     for v in 0..ctxt.n {
+        if ctxt.h_inv[v as usize] != E::MAX { continue }
+
         let ctxt = &mut ctxt.clone();
         if set(x, v, ctxt).is_ok() {
             run(ctxt);
