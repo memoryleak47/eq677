@@ -110,6 +110,13 @@ impl MatrixMagma {
         }
     }
 
+    pub fn autom_dump(&self) {
+        println!("AUTOM:");
+        let g = self.autom_group_mini();
+        for x in g {
+            draw_cycle(0, self.n, |i| x[i]);
+        }
+    }
 
     pub fn is_total(&self) -> bool {
         !self.data.contains(&usize::MAX)
