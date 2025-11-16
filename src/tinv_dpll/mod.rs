@@ -35,7 +35,6 @@ struct Ctxt {
     n: E,
     propagate_queue: Vec<(E, E, E)>,
     chosen_per_row: Box<[E]>,
-    yxx: Box<[E]>, // y := yxx[x] where y*x = x, E::MAX means undefined.
 }
 
 #[derive(Clone)]
