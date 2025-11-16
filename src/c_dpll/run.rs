@@ -135,9 +135,11 @@ fn submit_model(ctxt: &Ctxt) {
         for i in 0..r {
             let t = f(0, i);
             h[i as usize] = t;
+            print!("h({i}) = {t}; ");
             if t == i { is255 = true; }
             if t == r { c = i; }
         }
+        println!();
         for i in 0..n {
             assert_eq!(h.contains(&i), i != a);
         }
