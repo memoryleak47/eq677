@@ -1,109 +1,66 @@
 use crate::*;
+use smallvec::{SmallVec, smallvec};
 
+mod init;
+use init::*;
+
+mod c;
+use c::*;
+
+mod run;
+use run::*;
+pub use run::{tinv_run, tinv_search};
+
+// identifies an element.
 type E = u8;
 
 #[derive(Clone)]
+struct ClassXY {
+    value: E, // is E::MAX when undecided.
+    cs: SmallVec<[CXY; 7]>, // the constraints that currently wait on us.
+    score: i32, // a cache for the base_score.
+}
+
+#[derive(Clone)]
+struct ClassXZ {
+    value: E,
+    cs: SmallVec<[CXZ; 7]>,
+}
+
+#[derive(Clone)]
 struct Ctxt {
+    trail: Vec<TrailEvent>,
+    classes_xy: Box<[ClassXY]>,
+    classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`
     n: E,
-    h: Box<[E]>, // E::MAX means unknown.
-    h_inv: Box<[E]>, // E::MAX means unknown.
+    nonfresh: E, // The number of nonfresh elems. An element e is fresh, if e >= nonfresh.
+    propagate_queue: Vec<(E, E, E)>,
+    chosen_per_row: Box<[E]>,
+    yxx: Box<[E]>, // y := yxx[x] where y*x = x, E::MAX means undefined.
 }
 
-fn f(x: E, y: E, ctxt: &Ctxt) -> E {
-    assert!(x < ctxt.n);
-    assert!(y < ctxt.n);
-
-    let n = ctxt.n;
-    let i = (n+y-x)%n;
-    let h = ctxt.h[i as usize];
-    if h == E::MAX { return E::MAX }
-    (x + h)%n
+#[derive(Clone)]
+enum TrailEvent {
+    Decision(E, E, E),
+    DefineClass(E, E),
+    Defresh,
+    PushCXY(E, E),
+    PushCXZ(E, E),
 }
 
-pub fn tinv_run(n: usize) {
-    let mut ctxt = build_ctxt(n);
-    run(&mut ctxt);
+fn idx(x: E, y: E, n: E) -> usize {
+    (x as usize) + (n as usize) * (y as usize)
 }
 
-// returns i, s.t. h[i] will be guessed next.
-fn heuristic(ctxt: &Ctxt) -> Option<E> {
-    ctxt.h.iter().enumerate()
-        .filter(|(_, x)| **x == E::MAX)
-        .map(|(x, _)| x as E)
-        .next()
-}
-
-fn run(ctxt: &mut Ctxt) {
-    let Some(x) = heuristic(ctxt) else {
-        submit_model(ctxt);
-        return;
-    };
-
-    assert!(ctxt.h[x as usize] == E::MAX);
-
-    for v in 0..ctxt.n {
-        if ctxt.h_inv[v as usize] != E::MAX { continue }
-
-        let ctxt = &mut ctxt.clone();
-        if set(x, v, ctxt).is_ok() {
-            run(ctxt);
-        }
-    }
-}
-
-fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n as usize, "tinv-search", |x, y| f(x as E, y as E, ctxt) as usize);
-}
-
-// h[x] = v
-fn set(x: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    ctxt.h[x as usize] = v;
-    ctxt.h_inv[v as usize] = x;
-
-    propagate(ctxt)
-}
-
-fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
-    // 0 = f(y, f(0, f(f(y, 0), y)))
-    for y in 0..ctxt.n {
-        let a = f(y, 0, ctxt); if a == E::MAX { continue }
-        let a = f(a, y, ctxt); if a == E::MAX { continue }
-        let a = f(0, a, ctxt); if a == E::MAX { continue }
-        let b = f(y, a, ctxt); if b == E::MAX {
-            // f(y, a) == 0
-            // <-> y + h(a-y) == 0
-            // <-> h(a-y) == -y
-            let n = ctxt.n;
-            return set((a+n-y)%n, (n-y)%n, ctxt);
-        }
-        if b != 0 { return Err(()) }
+impl Ctxt {
+    pub fn matrix(&self) -> MatrixMagma {
+        MatrixMagma::by_fn(self.n as usize, |x, y| {
+             let i = idx(x as E, y as E, self.n);
+             let v = self.classes_xy[i].value;
+             if v == E::MAX { usize::MAX } else { v as _ }
+        })
     }
 
-    // 0 = f(f(y, 0), f(f(y, f(y, 0)), y))
-    // 0 = f(a, f(f(y, a), y))
-    // 0 = f(a, f(b, y))
-    // 0 = f(a, b)
-
-    for y in 0..ctxt.n {
-        let a = f(y, 0, ctxt); if a == E::MAX { continue }
-        let b = f(y, a, ctxt); if b == E::MAX { continue }
-        let b = f(b, y, ctxt); if b == E::MAX { continue }
-        let c = f(a, b, ctxt); if c == E::MAX {
-            // f(a, b) == 0
-            // <-> a + h(b-a) == 0
-            // <-> h(b-a) == -a
-            let n = ctxt.n;
-            return set((b+n-a)%n, (n-a)%n, ctxt);
-        }
-        if c != 0 { return Err(()) }
-    }
-    Ok(())
-}
-
-fn build_ctxt(n: usize) -> Ctxt {
-    Ctxt {
-        n: n as E,
-        h: vec![E::MAX; n].into_boxed_slice(),
-        h_inv: vec![E::MAX; n].into_boxed_slice(),
-    }
+    pub fn dump(&self) { self.matrix().dump() }
+    pub fn cycle_dump(&self) { self.matrix().cycle_dump() }
 }

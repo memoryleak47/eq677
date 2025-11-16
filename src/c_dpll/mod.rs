@@ -11,7 +11,8 @@ mod split;
 use split::*;
 
 mod run;
-pub use run::*;
+use run::*;
+pub use run::{c_run, c_search};
 
 mod twee;
 pub use twee::*;
