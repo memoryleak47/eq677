@@ -60,17 +60,23 @@ fn set(x: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     ctxt.h[x as usize] = v;
     ctxt.h_inv[v as usize] = x;
 
-    check(ctxt)
+    propagate(ctxt)
 }
 
-fn check(ctxt: &Ctxt) -> Result<(), ()> {
+fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     // 0 = f(y, f(0, f(f(y, 0), y)))
     for y in 0..ctxt.n {
         let a = f(y, 0, ctxt); if a == E::MAX { continue }
         let a = f(a, y, ctxt); if a == E::MAX { continue }
         let a = f(0, a, ctxt); if a == E::MAX { continue }
-        let a = f(y, a, ctxt); if a == E::MAX { continue }
-        if a != 0 { return Err(()) }
+        let b = f(y, a, ctxt); if b == E::MAX {
+            // f(y, a) == 0
+            // <-> y + h(a-y) == 0
+            // <-> h(a-y) == -y
+            let n = ctxt.n;
+            return set((a+n-y)%n, (n-y)%n, ctxt);
+        }
+        if b != 0 { return Err(()) }
     }
     Ok(())
 }
