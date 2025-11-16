@@ -20,7 +20,6 @@ pub fn build_ctxt(n: usize) -> Ctxt {
             .take(n*n)
             .collect(),
         propagate_queue: Vec::new(),
-        chosen_per_row: std::iter::repeat(0).take(n).collect(),
     };
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {

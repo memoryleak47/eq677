@@ -96,10 +96,9 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     let mut best_score = -1;
 
     for x in 0..ctxt.n {
-        let chosen_score = CHOSEN_SCORE * ctxt.chosen_per_row[x as usize] as i32;
         for y in 0..ctxt.n {
             let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
-            let score = class.score + chosen_score;
+            let score = class.score;
             if (class.value == E::MAX) & (score > best_score) {
                 best = (x, y);
                 best_score = score;
@@ -136,7 +135,6 @@ fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         e += 1;
     }
     ctxt.trail.push(TrailEvent::Decision(x, y, e));
-    ctxt.chosen_per_row[x as usize] += 1;
     prove_triple(x, y, e, ctxt)?;
 
     Ok(())
@@ -149,7 +147,6 @@ fn main_backtrack(ctxt: &mut Ctxt) {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
             TrailEvent::Decision(x, y, e) => {
-                ctxt.chosen_per_row[x as usize] -= 1;
                 if branch_options(x, y, e+1, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
