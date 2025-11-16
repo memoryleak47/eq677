@@ -15,45 +15,46 @@ pub use run::{tinv_run, tinv_search};
 type E = u8;
 
 #[derive(Clone)]
-struct ClassXY {
+struct ClassH {
     value: E, // is E::MAX when undecided.
-    cs: SmallVec<[CXY; 7]>, // the constraints that currently wait on us.
+    cs: SmallVec<[CH; 7]>, // the constraints that currently wait on us.
     score: i32, // a cache for the base_score.
 }
 
 #[derive(Clone)]
-struct ClassXZ {
+struct ClassHInv {
     value: E,
-    cs: SmallVec<[CXZ; 7]>,
 }
 
 #[derive(Clone)]
 struct Ctxt {
     trail: Vec<TrailEvent>,
-    classes_xy: Box<[ClassXY]>,
-    classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`
+    classes_h: Box<[ClassH]>,
+    classes_hinv: Box<[ClassHInv]>,
     n: E,
-    propagate_queue: Vec<(E, E, E)>,
+    propagate_queue: Vec<(E, E)>, // contains (i, j) for h(i) = j
 }
 
 #[derive(Clone)]
 enum TrailEvent {
-    Decision(E, E, E),
-    DefineClass(E, E),
-    PushCXY(E, E),
-    PushCXZ(E, E),
+    Decision(E, E), // contains (i, j) for h(i) = j.
+    DefineClass(E), // h(i) is now defined.
+    PushCH(E), // a new constraint is waiting for h(i) = ?.
 }
 
-fn idx(x: E, y: E, n: E) -> usize {
-    (x as usize) + (n as usize) * (y as usize)
+// f(x, y) = x + h(y-x)
+fn f(x: E, y: E, ctxt: &Ctxt) -> E {
+    let n = ctxt.n;
+     let i = (y+n-x)%n;
+     let v = ctxt.classes_h[i as usize].value;
+     if v == E::MAX { E::MAX } else { (x+v)%n }
 }
 
 impl Ctxt {
     pub fn matrix(&self) -> MatrixMagma {
         MatrixMagma::by_fn(self.n as usize, |x, y| {
-             let i = idx(x as E, y as E, self.n);
-             let v = self.classes_xy[i].value;
-             if v == E::MAX { usize::MAX } else { v as _ }
+            let z = f(x as E, y as E, self);
+            if z == E::MAX { usize::MAX } else { z as usize }
         })
     }
 

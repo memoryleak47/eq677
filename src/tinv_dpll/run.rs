@@ -46,63 +46,57 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
         return;
     }
 
-    let Some((x, y)) = select_p(ctxt) else {
+    let Some(i) = select_p(ctxt) else {
         submit_model(ctxt);
         return;
     };
 
-    range_for_each(ctxt.n, |e| {
-        if ctxt.classes_xz[idx(x, e, ctxt.n)].value != E::MAX { return }
+    range_for_each(ctxt.n, |v| {
+        if ctxt.classes_hinv[v as usize].value != E::MAX { return }
         let c = &mut ctxt.clone();
 
-        if prove_triple(x, y, e, c).is_err() { return }
+        if prove_pair(i, v, c).is_err() { return }
         if propagate(c).is_err() { return }
 
         prerun(depth+1, c);
     });
 }
 
-fn score_c(c: CXY) -> i32 {
+fn score_c(c: CH) -> i32 {
     match c {
-        CXY::C11(..) => C11_SCORE,
-        CXY::C12(..) => C12_SCORE,
-        CXY::C21(..) => C21_SCORE,
-        CXY::C22(..) => C22_SCORE,
+        CH::C11(..) => C11_SCORE,
+        CH::C12(..) => C12_SCORE,
     }
 }
 
-fn pos_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
-    let xi = x as i32;
-    let yi = y as i32;
+fn pos_score(i: E, ctxt: &Ctxt) -> i32 {
+    let ii = i as i32;
     let ni = ctxt.n as i32;
-    ni * ni - xi * ni - yi
+    ni - ii
 }
 
-pub fn compute_base_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
-    let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
+pub fn compute_base_score(i: E, ctxt: &Ctxt) -> i32 {
+    let class = &ctxt.classes_h[i as usize];
     let cs_score = class.cs.iter().map(|c| score_c(*c)).sum::<i32>();
-    let x0_score = X0_SCORE * (x == 0) as i32;
-    let pos_score = pos_score(x, y, ctxt);
+    let pos_score = pos_score(i, ctxt);
 
-    cs_score + x0_score + pos_score
+    cs_score + pos_score
 }
 
 // returns None if we are done.
-fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
+fn select_p(ctxt: &Ctxt) -> Option<E> {
     // Should hold here:
     // check_score(ctxt);
 
-    let mut best = (E::MAX, E::MAX);
+    let mut best = E::MAX;
     let mut best_score = -1;
 
-    for x in 0..ctxt.n {
-        for y in 0..ctxt.n {
-            let class = &ctxt.classes_xy[idx(x, y, ctxt.n)];
-            let score = class.score;
-            if (class.value == E::MAX) & (score > best_score) {
-                best = (x, y);
-                best_score = score;
-            }
+    for i in 0..ctxt.n {
+        let class = &ctxt.classes_h[i as usize];
+        let score = class.score;
+        if (class.value == E::MAX) & (score > best_score) {
+            best = i;
+            best_score = score;
         }
     }
 
@@ -111,31 +105,28 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n as usize, "tinv_dpll", |x, y| {
-        let i = idx(x as E, y as E, ctxt.n);
-        ctxt.classes_xy[i].value as usize
-    });
+    present_model(ctxt.n as usize, "tinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
 }
 
 fn main_branch(ctxt: &mut Ctxt) {
-    let Some((x, y)) = select_p(ctxt) else {
+    let Some(i) = select_p(ctxt) else {
         submit_model(ctxt);
         become main_backtrack(ctxt);
     };
 
-    if branch_options(x, y, 0, ctxt).is_ok() { become main_propagate(ctxt); }
+    if branch_options(i, 0, ctxt).is_ok() { become main_propagate(ctxt); }
     else { become main_backtrack(ctxt); }
 }
 
 // e is the next thing to try. If that doesn't work, we iterate from there.
-fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+fn branch_options(i: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     loop {
         if e >= ctxt.n { return Err(()) }
-        if ctxt.classes_xz[idx(x, e, ctxt.n)].value == E::MAX { break }
+        if ctxt.classes_hinv[e as usize].value == E::MAX { break }
         e += 1;
     }
-    ctxt.trail.push(TrailEvent::Decision(x, y, e));
-    prove_triple(x, y, e, ctxt)?;
+    ctxt.trail.push(TrailEvent::Decision(i, e));
+    prove_pair(i, e, ctxt)?;
 
     Ok(())
 }
@@ -146,20 +137,17 @@ fn main_backtrack(ctxt: &mut Ctxt) {
     loop {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
-            TrailEvent::Decision(x, y, e) => {
-                if branch_options(x, y, e+1, ctxt).is_ok() { become main_propagate(ctxt); }
+            TrailEvent::Decision(i, e) => {
+                if branch_options(i, e+1, ctxt).is_ok() { become main_propagate(ctxt); }
             },
-            TrailEvent::DefineClass(x, y) => {
-                let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
-                ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
+            TrailEvent::DefineClass(i) => {
+                let z = std::mem::replace(&mut ctxt.classes_h[i as usize].value, E::MAX);
+                ctxt.classes_hinv[z as usize].value = E::MAX;
             },
-            TrailEvent::PushCXY(x, y) => {
-                let class = &mut ctxt.classes_xy[idx(x, y, ctxt.n)];
+            TrailEvent::PushCH(i) => {
+                let class = &mut ctxt.classes_h[i as usize];
                 let c = class.cs.pop().unwrap();
                 class.score -= score_c(c);
-            }
-            TrailEvent::PushCXZ(x, z) => {
-                ctxt.classes_xz[idx(x, z, ctxt.n)].cs.pop().unwrap();
             }
         }
     }
@@ -172,50 +160,38 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
     }
 }
 
-pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let n = ctxt.n;
-    for o in 0..n {
-        prove_triple_impl((x+o)%n, (y+o)%n, (z+o)%n, ctxt)?;
-    }
+pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let i_ref = &mut ctxt.classes_h[i as usize].value;
+    let i_v = *i_ref;
+    if i_v == v { return Ok(()) }
+    if i_v != E::MAX { return Err(()) }
+
+    let hi_ref = &mut ctxt.classes_hinv[v as usize].value;
+    if *hi_ref != E::MAX { return Err(()); }
+
+    *i_ref = v;
+    *hi_ref = i;
+    ctxt.trail.push(TrailEvent::DefineClass(i));
+    ctxt.propagate_queue.push((i, v));
     Ok(())
 }
 
-pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
-    let xy = *xy_ref;
-    if xy == z { return Ok(()) }
-    if xy != E::MAX { return Err(()) }
-
-    let xz_ref = &mut ctxt.classes_xz[idx(x, z, ctxt.n)].value;
-    if *xz_ref != E::MAX { return Err(()); }
-
-    *xy_ref = z;
-    *xz_ref = y;
-    ctxt.trail.push(TrailEvent::DefineClass(x, y));
-    ctxt.propagate_queue.push((x, y, z));
-    Ok(())
+// f(x, y) = z <-> x + h(y-x) = z <-> h(y-x) = z-x
+pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let n = ctxt.n;
+    prove_pair((y+n-x)%n, (z+n-x)%n, ctxt)
 }
 
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
-    while let Some((x, y, z)) = ctxt.propagate_queue.pop() {
+    let n = ctxt.n;
+    while let Some((i, v)) = ctxt.propagate_queue.pop() {
         // spawn constraints!
-        let (a, b, ba) = (y, x, z);
-        visit_c11(a, b, ba, ctxt)?;
-        visit_c21(a, b, ba, ctxt)?;
+        visit_c11((n-i)%n, v, ctxt)?;
 
-        let i = idx(x, y, ctxt.n);
-        let len = ctxt.classes_xy[i].cs.len();
+        let len = ctxt.classes_h[i as usize].cs.len();
         for j in 0..len {
-            let c = ctxt.classes_xy[i].cs[j];
-            progress_c(c, x, y, z, ctxt)?;
-        }
-
-        let i = idx(x, z, ctxt.n);
-        let len = ctxt.classes_xz[i].cs.len();
-        for j in 0..len {
-            let CXZ(a,b) = ctxt.classes_xz[i].cs[j];
-            // z = x*(a*b).
-            prove_triple(a, b, y, ctxt)?;
+            let c = ctxt.classes_h[i as usize].cs[j];
+            progress_c(c, i, v, ctxt)?;
         }
     }
 
@@ -223,11 +199,9 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn check_score(ctxt: &Ctxt) {
-    for x in 0..ctxt.n {
-        for y in 0..ctxt.n {
-            let actual = compute_base_score(x, y, ctxt);
-            let stored = ctxt.classes_xy[idx(x, y, ctxt.n)].score;
-            assert_eq!(actual, stored);
-        }
+    for i in 0..ctxt.n {
+        let actual = compute_base_score(i, ctxt);
+        let stored = ctxt.classes_h[i as usize].score;
+        assert_eq!(actual, stored);
     }
 }
