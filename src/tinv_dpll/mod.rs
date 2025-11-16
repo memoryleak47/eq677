@@ -78,6 +78,25 @@ fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         }
         if b != 0 { return Err(()) }
     }
+
+    // 0 = f(f(y, 0), f(f(y, f(y, 0)), y))
+    // 0 = f(a, f(f(y, a), y))
+    // 0 = f(a, f(b, y))
+    // 0 = f(a, b)
+
+    for y in 0..ctxt.n {
+        let a = f(y, 0, ctxt); if a == E::MAX { continue }
+        let b = f(y, a, ctxt); if b == E::MAX { continue }
+        let b = f(b, y, ctxt); if b == E::MAX { continue }
+        let c = f(a, b, ctxt); if c == E::MAX {
+            // f(a, b) == 0
+            // <-> a + h(b-a) == 0
+            // <-> h(b-a) == -a
+            let n = ctxt.n;
+            return set((b+n-a)%n, (n-a)%n, ctxt);
+        }
+        if c != 0 { return Err(()) }
+    }
     Ok(())
 }
 
