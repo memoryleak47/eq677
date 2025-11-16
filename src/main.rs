@@ -16,6 +16,9 @@ pub use eq_dpll::*;
 mod sym_dpll;
 pub use sym_dpll::*;
 
+mod tinv_dpll;
+pub use tinv_dpll::*;
+
 mod c_dpll;
 pub use c_dpll::*;
 
@@ -56,5 +59,8 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    general_semitinv_search();
+    for i in 0..100 {
+        dbg!(i);
+        tinv_run(i);
+    }
 }
