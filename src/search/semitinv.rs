@@ -69,6 +69,10 @@ pub fn general_semitinv_search() {
                     f_def,
                 };
                 if f.is677() {
+                    dbg!(a);
+                    dbg!(b);
+                    dbg!(r);
+                    dbg!(&perm);
                     present_model(n, "general-semitinv", f_def);
                 }
             }
