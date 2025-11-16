@@ -66,6 +66,8 @@ fn score_c(c: CH) -> i32 {
     match c {
         CH::C11(..) => C11_SCORE,
         CH::C12(..) => C12_SCORE,
+        CH::C21(..) => C21_SCORE,
+        CH::C22(..) => C22_SCORE,
     }
 }
 
@@ -186,7 +188,8 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     let n = ctxt.n;
     while let Some((i, v)) = ctxt.propagate_queue.pop() {
         // spawn constraints!
-        visit_c11((n-i)%n, v, ctxt)?;
+        visit_c11((n-i)%n, (n-v)%n, ctxt)?;
+        visit_c21((n-i)%n, v, ctxt)?;
 
         let len = ctxt.classes_h[i as usize].cs.len();
         for j in 0..len {
