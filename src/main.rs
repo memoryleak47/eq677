@@ -59,7 +59,7 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for i in 0..100 {
+    for i in 0..22 {
         dbg!(i);
         tinv_run(i);
     }
