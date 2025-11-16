@@ -86,6 +86,17 @@ fn visit_c12(y: E, yab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let class = &mut ctxt.classes_h[yab as usize];
     let v = class.value;
     if v == E::MAX {
+        let neg_y = (n-y)%n;
+        // -y = h(-y + h(yab))
+        let class_hinv = &mut ctxt.classes_hinv[neg_y as usize];
+        let z = class_hinv.value;
+        if z != E::MAX {
+            // h(z) = -y
+            // -> z = -y + h(yab)
+            // -> h(yab) = y+z
+            return prove_pair(yab, (y+z)%n, ctxt);
+        }
+
         ctxt.trail.push(TrailEvent::PushCH(yab));
         class.cs.push(CH::C12(y));
         class.score += C12_SCORE;
@@ -121,6 +132,18 @@ pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let class = &mut ctxt.classes_h[neg_b as usize];
     let v = class.value;
     if v == E::MAX {
+        // -y - a = h(-a + b + h(-b))
+
+        let neg_ya = (n-y + n-a)%n;
+        let class_hinv = &mut ctxt.classes_hinv[neg_ya as usize];
+        let z = class_hinv.value;
+        if z != E::MAX {
+            // h(z) = -y-a
+            // -> -a + b + h(-b) = z
+            // -> h(-b) = z+a-b
+            return prove_pair(neg_b, (z+a+neg_b)%n, ctxt);
+        }
+
         ctxt.trail.push(TrailEvent::PushCH(neg_b));
         class.cs.push(CH::C22(y, a));
         class.score += C22_SCORE;
