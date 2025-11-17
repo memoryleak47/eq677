@@ -107,7 +107,22 @@ fn select_p(ctxt: &Ctxt) -> Option<E> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    present_model(ctxt.n as usize, "tinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
+    let n = ctxt.n;
+    if n > 2 {
+        let b = ctxt.classes_h[0].value;
+        let a = ctxt.classes_h[1].value - ctxt.classes_h[0].value;
+        // h[i] = a*x + b;
+        for i in 0..n {
+            print!("h[{i}] = {}, ", ctxt.classes_h[i as usize].value);
+        }
+        println!();
+        let linear = (0..n).all(|i| ctxt.classes_h[i as usize].value == (a*i + b)%n);
+        let selfinv = (0..n).all(|i| ctxt.classes_h[i as usize].value == ctxt.classes_hinv[i as usize].value);
+        println!("linear = {linear}");
+        println!("self-inverse = {selfinv}");
+        println!();
+    }
+    present_model(n as usize, "tinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
 }
 
 fn main_branch(ctxt: &mut Ctxt) {
