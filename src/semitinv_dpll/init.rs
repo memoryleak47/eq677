@@ -1,6 +1,6 @@
 use crate::semitinv_dpll::*;
 
-pub fn build_ctxt(n: usize) -> Ctxt {
+pub fn build_ctxt(r: E) -> Ctxt {
     let class_h = ClassH {
         value: E::MAX,
         cs: SmallVec::new(),
@@ -11,16 +11,18 @@ pub fn build_ctxt(n: usize) -> Ctxt {
     };
     let mut ctxt = Ctxt {
         trail: Vec::new(),
-        n: n as E,
+        r,
+        a: E::MAX,
+        b: E::MAX,
         classes_h: std::iter::repeat(class_h)
-            .take(n)
+            .take(r as usize)
             .collect(),
         classes_hinv: std::iter::repeat(class_hinv)
-            .take(n)
+            .take((r+1) as usize)
             .collect(),
         propagate_queue: Vec::new(),
     };
-    for i in 0..ctxt.n {
+    for i in 0..r {
         ctxt.classes_h[i as usize].score = compute_base_score(i, &ctxt);
     }
     ctxt

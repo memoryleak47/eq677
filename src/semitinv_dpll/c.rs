@@ -30,6 +30,8 @@ pub enum CH {
 }
 
 pub fn progress_c(c: CH, i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    todo!()
+/*
     let n = ctxt.n;
     match c {
         CH::C11(y) => {
@@ -60,10 +62,12 @@ pub fn progress_c(c: CH, i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             prove_pair((n-a + b + c)%n, (n-y + n-a)%n, ctxt)
         },
     }
+*/
 }
 
 // C1
 pub fn visit_c11(y: E, neg_a: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+/*
     let n = ctxt.n;
     let class = &mut ctxt.classes_h[neg_a as usize];
     let v = class.value;
@@ -79,9 +83,12 @@ pub fn visit_c11(y: E, neg_a: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         let yab = (y + a + b)%n;
         visit_c12(y, yab, ctxt)
     }
+*/
+    todo!()
 }
 
 fn visit_c12(y: E, yab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+/*
     let n = ctxt.n;
     let class = &mut ctxt.classes_h[yab as usize];
     let v = class.value;
@@ -107,10 +114,13 @@ fn visit_c12(y: E, yab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         // h(-y + c) = -y
         prove_pair((n-y+c)%n, (n-y)%n, ctxt)
     }
+    */
+    todo!()
 }
 
 // C2
 pub fn visit_c21(y: E, a: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    /*
     let n = ctxt.n;
     let class = &mut ctxt.classes_h[a as usize];
     let v = class.value;
@@ -125,9 +135,13 @@ pub fn visit_c21(y: E, a: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         let neg_b = (n-b)%n;
         visit_c22(y, a, neg_b, ctxt)
     }
+    */
+    todo!()
 }
 
 pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    todo!()
+    /*
     let n = ctxt.n;
     let class = &mut ctxt.classes_h[neg_b as usize];
     let v = class.value;
@@ -156,4 +170,5 @@ pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         let c = v;
         prove_pair((n-a + b + c)%n, (n-y + n-a)%n, ctxt)
     }
+*/
 }

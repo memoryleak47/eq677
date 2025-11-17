@@ -3,17 +3,25 @@ use crate::semitinv_dpll::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 const USE_COUNTER: bool = false;
-const DUMP_INFOS: bool = false;
-const SELF_INVERSE: bool = false;
 
-fn threading_depth(n: E) -> E { 4 }
+fn threading_depth(r: E) -> E { 2 }
 
 static RUNS_STARTED: AtomicUsize = AtomicUsize::new(0);
 static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn semitinv_run(n: usize) {
-    let mut ctxt = build_ctxt(n);
-    prerun(0, &mut ctxt);
+    if n < 2 { return }
+
+    let r = (n-1) as E;
+    let ctxt = build_ctxt(r);
+    for a in 0..r {
+        for b in 0..r {
+            let mut ctxt = ctxt.clone();
+            ctxt.a = a;
+            ctxt.b = b;
+            prerun(0, &mut ctxt);
+        }
+    }
 }
 
 pub fn semitinv_search() {
@@ -39,7 +47,7 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     // No need to have a trail, we won't backtrack in the prerun.
     ctxt.trail.clear();
 
-    if depth >= threading_depth(ctxt.n) {
+    if depth >= threading_depth(ctxt.r) {
         inc_counter(&RUNS_STARTED);
 
         main_branch(ctxt);
@@ -53,7 +61,7 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
         return;
     };
 
-    range_for_each(ctxt.n, |v| {
+    range_for_each(ctxt.r+1, |v| {
         if ctxt.classes_hinv[v as usize].value != E::MAX { return }
         let c = &mut ctxt.clone();
 
@@ -75,7 +83,7 @@ fn score_c(c: CH) -> i32 {
 
 fn pos_score(i: E, ctxt: &Ctxt) -> i32 {
     let ii = i as i32;
-    let ni = ctxt.n as i32;
+    let ni = ctxt.r as i32;
     ni - ii
 }
 
@@ -95,7 +103,7 @@ fn select_p(ctxt: &Ctxt) -> Option<E> {
     let mut best = E::MAX;
     let mut best_score = -1;
 
-    for i in 0..ctxt.n {
+    for i in 0..ctxt.r {
         let class = &ctxt.classes_h[i as usize];
         let score = class.score;
         if (class.value == E::MAX) & (score > best_score) {
@@ -109,21 +117,7 @@ fn select_p(ctxt: &Ctxt) -> Option<E> {
 }
 
 fn submit_model(ctxt: &Ctxt) {
-    let n = ctxt.n;
-    if DUMP_INFOS && n > 2 {
-        let b = ctxt.classes_h[0].value;
-        let a = ctxt.classes_h[1].value - ctxt.classes_h[0].value;
-        // h[i] = a*x + b;
-        for i in 0..n {
-            print!("h[{i}] = {}, ", ctxt.classes_h[i as usize].value);
-        }
-        println!();
-        let linear = (0..n).all(|i| ctxt.classes_h[i as usize].value == (a*i + b)%n);
-        let selfinv = (0..n).all(|i| ctxt.classes_h[i as usize].value == ctxt.classes_hinv[i as usize].value);
-        println!("linear = {linear}");
-        println!("self-inverse = {selfinv}");
-        println!();
-    }
+    let n = ctxt.r+1;
     present_model(n as usize, "semitinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
 }
 
@@ -140,7 +134,7 @@ fn main_branch(ctxt: &mut Ctxt) {
 // e is the next thing to try. If that doesn't work, we iterate from there.
 fn branch_options(i: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     loop {
-        if e >= ctxt.n { return Err(()) }
+        if e >= ctxt.r+1 { return Err(()) }
         if ctxt.classes_hinv[e as usize].value == E::MAX { break }
         e += 1;
     }
@@ -180,14 +174,6 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    prove_pair_impl(i, v, ctxt)?;
-    if SELF_INVERSE {
-        prove_pair_impl(v, i, ctxt)?;
-    }
-    Ok(())
-}
-
-pub fn prove_pair_impl(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let i_ref = &mut ctxt.classes_h[i as usize].value;
     let i_v = *i_ref;
     if i_v == v { return Ok(()) }
@@ -203,14 +189,8 @@ pub fn prove_pair_impl(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     Ok(())
 }
 
-// f(x, y) = z <-> x + h(y-x) = z <-> h(y-x) = z-x
-pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    let n = ctxt.n;
-    prove_pair((y+n-x)%n, (z+n-x)%n, ctxt)
-}
-
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
-    let n = ctxt.n;
+    let n = ctxt.r+1;
     while let Some((i, v)) = ctxt.propagate_queue.pop() {
         // spawn constraints!
         visit_c11((n-i)%n, (n-v)%n, ctxt)?;
@@ -227,7 +207,7 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 fn check_score(ctxt: &Ctxt) {
-    for i in 0..ctxt.n {
+    for i in 0..ctxt.r {
         let actual = compute_base_score(i, ctxt);
         let stored = ctxt.classes_h[i as usize].score;
         assert_eq!(actual, stored);

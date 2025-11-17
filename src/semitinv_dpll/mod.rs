@@ -31,7 +31,9 @@ struct Ctxt {
     trail: Vec<TrailEvent>,
     classes_h: Box<[ClassH]>,
     classes_hinv: Box<[ClassHInv]>,
-    n: E,
+    a: E,
+    b: E,
+    r: E, // n = r+1
     propagate_queue: Vec<(E, E)>, // contains (i, j) for h(i) = j
 }
 
@@ -42,17 +44,26 @@ enum TrailEvent {
     PushCH(E), // a new constraint is waiting for h(i) = ?.
 }
 
-// f(x, y) = x + h(y-x)
+// f(r, r) = r
+// f(i, r) = a+i
+// f(r, j) = b+j
+// f(i, j) = i + h(j-i)
 fn f(x: E, y: E, ctxt: &Ctxt) -> E {
-    let n = ctxt.n;
-     let i = (y+n-x)%n;
-     let v = ctxt.classes_h[i as usize].value;
-     if v == E::MAX { E::MAX } else { (x+v)%n }
+    let r = ctxt.r;
+    match (x == r, y == r) {
+        (true, true) => return r,
+        (false, true) => return (x + ctxt.a)%r,
+        (true, false) => return (y + ctxt.b)%r,
+        (false, false) => {},
+    }
+    let id = (y+r-x)%r;
+    let v = ctxt.classes_h[id as usize].value;
+    if v == E::MAX { E::MAX } else { (x+v)%r }
 }
 
 impl Ctxt {
     pub fn matrix(&self) -> MatrixMagma {
-        MatrixMagma::by_fn(self.n as usize, |x, y| {
+        MatrixMagma::by_fn(self.r as usize + 1, |x, y| {
             let z = f(x as E, y as E, self);
             if z == E::MAX { usize::MAX } else { z as usize }
         })
