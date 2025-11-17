@@ -3,6 +3,8 @@ use crate::tinv_dpll::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 const USE_COUNTER: bool = false;
+const DUMP_INFOS: bool = false;
+const SELF_INVERSE: bool = false;
 
 fn threading_depth(n: E) -> E { 4 }
 
@@ -108,7 +110,7 @@ fn select_p(ctxt: &Ctxt) -> Option<E> {
 
 fn submit_model(ctxt: &Ctxt) {
     let n = ctxt.n;
-    if n > 2 {
+    if DUMP_INFOS && n > 2 {
         let b = ctxt.classes_h[0].value;
         let a = ctxt.classes_h[1].value - ctxt.classes_h[0].value;
         // h[i] = a*x + b;
@@ -178,6 +180,14 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    prove_pair_impl(i, v, ctxt)?;
+    if SELF_INVERSE {
+        prove_pair_impl(v, i, ctxt)?;
+    }
+    Ok(())
+}
+
+pub fn prove_pair_impl(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let i_ref = &mut ctxt.classes_h[i as usize].value;
     let i_v = *i_ref;
     if i_v == v { return Ok(()) }

@@ -56,7 +56,7 @@ fn conj_d_bij(m: &MatrixMagma) {
 }
 
 fn conj_2_orbit(m: &MatrixMagma) {
-    if m.n > 60 { return } // for performance
+    if m.n > 40 { return } // for performance
 
     if !is_prime(m.n) { return }
 
