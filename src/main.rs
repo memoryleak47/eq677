@@ -19,6 +19,9 @@ pub use sym_dpll::*;
 mod tinv_dpll;
 pub use tinv_dpll::*;
 
+mod semitinv_dpll;
+pub use semitinv_dpll::*;
+
 mod c_dpll;
 pub use c_dpll::*;
 
@@ -61,6 +64,6 @@ fn main() {
 
     for i in 0..300 {
         dbg!(i);
-        tinv_run(i);
+        semitinv_run(i);
     }
 }
