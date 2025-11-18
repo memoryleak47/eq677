@@ -39,8 +39,12 @@ fn progress_c12(y: E, x: E, a2: E, a3: E, ctxt: &mut Ctxt) -> Result<(), ()> { p
 
 // called when f(x, y) = z gets proven.
 pub fn spawn_cs(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    visit_c11(y, z, x, ctxt)
+    spawn_c11(x, y, z, ctxt)?; // argument order always x, y, z.
+    Ok(())
 }
+
+// f(y, x) = a1.
+fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c11(x, a1, y, ctxt) }
 
 // C1
 pub fn visit_c11(x: E, a1: E, y: E, ctxt: &mut Ctxt) -> Result<(), ()> {
