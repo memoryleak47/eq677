@@ -193,13 +193,13 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     let n = ctxt.r+1;
     while let Some((i, v)) = ctxt.propagate_queue.pop() {
         // spawn constraints!
-        visit_c11((n-i)%n, (n-v)%n, ctxt)?;
-        visit_c21((n-i)%n, v, ctxt)?;
+        spawn_c11(0, i, v, ctxt)?;
+        spawn_c21(0, i, v, ctxt)?;
 
         let len = ctxt.classes_h[i as usize].cs.len();
         for j in 0..len {
             let c = ctxt.classes_h[i as usize].cs[j];
-            progress_c(c, i, v, ctxt)?;
+            progress_c(c, 0, i, v, ctxt)?;
         }
     }
 

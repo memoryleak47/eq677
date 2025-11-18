@@ -7,26 +7,77 @@ pub const C12_SCORE: i32 = 3000;
 pub const C21_SCORE: i32 = 2000;
 pub const C22_SCORE: i32 = 3000;
 
-//       0 = y + h(-y + h(y + h(-y) + h(-h(-y)))); i = -y
-// (C11) 0 = y + h(-y + h(y + a + h(-a))); i = -a
-// (C12) 0 = y + h(-y + h(y + a + b)); i = y + a + b
-//       0 = y + h(-y + c)
+//       x = f(y, f(x, f(f(y, x), y)))
+// (C11) x = f(y, f(x, f(a1, y)))
+// (C12) x = f(y, f(x, a2))
+//       x = f(y, a3)
 
-//       0 = y + h(-y) + h(-h(-y) + h(h(-y)) + h(-h(h(-y)))); i = -y
-// (C21) 0 = y + a + h(-a + h(a) + h(-h(a))); i = a
-// (C22) 0 = y + a + h(-a + b + h(-b)); i = -b
-//       0 = y + a + h(-a + b + c)
-
-// the visit_c** functions first get all the CH::C**(..) args, and then i.
-// progress_c also, but then also gets v.
+// argument order for visit_cij/spawn_cij and progress_c:
+// - everything contained in the constraint variant CH in order
+// - the query args (i.e. a, b of the query f(a, b)).
+// - the answer to the query (only for progress_c)
 
 #[derive(Clone, Copy)]
 pub enum CH {
-    C11(/*y*/ E),
-    C12(/*y*/ E),
+    C11(/*x*/ E), // query = f(a1, y) =: a2
+    C12(/*y*/ E), // query = f(x, a2) =: a3
 
     C21(/*y*/ E),
     C22(/*y*/ E, /*a*/ E),
+}
+
+pub fn progress_c(c: CH, x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    match c {
+        CH::C11(xx) => {
+            let (a1, y, a2) = (x, y, z);
+            visit_c12(y, xx, a2, ctxt)
+        },
+        CH::C12(yy) => {
+            let (x, a2, a3) = (x, y, z);
+            prove_triple(y, a3, x, ctxt)
+        },
+        _ => Ok(()), // TODO
+    }
+}
+
+// C1
+pub fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    // f(y, x) = a1 (where y=0)
+    // <-> h(x) = a1
+    let y = 0;
+    match try_f(a1, y, ctxt) {
+        Err(i) => {
+            ctxt.trail.push(TrailEvent::PushCH(i));
+            let class = &mut ctxt.classes_h[i as usize];
+            class.cs.push(CH::C11(x));
+            class.score += C11_SCORE;
+            Ok(())
+        },
+        Ok(a2) => visit_c12(y, x, a2, ctxt),
+    }
+}
+
+fn visit_c12(y: E, x: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    match try_f(x, a2, ctxt) {
+        Err(i) => {
+            ctxt.trail.push(TrailEvent::PushCH(i));
+            let class = &mut ctxt.classes_h[i as usize];
+            class.cs.push(CH::C12(y));
+            class.score += C12_SCORE;
+            Ok(())
+        },
+        Ok(a3) => prove_triple(y, a3, x, ctxt),
+    }
+}
+
+// C2
+// TODO
+pub fn spawn_c21(a: E, b: E, c: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    Ok(())
+}
+
+pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    Ok(())
 }
 
 // Ok(i) means: f(x, y) = i.
@@ -44,146 +95,21 @@ fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
     if v == E::MAX { Err(id) } else { Ok((x+v)%r) }
 }
 
-pub fn progress_c(c: CH, i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    todo!()
-/*
-    let n = ctxt.n;
-    match c {
-        CH::C11(y) => {
-            let a = (n-i)%n;
-            let yab = (y + a + v)%n;
-            visit_c12(y, yab, ctxt)
-        },
-        CH::C12(y) => {
-            // 0 = y + h(-y + v)
-            // -> h(-y + v) = -y
-            let n = ctxt.n;
-            prove_pair((n-y+v)%n, (n-y)%n, ctxt)
-        },
 
-        CH::C21(y) => {
-            let a = i;
-            let b = v;
-            let neg_b = (n-b)%n;
-            visit_c22(y, a, neg_b, ctxt)
-        },
+fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let r = ctxt.r;
+    match try_f(x, y, ctxt) {
+        Ok(z2) => assert(z == z2),
 
-        CH::C22(y, a) => {
-            // 0 = y + a + h(-a + b + c)
-            // <-> h(-a + b + c) = -y - a 
-            let neg_b = i;
-            let c = v;
-            let b = (n-neg_b)%n;
-            prove_pair((n-a + b + c)%n, (n-y + n-a)%n, ctxt)
-        },
+        // f(x, y) = x + h(y-x)
+        // <-> h(y-x) = f(x, y) - x
+        Err(i) => prove_pair(i, (z+r-x)%r, ctxt),
     }
-*/
 }
 
-// C1
-pub fn visit_c11(y: E, neg_a: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-/*
-    let n = ctxt.n;
-    let class = &mut ctxt.classes_h[neg_a as usize];
-    let v = class.value;
-    if v == E::MAX {
-        ctxt.trail.push(TrailEvent::PushCH(neg_a));
-        class.cs.push(CH::C11(y));
-        class.score += C11_SCORE;
-
-        Ok(())
-    } else {
-        let a = (n-neg_a)%n;
-        let b = v;
-        let yab = (y + a + b)%n;
-        visit_c12(y, yab, ctxt)
+fn assert(x: bool) -> Result<(), ()> {
+    match x {
+        true => Ok(()),
+        false => Err(()),
     }
-*/
-    todo!()
-}
-
-fn visit_c12(y: E, yab: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-/*
-    let n = ctxt.n;
-    let class = &mut ctxt.classes_h[yab as usize];
-    let v = class.value;
-    if v == E::MAX {
-        let neg_y = (n-y)%n;
-        // -y = h(-y + h(yab))
-        let class_hinv = &mut ctxt.classes_hinv[neg_y as usize];
-        let z = class_hinv.value;
-        if z != E::MAX {
-            // h(z) = -y
-            // -> z = -y + h(yab)
-            // -> h(yab) = y+z
-            return prove_pair(yab, (y+z)%n, ctxt);
-        }
-
-        ctxt.trail.push(TrailEvent::PushCH(yab));
-        class.cs.push(CH::C12(y));
-        class.score += C12_SCORE;
-
-        Ok(())
-    } else {
-        let c = v;
-        // h(-y + c) = -y
-        prove_pair((n-y+c)%n, (n-y)%n, ctxt)
-    }
-    */
-    todo!()
-}
-
-// C2
-pub fn visit_c21(y: E, a: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    /*
-    let n = ctxt.n;
-    let class = &mut ctxt.classes_h[a as usize];
-    let v = class.value;
-    if v == E::MAX {
-        ctxt.trail.push(TrailEvent::PushCH(a));
-        class.cs.push(CH::C21(y));
-        class.score += C21_SCORE;
-
-        Ok(())
-    } else {
-        let b = v;
-        let neg_b = (n-b)%n;
-        visit_c22(y, a, neg_b, ctxt)
-    }
-    */
-    todo!()
-}
-
-pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    todo!()
-    /*
-    let n = ctxt.n;
-    let class = &mut ctxt.classes_h[neg_b as usize];
-    let v = class.value;
-    if v == E::MAX {
-        // -y - a = h(-a + b + h(-b))
-
-        let neg_ya = (n-y + n-a)%n;
-        let class_hinv = &mut ctxt.classes_hinv[neg_ya as usize];
-        let z = class_hinv.value;
-        if z != E::MAX {
-            // h(z) = -y-a
-            // -> -a + b + h(-b) = z
-            // -> h(-b) = z+a-b
-            return prove_pair(neg_b, (z+a+neg_b)%n, ctxt);
-        }
-
-        ctxt.trail.push(TrailEvent::PushCH(neg_b));
-        class.cs.push(CH::C22(y, a));
-        class.score += C22_SCORE;
-
-        Ok(())
-    } else {
-        // 0 = y + a + h(-a + b + c)
-        // <-> h(-a + b + c) = -y - a 
-        let b = (n-neg_b)%n;
-        let c = v;
-        prove_pair((n-a + b + c)%n, (n-y + n-a)%n, ctxt)
-    }
-*/
 }
