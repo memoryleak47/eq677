@@ -28,17 +28,14 @@ pub enum CH {
 
 pub fn progress_c(c: CH, x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
-        CH::C11(xx) => {
-            let (a1, y, a2) = (x, y, z);
-            visit_c12(y, xx, a2, ctxt)
-        },
-        CH::C12(yy) => {
-            let (x, a2, a3) = (x, y, z);
-            prove_triple(y, a3, x, ctxt)
-        },
-        _ => Ok(()), // TODO
+        CH::C11(c1) => progress_c11(c1, x, y, z, ctxt),
+        CH::C12(c1) => progress_c12(c1, x, y, z, ctxt),
+        _ => Ok(()),
     }
 }
+
+fn progress_c11(x: E, a1: E, y: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c12(y, x, a2, ctxt) } 
+fn progress_c12(y: E, x: E, a2: E, a3: E, ctxt: &mut Ctxt) -> Result<(), ()> { prove_triple(y, a3, x, ctxt) }
 
 // C1
 pub fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
@@ -47,26 +44,20 @@ pub fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let y = 0;
     match try_f(a1, y, ctxt) {
         Err(i) => {
-            ctxt.trail.push(TrailEvent::PushCH(i));
-            let class = &mut ctxt.classes_h[i as usize];
-            class.cs.push(CH::C11(x));
-            class.score += C11_SCORE;
+            add_c(CH::C11(x), i, ctxt);
             Ok(())
         },
-        Ok(a2) => visit_c12(y, x, a2, ctxt),
+        Ok(a2) => progress_c11(y, x, a1, a2, ctxt),
     }
 }
 
 fn visit_c12(y: E, x: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match try_f(x, a2, ctxt) {
         Err(i) => {
-            ctxt.trail.push(TrailEvent::PushCH(i));
-            let class = &mut ctxt.classes_h[i as usize];
-            class.cs.push(CH::C12(y));
-            class.score += C12_SCORE;
+            add_c(CH::C12(y), i, ctxt);
             Ok(())
         },
-        Ok(a3) => prove_triple(y, a3, x, ctxt),
+        Ok(a3) => progress_c12(y, x, a2, a3, ctxt),
     }
 }
 
@@ -112,4 +103,11 @@ fn assert(x: bool) -> Result<(), ()> {
         true => Ok(()),
         false => Err(()),
     }
+}
+
+fn add_c(c: CH, i: E, ctxt: &mut Ctxt) {
+    ctxt.trail.push(TrailEvent::PushCH(i));
+    let class = &mut ctxt.classes_h[i as usize];
+    class.cs.push(c);
+    class.score += score_c(c);
 }

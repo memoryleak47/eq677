@@ -72,7 +72,7 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     });
 }
 
-fn score_c(c: CH) -> i32 {
+pub fn score_c(c: CH) -> i32 {
     match c {
         CH::C11(..) => C11_SCORE,
         CH::C12(..) => C12_SCORE,
