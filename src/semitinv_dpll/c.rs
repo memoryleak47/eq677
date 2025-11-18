@@ -12,10 +12,10 @@ pub const C22_SCORE: i32 = 3000;
 // (C12) x = f(y, f(x, a2))
 //       x = f(y, a3)
 
-// argument order for visit_cij and progress_c:
+// argument order for visit_cij and progress_c/progress_cij:
 // - everything contained in the constraint variant CH in order
 // - the query args (i.e. a, b of the query f(a, b)).
-// - the answer to the query (only for progress_c)
+// - the answer to the query (only for progress_c/progress_cij)
 
 #[derive(Clone, Copy)]
 pub enum CH {
