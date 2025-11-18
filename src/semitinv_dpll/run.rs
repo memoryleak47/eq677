@@ -178,7 +178,11 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
     }
 }
 
+// we proved h(i) = v.
+// i may not be r, but v may.
 pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    assert!(i < ctxt.r);
+
     let i_ref = &mut ctxt.classes_h[i as usize].value;
     let i_v = *i_ref;
     if i_v == v { return Ok(()) }

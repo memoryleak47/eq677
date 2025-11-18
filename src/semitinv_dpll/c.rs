@@ -114,9 +114,14 @@ fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match try_f(x, y, ctxt) {
         Ok(z2) => assert(z == z2),
 
+        // note: if x=r or y=r, then we are guaranteed to be in the Ok-case above.
+        // Thus we are in case four:
         // f(x, y) = x + h(y-x)
         // <-> h(y-x) = f(x, y) - x
-        Err(i) => prove_pair(i, (z+r-x)%r, ctxt),
+        Err(i) => {
+            let v = if z == r { r } else { (z+r-x)%r };
+            prove_pair(i, v, ctxt)
+        },
     }
 }
 
