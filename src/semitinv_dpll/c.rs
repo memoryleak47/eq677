@@ -29,6 +29,21 @@ pub enum CH {
     C22(/*y*/ E, /*a*/ E),
 }
 
+// Ok(i) means: f(x, y) = i.
+// Err(i) means: you are blocked on the computation of h(i).
+fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
+    let r = ctxt.r;
+    match (x == r, y == r) {
+        (true, true) => return Ok(r),
+        (false, true) => return Ok((x + ctxt.a)%r),
+        (true, false) => return Ok((y + ctxt.b)%r),
+        (false, false) => {},
+    }
+    let id = (y+r-x)%r;
+    let v = ctxt.classes_h[id as usize].value;
+    if v == E::MAX { Err(id) } else { Ok((x+v)%r) }
+}
+
 pub fn progress_c(c: CH, i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     todo!()
 /*
