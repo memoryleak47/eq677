@@ -89,7 +89,7 @@ pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 // f(r, r) = r
 // f(i, r) = a+i
 // f(r, j) = b+j
-// f(i, j) = i + h(j-i)
+// f(i, j) = i + h(j-i), where i+r = r.
 
 // Ok(i) means: f(x, y) = i.
 // Err(i) means: you are blocked on the computation of h(i).
