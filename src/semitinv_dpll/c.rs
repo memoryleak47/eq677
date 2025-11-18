@@ -44,6 +44,7 @@ pub fn spawn_cs(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         dbg!(y);
         dbg!(z);
         dbg!(f(x, y, ctxt));
+        dbg!(ctxt.classes_h.iter().map(|x| x.value).collect::<Vec<_>>());
         panic!("spawn_cs called on untrue triple.");
     }
 
@@ -102,7 +103,9 @@ pub fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
     }
     let id = (y+r-x)%r;
     let v = ctxt.classes_h[id as usize].value;
-    if v == E::MAX { Err(id) } else { Ok((x+v)%r) }
+    if v == E::MAX { Err(id) }
+    else if v == r { Ok(r) }
+    else { Ok((x+v)%r) }
 }
 
 
