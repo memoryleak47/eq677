@@ -39,6 +39,14 @@ fn progress_c12(y: E, x: E, a2: E, a3: E, ctxt: &mut Ctxt) -> Result<(), ()> { p
 
 // called when f(x, y) = z gets proven.
 pub fn spawn_cs(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    if f(x, y, ctxt) != z {
+        dbg!(x);
+        dbg!(y);
+        dbg!(z);
+        dbg!(f(x, y, ctxt));
+        panic!("spawn_cs called on untrue triple.");
+    }
+
     spawn_c11(x, y, z, ctxt)?; // argument order always x, y, z.
     Ok(())
 }
@@ -77,9 +85,14 @@ pub fn visit_c22(y: E, a: E, neg_b: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     Ok(())
 }
 
+// f(r, r) = r
+// f(i, r) = a+i
+// f(r, j) = b+j
+// f(i, j) = i + h(j-i)
+
 // Ok(i) means: f(x, y) = i.
 // Err(i) means: you are blocked on the computation of h(i).
-fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
+pub fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
     let r = ctxt.r;
     match (x == r, y == r) {
         (true, true) => return Ok(r),

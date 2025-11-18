@@ -44,21 +44,11 @@ enum TrailEvent {
     PushCH(E), // a new constraint is waiting for h(i) = ?.
 }
 
-// f(r, r) = r
-// f(i, r) = a+i
-// f(r, j) = b+j
-// f(i, j) = i + h(j-i)
 fn f(x: E, y: E, ctxt: &Ctxt) -> E {
-    let r = ctxt.r;
-    match (x == r, y == r) {
-        (true, true) => return r,
-        (false, true) => return (x + ctxt.a)%r,
-        (true, false) => return (y + ctxt.b)%r,
-        (false, false) => {},
+    match try_f(x, y, ctxt) {
+        Ok(z) => z,
+        Err(_) => E::MAX,
     }
-    let id = (y+r-x)%r;
-    let v = ctxt.classes_h[id as usize].value;
-    if v == E::MAX { E::MAX } else { (x+v)%r }
 }
 
 impl Ctxt {
