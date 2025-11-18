@@ -12,7 +12,7 @@ pub const C22_SCORE: i32 = 3000;
 // (C12) x = f(y, f(x, a2))
 //       x = f(y, a3)
 
-// argument order for visit_cij/spawn_cij and progress_c:
+// argument order for visit_cij and progress_c:
 // - everything contained in the constraint variant CH in order
 // - the query args (i.e. a, b of the query f(a, b)).
 // - the answer to the query (only for progress_c)
@@ -37,17 +37,19 @@ pub fn progress_c(c: CH, x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 fn progress_c11(x: E, a1: E, y: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c12(y, x, a2, ctxt) } 
 fn progress_c12(y: E, x: E, a2: E, a3: E, ctxt: &mut Ctxt) -> Result<(), ()> { prove_triple(y, a3, x, ctxt) }
 
+// called when f(x, y) = z gets proven.
+pub fn spawn_cs(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    visit_c11(y, z, x, ctxt)
+}
+
 // C1
-pub fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    // f(y, x) = a1 (where y=0)
-    // <-> h(x) = a1
-    let y = 0;
+pub fn visit_c11(x: E, a1: E, y: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match try_f(a1, y, ctxt) {
         Err(i) => {
             add_c(CH::C11(x), i, ctxt);
             Ok(())
         },
-        Ok(a2) => progress_c11(y, x, a1, a2, ctxt),
+        Ok(a2) => progress_c11(x, a1, y, a2, ctxt),
     }
 }
 
@@ -63,7 +65,7 @@ fn visit_c12(y: E, x: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 
 // C2
 // TODO
-pub fn spawn_c21(a: E, b: E, c: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+pub fn visit_c21(a: E, b: E, c: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     Ok(())
 }
 

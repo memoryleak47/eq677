@@ -192,9 +192,7 @@ pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     let n = ctxt.r+1;
     while let Some((i, v)) = ctxt.propagate_queue.pop() {
-        // spawn constraints!
-        spawn_c11(0, i, v, ctxt)?;
-        spawn_c21(0, i, v, ctxt)?;
+        spawn_cs(0, i, v, ctxt)?;
 
         let len = ctxt.classes_h[i as usize].cs.len();
         for j in 0..len {
