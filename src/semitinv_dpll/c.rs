@@ -28,7 +28,7 @@ pub enum CH {
 
 pub fn progress_c(c: CH, x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
-        CH::C11(c1) => progress_c11(c1, x, y, z, ctxt),
+        CH::C11(c1) => progress_c11(c1, x, y, z, ctxt), // always argument order c1, ..., ck, x, y, z
         CH::C12(c1) => progress_c12(c1, x, y, z, ctxt),
         _ => Ok(()),
     }
