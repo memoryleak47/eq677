@@ -19,6 +19,11 @@ pub fn semitinv_run(n: usize) {
             let mut ctxt = ctxt.clone();
             ctxt.a = a;
             ctxt.b = b;
+
+            if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
+            if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
+            if propagate(&mut ctxt).is_err() { continue }
+
             prerun(0, &mut ctxt);
         }
     }
