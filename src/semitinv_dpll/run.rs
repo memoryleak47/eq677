@@ -17,9 +17,8 @@ pub fn semitinv_run(n: usize) {
     for a in 0..r {
         for b in 0..r {
             let mut ctxt = ctxt.clone();
-            println!("-------");
-            ctxt.a = dbg!(a);
-            ctxt.b = dbg!(b);
+            ctxt.a = a;
+            ctxt.b = b;
 
             if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
             if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
@@ -188,7 +187,6 @@ pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let hi_ref = &mut ctxt.classes_hinv[v as usize].value;
     if *hi_ref != E::MAX { return Err(()); }
 
-    println!("h({i}) = {v}");
     *i_ref = v;
     *hi_ref = i;
     ctxt.trail.push(TrailEvent::DefineClass(i));
