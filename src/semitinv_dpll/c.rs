@@ -106,7 +106,7 @@ pub fn spawn_cs(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 // f(y, x) = a1.
-fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c11(x, a1, y, ctxt) }
+fn spawn_c11(y: E, x: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c11(x, y, a1, ctxt) }
 
 
 fn assert(x: bool) -> Result<(), ()> {
