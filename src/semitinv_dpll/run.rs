@@ -20,6 +20,7 @@ pub fn semitinv_run(n: usize) {
             ctxt.a = a;
             ctxt.b = b;
 
+            if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { continue 'here; }
             for o in 0..r {
                 if spawn_cs(o, r, (a+o)%r, &mut ctxt).is_err() { continue 'here; }
                 if spawn_cs(r, o, (b+o)%r, &mut ctxt).is_err() { continue 'here; }
