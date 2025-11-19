@@ -67,7 +67,7 @@ fn prerun(depth: E, ctxt: &mut Ctxt) {
     };
 
     range_for_each(ctxt.r+1, |v| {
-        if ctxt.classes_hinv[v as usize].value != E::MAX { return }
+        if infeasible_decision(i, v, ctxt) { return }
         let c = &mut ctxt.clone();
 
         if prove_pair(i, v, c).is_err() { return }
@@ -140,7 +140,7 @@ fn main_branch(ctxt: &mut Ctxt) {
 fn branch_options(i: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     loop {
         if e >= ctxt.r+1 { return Err(()) }
-        if ctxt.classes_hinv[e as usize].value == E::MAX { break }
+        if !infeasible_decision(i, e, ctxt) { break }
         e += 1;
     }
     ctxt.trail.push(TrailEvent::Decision(i, e));
@@ -219,4 +219,15 @@ fn check_score(ctxt: &Ctxt) {
         let stored = ctxt.classes_h[i as usize].score;
         assert_eq!(actual, stored);
     }
+}
+
+// h(i) = v is disallowed.
+fn infeasible_decision(i: E, v: E, ctxt: &Ctxt) -> bool {
+    assert!(i != ctxt.r);
+    assert!(ctxt.classes_h[i as usize].value == E::MAX);
+
+    if ctxt.classes_hinv[v as usize].value != E::MAX { return true }
+    if ctxt.a == v { return true }
+
+    false
 }
