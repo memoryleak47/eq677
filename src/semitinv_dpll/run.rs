@@ -136,7 +136,7 @@ fn main_branch(ctxt: &mut Ctxt) {
     else { become main_backtrack(ctxt); }
 }
 
-// e is the next thing to try. If that doesn't work, we iterate from there.
+// e_start is the next thing to try. If that doesn't work, we iterate from there.
 fn branch_options(i: E, e_start: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     for e in e_start..=ctxt.r {
         if infeasible_decision(i, e, ctxt) { continue }
