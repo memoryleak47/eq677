@@ -137,16 +137,15 @@ fn main_branch(ctxt: &mut Ctxt) {
 }
 
 // e is the next thing to try. If that doesn't work, we iterate from there.
-fn branch_options(i: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    loop {
-        if e >= ctxt.r+1 { return Err(()) }
-        if !infeasible_decision(i, e, ctxt) { break }
-        e += 1;
-    }
-    ctxt.trail.push(TrailEvent::Decision(i, e));
-    prove_pair(i, e, ctxt)?;
+fn branch_options(i: E, e_start: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    for e in e_start..=ctxt.r {
+        if infeasible_decision(i, e, ctxt) { continue }
 
-    Ok(())
+        ctxt.trail.push(TrailEvent::Decision(i, e));
+        prove_pair(i, e, ctxt)?;
+        return Ok(());
+    }
+    Err(())
 }
 
 fn main_backtrack(ctxt: &mut Ctxt) {
