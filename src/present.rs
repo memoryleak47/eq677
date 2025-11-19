@@ -28,6 +28,8 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     if n < 52 {
         println!("Model of size {n} found by {finder}:");
         magma.cycle_dump();
+        println!("Canon:");
+        magma.canonicalize2().dump();
     } else {
         println!("Model found of size {n} found by {finder}");
     }
