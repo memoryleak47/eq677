@@ -15,13 +15,15 @@ pub fn semitinv_run(n: usize) {
     let r = (n-1) as E;
     let ctxt = build_ctxt(r);
     for a in 0..r {
-        for b in 0..r {
+        'here: for b in 0..r {
             let mut ctxt = ctxt.clone();
             ctxt.a = a;
             ctxt.b = b;
 
-            if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
-            if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
+            for o in 0..r {
+                if spawn_cs(o, r, (a+o)%r, &mut ctxt).is_err() { continue 'here; }
+                if spawn_cs(r, o, (b+o)%r, &mut ctxt).is_err() { continue 'here; }
+            }
             if propagate(&mut ctxt).is_err() { continue }
 
             prerun(0, &mut ctxt);
@@ -81,8 +83,6 @@ pub fn score_c(c: CH) -> i32 {
     match c {
         CH::C11(..) => C11_SCORE,
         CH::C12(..) => C12_SCORE,
-        CH::C21(..) => C21_SCORE,
-        CH::C22(..) => C22_SCORE,
     }
 }
 
@@ -198,14 +198,21 @@ pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 }
 
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
-    let n = ctxt.r+1;
+    let r = ctxt.r;
+    let n = r+1;
     while let Some((i, v)) = ctxt.propagate_queue.pop() {
-        spawn_cs(0, i, v, ctxt)?;
+        for o in 0..r {
+            if v == r {
+                spawn_cs(o, (o+i)%r, r, ctxt)?;
+            } else {
+                spawn_cs(o, (o+i)%r, (o+v)%r, ctxt)?;
+            }
+        }
 
         let len = ctxt.classes_h[i as usize].cs.len();
         for j in 0..len {
             let c = ctxt.classes_h[i as usize].cs[j];
-            progress_c(c, 0, i, v, ctxt)?;
+            progress_c(c, ctxt)?;
         }
     }
 
