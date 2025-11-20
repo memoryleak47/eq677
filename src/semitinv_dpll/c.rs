@@ -54,8 +54,12 @@ pub fn visit_c11(x: E, y: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 fn visit_c12(x: E, y: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match try_f(x, a2, ctxt) {
         Err(i) => {
-            add_c(CH::C12(x, y, a2), i, ctxt);
-            Ok(())
+            if let Ok(a3) = try_g(y, x, ctxt) {
+                prove_triple(x, a2, a3, ctxt)
+            } else {
+                add_c(CH::C12(x, y, a2), i, ctxt);
+                Ok(())
+            }
         },
         Ok(a3) => progress_c12(x, y, a2, a3, ctxt),
     }
@@ -65,8 +69,12 @@ fn visit_c12(x: E, y: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
 pub fn visit_c21(x: E, y: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     match try_f(y, a1, ctxt) {
         Err(i) => {
-            add_c(CH::C21(x, y, a1), i, ctxt);
-            Ok(())
+            if let Ok(a3) = try_g(a1, x, ctxt) {
+                prove_triple(a1, a3, x, ctxt)
+            } else {
+                add_c(CH::C21(x, y, a1), i, ctxt);
+                Ok(())
+            }
         },
         Ok(a2) => progress_c21(x, y, a1, a2, ctxt),
     }
@@ -104,6 +112,11 @@ pub fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
     else { Ok((x+v)%r) }
 }
 
+// Ok(y) means: f(x, y) = z.
+// Err(()) means: we don't know.
+pub fn try_g(x: E, z: E, ctxt: &Ctxt) -> Result<E, ()> {
+    Err(())
+}
 
 fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let r = ctxt.r;
