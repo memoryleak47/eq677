@@ -23,7 +23,8 @@ pub fn semitinv_run(n: usize) {
         if prove_pair((r-a)%r, h_nega, &mut ctxt).is_err() { return }
 
         // r = h(b + a + h(-a)).
-        if prove_pair((h_nega + a + b)%r, r, &mut ctxt).is_err() { return }
+        let c = (h_nega + a + b)%r;
+        if prove_pair(c, r, &mut ctxt).is_err() { return }
 
         if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { return }
         if spawn_cs(0, r, a, &mut ctxt).is_err() { return }
