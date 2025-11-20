@@ -115,7 +115,42 @@ pub fn try_f(x: E, y: E, ctxt: &Ctxt) -> Result<E, E> {
 // Ok(y) means: f(x, y) = z.
 // Err(()) means: we don't know.
 pub fn try_g(x: E, z: E, ctxt: &Ctxt) -> Result<E, ()> {
-    Err(())
+    let r = ctxt.r;
+    match (x == r, z == r) {
+        (true, true) => return Ok(r),
+        (false, true) => {
+            let i = ctxt.classes_hinv[r as usize].value;
+            if i == E::MAX { return Err(()) }
+            // f(x, x+i) = r <-> h(i) = r
+            Ok((x+i)%r)
+        },
+        (true, false) => {
+            // f(r, ?) = z
+            // <-> b + ? = z
+            // <-> ? = z-b
+            Ok((z + r - ctxt.b)%r)
+        },
+        (false, false) => {
+            // f(x, ?) = z
+
+            // if f(x, r) = z works, take it:
+
+            // f(x, r) = z
+            // <-> a + x = z
+            if (ctxt.a + x)%r == z {
+                Ok(r)
+            } else {
+                // f(x, y) = z
+                // <-> x + h(y-x) = z
+                // <-> h(y-x) = z-x
+                let i = ctxt.classes_hinv[((z+r-x)%r) as usize].value;
+                if i == E::MAX { return Err(()) }
+                // i = y-x
+                // <-> y = x+i
+                Ok((x+i)%r)
+            }
+        },
+    }
 }
 
 fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
