@@ -13,6 +13,7 @@ type RecExpr = egg::RecExpr<MagmaLang>;
 define_language! {
     enum MagmaLang {
         "f" = F([Id; 2]),
+        "g" = G([Id; 2]),
         "phi" = Phi(Id),
         "invphi" = InvPhi(Id),
         E(usize),
@@ -155,9 +156,13 @@ fn eggify(m: &MatrixMagma) -> EGraph {
         for y in 0..m.n {
             let x_ = eg.lookup(MagmaLang::E(x)).unwrap();
             let y_ = eg.lookup(MagmaLang::E(y)).unwrap();
+
             let fxy_ = eg.add(MagmaLang::F([x_, y_]));
             let z_ = eg.lookup(MagmaLang::E(m.f(x, y))).unwrap();
             eg.union(z_, fxy_);
+
+            let gxz_ = eg.add(MagmaLang::G([x_, z_]));
+            eg.union(y_, gxz_);
         }
     }
     eg.rebuild();
@@ -174,9 +179,10 @@ impl CostFunction<MagmaLang> for MySize {
     fn cost<C>(&mut self, enode: &MagmaLang, mut costs: C) -> usize where C: FnMut(Id) -> usize {
         match *enode {
             MagmaLang::F([a, b]) => costs(a) + costs(b),
+            MagmaLang::G([a, b]) => costs(a) + costs(b) + 3, // often cancels out with f in useless ways.
             MagmaLang::Phi(a) => costs(a) + 1,
-            MagmaLang::InvPhi(a) => costs(a) + 1,
-            MagmaLang::E(_) => 3,
+            MagmaLang::InvPhi(a) => costs(a) + 4, // often cancels out with phi in useless ways.
+            MagmaLang::E(_) => 2,
             MagmaLang::X => 1,
             MagmaLang::Y => 1,
         }
