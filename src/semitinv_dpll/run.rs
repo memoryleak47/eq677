@@ -14,26 +14,22 @@ pub fn semitinv_run(n: usize) {
 
     let r = (n-1) as E;
     let ctxt = build_ctxt(r);
-    for a in 0..r {
-        for b in 0..r {
-            for h_nega in 0..r {
-                let mut ctxt = ctxt.clone();
-                ctxt.a = a;
-                ctxt.b = b;
+    for (a, b, h_nega) in itertools::iproduct!(0..r, 0..r, 0..r) {
+        let mut ctxt = ctxt.clone();
+        ctxt.a = a;
+        ctxt.b = b;
 
-                if prove_pair((r-a)%r, h_nega, &mut ctxt).is_err() { continue }
+        if prove_pair((r-a)%r, h_nega, &mut ctxt).is_err() { continue }
 
-                // r = h(b + a + h(-a)).
-                if prove_pair((h_nega + a + b)%r, r, &mut ctxt).is_err() { continue }
+        // r = h(b + a + h(-a)).
+        if prove_pair((h_nega + a + b)%r, r, &mut ctxt).is_err() { continue }
 
-                if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { continue }
-                if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
-                if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
-                if propagate(&mut ctxt).is_err() { continue }
+        if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { continue }
+        if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
+        if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
+        if propagate(&mut ctxt).is_err() { continue }
 
-                prerun(0, &mut ctxt);
-            }
-        }
+        prerun(0, &mut ctxt);
     }
 }
 
