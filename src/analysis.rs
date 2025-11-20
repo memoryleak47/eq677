@@ -5,6 +5,7 @@ use egg::*;
 use std::collections::HashSet;
 
 const FILTER_THRESHOLD: usize = 5;
+const PHI: bool = true;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
 type RecExpr = egg::RecExpr<MagmaLang>;
@@ -12,6 +13,8 @@ type RecExpr = egg::RecExpr<MagmaLang>;
 define_language! {
     enum MagmaLang {
         "f" = F([Id; 2]),
+        "phi" = Phi(Id),
+        "invphi" = InvPhi(Id),
         E(usize),
         "X" = X,
         "Y" = Y,
@@ -84,6 +87,23 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
     eg.add(MagmaLang::Y);
 
     for x in 0..m.n {
+        eg.add(MagmaLang::E(x));
+    }
+
+    if PHI {
+        for x in 0..m.n {
+            let xx = eg.lookup(MagmaLang::E(x)).unwrap();
+            let yy = eg.lookup(MagmaLang::E((x+1)%m.n)).unwrap();
+
+            let phi_xx = eg.add(MagmaLang::Phi(xx));
+            eg.union(yy, phi_xx);
+
+            let invphi_yy = eg.add(MagmaLang::InvPhi(yy));
+            eg.union(xx, invphi_yy);
+        }
+    }
+
+    for x in 0..m.n {
         for y in 0..m.n {
             let mut eg = eg.clone();
 
@@ -154,6 +174,8 @@ impl CostFunction<MagmaLang> for MySize {
     fn cost<C>(&mut self, enode: &MagmaLang, mut costs: C) -> usize where C: FnMut(Id) -> usize {
         match *enode {
             MagmaLang::F([a, b]) => costs(a) + costs(b),
+            MagmaLang::Phi(a) => costs(a) + 1,
+            MagmaLang::InvPhi(a) => costs(a) + 1,
             MagmaLang::E(_) => 3,
             MagmaLang::X => 1,
             MagmaLang::Y => 1,
