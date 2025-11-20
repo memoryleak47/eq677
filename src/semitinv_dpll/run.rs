@@ -14,23 +14,25 @@ pub fn semitinv_run(n: usize) {
 
     let r = (n-1) as E;
     let ctxt = build_ctxt(r);
-    for (a, b, h_nega) in itertools::iproduct!(0..r, 0..r, 0..r) {
+    let iters: Vec<_> = itertools::iproduct!(0..r, 0..r, 0..r).collect();
+    into_par_for_each(iters, |(a, b, h_nega)| {
         let mut ctxt = ctxt.clone();
         ctxt.a = a;
         ctxt.b = b;
 
-        if prove_pair((r-a)%r, h_nega, &mut ctxt).is_err() { continue }
+        if prove_pair((r-a)%r, h_nega, &mut ctxt).is_err() { return }
 
         // r = h(b + a + h(-a)).
-        if prove_pair((h_nega + a + b)%r, r, &mut ctxt).is_err() { continue }
+        if prove_pair((h_nega + a + b)%r, r, &mut ctxt).is_err() { return }
 
-        if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { continue }
-        if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
-        if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
-        if propagate(&mut ctxt).is_err() { continue }
+        if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { return }
+        if spawn_cs(0, r, a, &mut ctxt).is_err() { return }
+        if spawn_cs(r, 0, b, &mut ctxt).is_err() { return }
+        if propagate(&mut ctxt).is_err() { return }
 
-        prerun(0, &mut ctxt);
-    }
+        // prerun is unnecessary due to the large amount of model splitting.
+        main_branch(&mut ctxt);
+    });
 }
 
 pub fn semitinv_search() {
