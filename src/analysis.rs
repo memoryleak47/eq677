@@ -126,6 +126,14 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
     let eg = out.unwrap();
     let ex = Extractor::new(&eg, MySize);
 
+    if PHI {
+        let x = eg.lookup(MagmaLang::X).unwrap();
+        if let Some(phi_x) = eg.lookup(MagmaLang::Phi(x)) {
+            let phi_def = ex.find_best(phi_x).1;
+            println!("phi(X) = {phi_def}");
+        }
+    }
+
     let mut equations = HashSet::new();
     for c in eg.classes() {
         let lhs = ex.find_best(c.id).1;
