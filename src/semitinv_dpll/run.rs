@@ -137,6 +137,13 @@ fn submit_model(ctxt: &Ctxt) {
         dbg!(c);
         for i in 0..r { print!("h({i}) = {}; ", h(i)); }
         println!();
+
+        // facts:
+        assert!(h((a+b)%r) == (r-b)%r);
+        assert!(c == (a + b + h((r-a)%r))%r);
+        assert!((r-a)%r != c);
+        if b == dbg!((2*c)%r) { assert!((2*a)%r == b); }
+
         println!("-----");
     }
     present_model(n as usize, "semitinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
