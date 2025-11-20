@@ -124,6 +124,21 @@ fn select_p(ctxt: &Ctxt) -> Option<E> {
 
 fn submit_model(ctxt: &Ctxt) {
     let n = ctxt.r+1;
+    {
+        let r = ctxt.r;
+        let a = ctxt.a;
+        let b = ctxt.b;
+        let h = |i: E| ctxt.classes_h[i as usize].value;
+        let c = (0..r).find(|i| h(*i) == r).unwrap();
+        println!("-----");
+        dbg!(r);
+        dbg!(a);
+        dbg!(b);
+        dbg!(c);
+        for i in 0..r { print!("h({i}) = {}; ", h(i)); }
+        println!();
+        println!("-----");
+    }
     present_model(n as usize, "semitinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
 }
 
