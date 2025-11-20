@@ -15,16 +15,14 @@ pub fn semitinv_run(n: usize) {
     let r = (n-1) as E;
     let ctxt = build_ctxt(r);
     for a in 0..r {
-        'here: for b in 0..r {
+        for b in 0..r {
             let mut ctxt = ctxt.clone();
             ctxt.a = a;
             ctxt.b = b;
 
-            if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { continue 'here; }
-            for o in 0..r {
-                if spawn_cs(o, r, (a+o)%r, &mut ctxt).is_err() { continue 'here; }
-                if spawn_cs(r, o, (b+o)%r, &mut ctxt).is_err() { continue 'here; }
-            }
+            if prove_pair((a+b)%r, (r-b)%r, &mut ctxt).is_err() { continue }
+            if spawn_cs(0, r, a, &mut ctxt).is_err() { continue }
+            if spawn_cs(r, 0, b, &mut ctxt).is_err() { continue }
             if propagate(&mut ctxt).is_err() { continue }
 
             prerun(0, &mut ctxt);
@@ -224,13 +222,7 @@ pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     let r = ctxt.r;
     let n = r+1;
     while let Some((i, v)) = ctxt.propagate_queue.pop() {
-        for o in 0..r {
-            if v == r {
-                spawn_cs(o, (o+i)%r, r, ctxt)?;
-            } else {
-                spawn_cs(o, (o+i)%r, (o+v)%r, ctxt)?;
-            }
-        }
+        spawn_cs(0, i, v, ctxt)?;
 
         let len = ctxt.classes_h[i as usize].cs.len();
         for j in 0..len {
