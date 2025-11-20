@@ -12,21 +12,33 @@ pub const C22_SCORE: i32 = 3000;
 // (C12) x = f(y, f(x, a2))
 //       x = f(y, a3)
 
+//       x = f(f(y, x), f(f(y, f(y, x)), y))
+// (C21) x = f(a1, f(f(y, a1), y))
+// (C22) x = f(a1, f(a2, y))
+//       x = f(a1, a3)
+
 #[derive(Clone, Copy)]
 pub enum CH {
     C11(/*x*/ E, /*y*/ E, /*a1*/ E),
     C12(/*x*/ E, /*y*/ E, /*a2*/ E),
+
+    C21(/*x*/ E, /*y*/ E, /*a1*/ E),
+    C22(/*x*/ E, /*y*/ E, /*a1*/ E, /*a2*/ E),
 }
 
 pub fn progress_c(c: CH, ctxt: &mut Ctxt) -> Result<(), ()> {
     match c {
         CH::C11(x, y, a1) => visit_c11(x, y, a1, ctxt),
         CH::C12(x, y, a2) => visit_c12(x, y, a2, ctxt),
+        CH::C21(x, y, a1) => visit_c21(x, y, a1, ctxt),
+        CH::C22(x, y, a1, a2) => visit_c22(x, y, a1, a2, ctxt),
     }
 }
 
 fn progress_c11(x: E, y: E, a1: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c12(x, y, a2, ctxt) }
 fn progress_c12(x: E, y: E, a2: E, a3: E, ctxt: &mut Ctxt) -> Result<(), ()> { prove_triple(y, a3, x, ctxt) }
+fn progress_c21(x: E, y: E, a1: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> { visit_c22(x, y, a1, a2, ctxt) }
+fn progress_c22(x: E, y: E, a1: E, a2: E, a3: E, ctxt: &mut Ctxt) -> Result<(), ()> { prove_triple(a1, a3, x, ctxt) }
 
 // C1
 pub fn visit_c11(x: E, y: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
@@ -46,6 +58,27 @@ fn visit_c12(x: E, y: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
             Ok(())
         },
         Ok(a3) => progress_c12(x, y, a2, a3, ctxt),
+    }
+}
+
+// C2
+pub fn visit_c21(x: E, y: E, a1: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    match try_f(y, a1, ctxt) {
+        Err(i) => {
+            add_c(CH::C21(x, y, a1), i, ctxt);
+            Ok(())
+        },
+        Ok(a2) => progress_c21(x, y, a1, a2, ctxt),
+    }
+}
+
+fn visit_c22(x: E, y: E, a1: E, a2: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    match try_f(a2, y, ctxt) {
+        Err(i) => {
+            add_c(CH::C22(x, y, a1, a2), i, ctxt);
+            Ok(())
+        },
+        Ok(a3) => progress_c22(x, y, a1, a2, a3, ctxt),
     }
 }
 
@@ -122,3 +155,14 @@ fn add_c(c: CH, i: E, ctxt: &mut Ctxt) {
     class.cs.push(c);
     class.score += score_c(c);
 }
+
+pub fn score_c(c: CH) -> i32 {
+    match c {
+        CH::C11(..) => C11_SCORE,
+        CH::C12(..) => C12_SCORE,
+        CH::C21(..) => C21_SCORE,
+        CH::C22(..) => C22_SCORE,
+    }
+}
+
+
