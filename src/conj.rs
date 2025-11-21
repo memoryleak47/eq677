@@ -28,6 +28,7 @@ pub fn conj(m: &MatrixMagma) {
 
     false_conj_right_cancellative(m);
     // false_conj_exists_idempotence(m);
+    // false_conj_tinv_or_semitinv(m);
 }
 
 // Conjectures:
@@ -38,6 +39,40 @@ fn conj_db_complete_21(m: &MatrixMagma) {
     let m = m.canonicalize2();
     for (_, m2) in db() {
         if m == m2 { return }
+    }
+    assert!(false);
+}
+
+fn bij_to_cycles(n: usize, bij: impl Fn(usize) -> usize) -> Vec<Vec<usize>> {
+    let mut out = Vec::new();
+
+    let mut seen = vec![false; n];
+    for mut i in 0..n {
+        if seen[i] { continue }
+
+        let mut current = vec![i];
+
+        loop {
+            seen[i] = true;
+            i = bij(i);
+            if seen[i] {
+                out.push(std::mem::take(&mut current));
+                break
+            } else {
+                current.push(i);
+            }
+        }
+    }
+    out
+}
+
+fn false_conj_tinv_or_semitinv(m: &MatrixMagma) {
+    if m.n < 2 || m.n > 50 /* for perf */ { return }
+
+    let grp = m.autom_group();
+    for perm in grp {
+        let c = bij_to_cycles(m.n, |i| perm[i]);
+        if c.iter().any(|cyc| cyc.len() >= m.n-1) { return }
     }
     assert!(false);
 }
