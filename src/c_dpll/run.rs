@@ -1,23 +1,17 @@
 use crate::c_dpll::*;
 
 // We need tiny threading depth, as model splitting has already blown up a lot!
-fn threading_depth(n: E) -> E { 3 }
+fn threading_depth(n: E) -> E { 10 }
 
 pub fn c_run(n: usize) {
-    let models = split_models_via_row(build_ctxt(n));
-
-/*
-    // TODO remove:
-    for m in &models {
-        dbg!(&m.cycle_class);
-        m.cycle_dump();
+    let mut ctxt = build_ctxt(n);
+    for i in 0..n {
+        ctxt.cycle_class[i] = K;
     }
-    println!("--");
-*/
-
-    into_par_for_each(models, |mut ctxt| {
-        prerun(0, &mut ctxt);
-    });
+    if n%(K as usize) == 1 {
+        ctxt.cycle_class[n-1] = 0;
+    }
+    prerun(0, &mut ctxt);
 }
 
 pub fn c_search() {
@@ -205,7 +199,25 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
     }
 }
 
+pub const K: E = 2;
+
+fn upd(mut x: E, o: E, n: E) -> E {
+    if n%K == 1 && x == n-1 { return n-1 }
+    let a = (x/K)*K;
+    let s = x-a;
+    let s = (s + o)%K;
+    a + s
+}
+
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    let n = ctxt.n;
+    for o in 0..n {
+        prove_triple_impl(upd(x, o, n), upd(y, o, n), upd(z, o, n), ctxt)?;
+    }
+    Ok(())
+}
+
+pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
     let xy = *xy_ref;
     if xy == z { return Ok(()) }

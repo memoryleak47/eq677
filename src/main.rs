@@ -46,7 +46,9 @@ pub use twee::*;
 fn main() {
     setup_panic_hook();
 
-    for i in 0..11 {
+    for i in 0..100 {
+        if i%(K as usize) > 1 { continue }
+
         println!("Looking for models of size {i}:");
         c_run(i);
     }
