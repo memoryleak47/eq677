@@ -205,6 +205,9 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    if (x, y, z) == (1, 1, 0) { return Err(()) }
+    if (x, y, z) == (2, 1, 0) { return Err(()) }
+
     let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
     let xy = *xy_ref;
     if xy == z { return Ok(()) }
