@@ -12,6 +12,8 @@ pub fn db_search() {
 pub fn db_cart_search() {
     for (n1, m1) in db() {
         for (n2, m2) in db() {
+            if m1.n * m2.n > 1000 { continue }
+
             let m = cartesian(&m1, &m2);
             let s = format!("db-cartesian: {n1} ⨯ {n2}");
             present_model(m.n, &s, |x, y| m.f(x, y));

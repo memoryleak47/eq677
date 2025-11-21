@@ -34,12 +34,15 @@ pub fn conj(m: &MatrixMagma) {
 // Conjectures:
 
 fn conj_db_complete(m: &MatrixMagma) {
-    if m.n > 25 { return }
+    if m.n > 50 { return }
 
     let m = m.canonicalize2();
     for (_, m2) in db() {
         if m == m2 { return }
     }
+    println!("==================================================");
+    println!("=== This model is new, please add it to the db ===");
+    println!("==================================================");
     assert!(false);
 }
 
