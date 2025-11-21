@@ -22,11 +22,11 @@ pub fn conj(m: &MatrixMagma) {
     conj_not_rigid(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
-    conj_d_bij(m);
     conj_unique_cycle_size(m);
     conj_db_complete_21(m);
 
     false_conj_right_cancellative(m);
+    false_conj_d_bij(m);
     // false_conj_exists_idempotence(m);
     // false_conj_tinv_or_semitinv(m);
 }
@@ -77,7 +77,9 @@ fn false_conj_tinv_or_semitinv(m: &MatrixMagma) {
     assert!(false);
 }
 
-fn conj_d_bij(m: &MatrixMagma) {
+fn false_conj_d_bij(m: &MatrixMagma) {
+    if m.n == 496 { return }
+
     // claim: for any x, {f(f(y,x),y) | y in M} = M.
     let n = m.n;
     for x in 0..n {
@@ -243,6 +245,8 @@ fn false_conj_odd(m: &MatrixMagma) {
 }
 
 fn false_conj_right_cancellative(m: &MatrixMagma) {
+    if m.n == 496 { return }
+
     assert!(m.is_right_cancellative());
 }
 

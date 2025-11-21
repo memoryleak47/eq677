@@ -86,7 +86,9 @@ impl MatrixMagma {
     }
 
     pub fn dump(&self) {
-        let div = self.n/10 + 2;
+        if self.n == 0 { return }
+
+        let div = self.n.ilog10() as usize + 2;
         for x in 0..self.n {
             for y in 0..self.n {
                 let z = self.f(x, y);
