@@ -5,7 +5,8 @@ use crate::*;
     f(x, y) = x + h(y - x)
 */
 
-// NOTE: this searches is deprecated due to the better https://github.com/memoryleak47/eq677/tree/tinv_cdpll.
+
+// NOTE: this searches is deprecated due to the better https://github.com/memoryleak47/eq677/tree/main/src/tinv_dpll
 //       Also because it runs out of RAM real quick.
 
 
@@ -25,7 +26,7 @@ pub fn all_perms(n: usize) -> Vec<Vec<usize>> {
     outs
 }
 
-pub fn tinv_search() {
+pub fn bad_tinv_search() {
     for p in 1.. {
         for h in all_perms(p) {
             let f_def = |x, y| (x + h[(y + p - x)%p])%p;

@@ -62,8 +62,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for i in 0..25 {
-        dbg!(i);
-        semitinv_run(i);
-    }
+    all();
 }
