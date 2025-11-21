@@ -24,7 +24,7 @@ pub fn conj(m: &MatrixMagma) {
     conj_2_orbit(m);
     conj_d_bij(m);
     conj_unique_cycle_size(m);
-    conj_db_complete_21(m);
+    conj_db_complete(m);
 
     false_conj_right_cancellative(m);
     // false_conj_exists_idempotence(m);
@@ -33,8 +33,8 @@ pub fn conj(m: &MatrixMagma) {
 
 // Conjectures:
 
-fn conj_db_complete_21(m: &MatrixMagma) {
-    if m.n > 21 { return }
+fn conj_db_complete(m: &MatrixMagma) {
+    if m.n > 25 { return }
 
     let m = m.canonicalize2();
     for (_, m2) in db() {
