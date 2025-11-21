@@ -62,5 +62,10 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    all();
+    for (n, m) in db() {
+        if m.n < 100 { 
+            dbg!(n);
+            m.dump();
+        }
+    }
 }
