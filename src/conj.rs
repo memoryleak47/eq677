@@ -339,7 +339,7 @@ fn c_summary(m: &MatrixMagma, x: usize) -> Vec<u32> {
 }
 
 impl MatrixMagma {
-    fn is_left_cancellative(&self) -> bool {
+    pub fn is_left_cancellative(&self) -> bool {
         for a in 0..self.n {
             for b in 0..self.n {
                 for c in 0..self.n {
@@ -351,7 +351,7 @@ impl MatrixMagma {
         true
     }
 
-    fn is_right_cancellative(&self) -> bool {
+    pub fn is_right_cancellative(&self) -> bool {
         for a in 0..self.n {
             for b in 0..self.n {
                 for c in 0..self.n {
@@ -363,7 +363,7 @@ impl MatrixMagma {
         true
     }
 
-    fn is_diag_constant(&self) -> bool {
+    pub fn is_diag_constant(&self) -> bool {
         for x in 0..self.n {
             for y in 0..self.n {
                 if self.f(x, x) != self.f(y, y) { return false }
@@ -372,7 +372,7 @@ impl MatrixMagma {
         true
     }
 
-    fn is_diag_bijective(&self) -> bool {
+    pub fn is_diag_bijective(&self) -> bool {
         for x in 0..self.n {
             for y in 0..self.n {
                 if x == y { continue }
@@ -382,7 +382,7 @@ impl MatrixMagma {
         true
     }
 
-    fn is_idempotent(&self) -> bool {
+    pub fn is_idempotent(&self) -> bool {
         for x in 0..self.n {
             let xx = self.f(x, x);
             if self.f(xx, xx) != xx { return false }

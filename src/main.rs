@@ -62,10 +62,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for (n, m) in db() {
-        if m.n < 100 { 
-            dbg!(n);
-            m.dump();
-        }
-    }
+    db_get("7/0").canonicalize().column_cycle_dump();
 }

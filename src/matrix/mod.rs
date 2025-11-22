@@ -112,6 +112,15 @@ impl MatrixMagma {
         }
     }
 
+    pub fn column_cycle_dump(&self) {
+        assert!(self.is_right_cancellative());
+        let ctxt = self;
+        for x in 0..ctxt.n {
+            print!("C {x}: ");
+            draw_cycle(x, ctxt.n, |i| ctxt.f(i, x));
+        }
+    }
+
     pub fn autom_dump(&self) {
         println!("AUTOM:");
         let g = self.autom_group_mini();
