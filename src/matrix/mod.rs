@@ -109,6 +109,7 @@ impl MatrixMagma {
         for x in 0..ctxt.n {
             print!("{x}: ");
             draw_cycle(x, ctxt.n, |i| ctxt.f(x, i));
+            println!();
         }
     }
 
@@ -116,8 +117,8 @@ impl MatrixMagma {
         assert!(self.is_right_cancellative());
         let ctxt = self;
         for x in 0..ctxt.n {
-            print!("C {x}: ");
             draw_cycle(x, ctxt.n, |i| ctxt.f(i, x));
+            print!(":{x}\n");
         }
     }
 
@@ -126,6 +127,7 @@ impl MatrixMagma {
         let g = self.autom_group_mini();
         for x in g {
             draw_cycle(0, self.n, |i| x[i]);
+            println!();
         }
     }
 
@@ -153,7 +155,6 @@ pub fn draw_cycle(x: usize, n: usize, f: impl Fn(usize) -> usize) {
         }
         print!(") ");
     }
-    println!();
 }
 
 pub fn cartesian(m0: &MatrixMagma, m1: &MatrixMagma) -> MatrixMagma {
