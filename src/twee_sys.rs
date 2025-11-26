@@ -15,8 +15,8 @@ pub type Equation = (TTerm, TTerm);
 pub type Diseq = (TTerm, TTerm);
 
 // returning Err means unsat.
-pub fn twee_call(eqs: &[Equation], diseq: &[Diseq], max_term_size: u32) -> Result<Vec<Equation>, ()> {
-    let mut cmd = Command::new("twee").args(&["-", "--max-term-size", &max_term_size.to_string()])
+pub fn twee_call(eqs: &[Equation], diseq: &[Diseq], max_cps: u32) -> Result<Vec<Equation>, ()> {
+    let mut cmd = Command::new("twee").args(&["-", "--max-cps", &max_cps.to_string()])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
@@ -39,7 +39,7 @@ pub fn twee_call(eqs: &[Equation], diseq: &[Diseq], max_term_size: u32) -> Resul
 
 fn stringify(eqs: &[Equation], diseq: &[Diseq]) -> String {
     // this keeps twee running for a bit.
-    let mut s = String::from("cnf(a,axiom, _priv_a != _priv_b).\n");
+    let mut s = String::from("cnf(a,axiom, private_a != private_b).\n");
 
     for (lhs, rhs) in eqs {
         writeln!(&mut s, "cnf(a,axiom, {} = {}).", stringify_term(lhs), stringify_term(rhs)).unwrap();

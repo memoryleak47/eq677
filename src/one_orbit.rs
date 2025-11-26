@@ -91,7 +91,7 @@ fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
         }
     }
 
-    let facts = twee_call(&eqs, &diseqs, 20)?;
+    let facts = twee_call(&eqs, &diseqs, 50)?;
 
     // TODO: actually propagate
     Ok(())
