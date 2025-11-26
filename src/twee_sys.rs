@@ -24,12 +24,17 @@ pub fn twee_call(eqs: &[Equation], diseq: &[Diseq], max_cps: u32) -> Result<Vec<
 
     let input = stringify(eqs, diseq);
 
+    // println!("in:\n\n{input}\n\n");
+
     let mut stdin = cmd.stdin.take().unwrap();
     write!(stdin, "{}", input).unwrap();
     drop(stdin);
 
     let out = cmd.wait_with_output().unwrap();
     let out = String::from_utf8_lossy(&out.stdout);
+
+    // println!("out:\n\n{out}\n\n");
+
     twee_parse(&out)
 }
 

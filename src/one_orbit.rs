@@ -24,9 +24,12 @@ fn run(ctxt: &mut Ctxt) {
         present_model(ctxt.n, "one_orbit", |x, y| ctxt.m.f(x, y));
         return;
     };
+    if x >= ctxt.nonfresh { ctxt.nonfresh = x+1; }
+    if y >= ctxt.nonfresh { ctxt.nonfresh = y+1; }
 
-    for z in 0..=ctxt.nonfresh {
+    for z in 0..ctxt.n { // TODO use freshness
         let mut ctxt = ctxt.clone();
+        if z >= ctxt.nonfresh { ctxt.nonfresh = z+1; }
         ctxt.m.set_f(x, y, z);
         if propagate(&mut ctxt).is_ok() {
             run(&mut ctxt);
