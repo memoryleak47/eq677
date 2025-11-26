@@ -11,13 +11,18 @@ static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn c_run(n: usize) {
     let mut ctxt = build_ctxt(n);
-    ctxt.nonfresh = 5;
-    let m5 = db_get("5/0");
+    ctxt.nonfresh = ctxt.n;
+    let m5 = MatrixMagma::by_fn(5, |x, y| (2*x + 4*y)%5);
     for x in 0..5 {
         for y in 0..5 {
             prove_triple(x, y, m5.f(x as usize, y as usize) as E, &mut ctxt).unwrap();
         }
     }
+
+    for x in 0..ctxt.n {
+        if prove_triple(x, x, x%5, &mut ctxt).is_err() { return; }
+    }
+
     propagate(&mut ctxt).unwrap();
     prerun(0, &mut ctxt);
 }
@@ -210,7 +215,26 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
     }
 }
 
-pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+fn upd(a: E, ctxt: &Ctxt) -> E {
+    if a < 5 {
+        (a+1)%5
+    } else {
+        let k = ctxt.n-5;
+        let base = a-5;
+        (base+1)%k + 5
+    }
+}
+
+pub fn prove_triple(mut x: E, mut y: E, mut z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    prove_triple_impl(x, y, z, ctxt)?;
+    for _ in 0..ctxt.n {
+        (x, y, z) = (upd(x, ctxt), upd(y, ctxt), upd(z, ctxt));
+        prove_triple_impl(x, y, z, ctxt)?;
+    }
+    Ok(())
+}
+
+pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     // diagonal entries (x == y) are required to have f(x, y) < 5.
     if x == y && z >= 5 { return Err(()) }
 
