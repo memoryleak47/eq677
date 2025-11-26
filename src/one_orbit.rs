@@ -63,6 +63,13 @@ fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
     }
 
     // equalities
+
+    {
+        let x = mk_X();
+        let rhs = mk_e(0, &x);
+        eqs.push((x, rhs));
+    }
+
     for a in 0..ctxt.n {
         for b in 0..ctxt.n {
             let z = ctxt.m.f(a, b);
