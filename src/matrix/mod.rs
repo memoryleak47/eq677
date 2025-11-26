@@ -36,6 +36,13 @@ impl MatrixMagma {
         }
     }
 
+    pub fn undefined(n: usize) -> Self {
+        MatrixMagma {
+            n,
+            data: std::iter::repeat(usize::MAX).take(n*n).collect(),
+        }
+    }
+
     pub fn parse(s: &str) -> Self {
         let s = s.replace(",", " ");
         let s = s.trim();

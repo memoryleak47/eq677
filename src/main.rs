@@ -61,11 +61,15 @@ pub use fo::*;
 mod analysis;
 pub use analysis::*;
 
+mod one_orbit;
+pub use one_orbit::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = db_get("7/0").canonicalize();
-    m.cycle_dump();
-    m.column_cycle_dump();
+    for i in 0..100 {
+        dbg!(i);
+        one_orbit_run(i);
+    }
 }
