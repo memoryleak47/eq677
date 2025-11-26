@@ -5,6 +5,7 @@ use std::fmt::Write;
 use std::io::Write as IoWrite;
 use egg::Symbol;
 
+#[derive(Clone)]
 pub enum TTerm {
     Var(Symbol),
     Fun(Symbol, Box<[TTerm]>),
