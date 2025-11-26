@@ -93,7 +93,8 @@ fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {
 
     let facts = twee_call(&eqs, &diseqs, 20)?;
 
-    todo!()
+    // TODO: actually propagate
+    Ok(())
 }
 
 

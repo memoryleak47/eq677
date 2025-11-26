@@ -39,7 +39,7 @@ pub fn twee_call(eqs: &[Equation], diseq: &[Diseq], max_term_size: u32) -> Resul
 
 fn stringify(eqs: &[Equation], diseq: &[Diseq]) -> String {
     // this keeps twee running for a bit.
-    let mut s = String::from("cnf(a,axiom, _priv_a != _priv_b).");
+    let mut s = String::from("cnf(a,axiom, _priv_a != _priv_b).\n");
 
     for (lhs, rhs) in eqs {
         writeln!(&mut s, "cnf(a,axiom, {} = {}).", stringify_term(lhs), stringify_term(rhs)).unwrap();
