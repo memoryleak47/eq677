@@ -11,15 +11,17 @@ pub enum TTerm {
 }
 
 pub type Equation = (TTerm, TTerm);
+pub type Diseq = (TTerm, TTerm);
 
-pub fn twee_call(eqs: &[Equation], max_term_size: u32) -> Vec<Equation> {
+// returning Err means unsat.
+pub fn twee_call(eqs: &[Equation], diseq: &[Diseq], max_term_size: u32) -> Result<Vec<Equation>, ()> {
     let mut cmd = Command::new("twee").args(&["-", "--max-term-size", &max_term_size.to_string()])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
         .unwrap();
 
-    let input = stringify(eqs);
+    let input = stringify(eqs, diseq);
 
     let mut stdin = cmd.stdin.take().unwrap();
     write!(stdin, "{}", input).unwrap();
@@ -34,12 +36,16 @@ pub fn twee_call(eqs: &[Equation], max_term_size: u32) -> Vec<Equation> {
 // stringify:
 // =========
 
-fn stringify(eqs: &[Equation]) -> String {
+fn stringify(eqs: &[Equation], diseq: &[Diseq]) -> String {
     // this keeps twee running for a bit.
     let mut s = String::from("cnf(a,axiom, _priv_a != _priv_b).");
 
     for (lhs, rhs) in eqs {
         writeln!(&mut s, "cnf(a,axiom, {} = {}).", stringify_term(lhs), stringify_term(rhs)).unwrap();
+    }
+
+    for (lhs, rhs) in diseq {
+        writeln!(&mut s, "cnf(a,axiom, {} != {}).", stringify_term(lhs), stringify_term(rhs)).unwrap();
     }
 
     s
@@ -68,7 +74,9 @@ fn stringify_term(t: &TTerm) -> String {
 // parse:
 // =========
 
-fn twee_parse(s: &str) -> Vec<Equation> {
+fn twee_parse(s: &str) -> Result<Vec<Equation>, ()> {
+    if s.contains("RESULT: Unsatisfiable") { return Err(()) }
+
     let s = s.split("Here is the final rewrite system:\n").last().unwrap();
     let s = s.split("RESULT: GaveUp").next().unwrap();
 
@@ -85,7 +93,7 @@ fn twee_parse(s: &str) -> Vec<Equation> {
         out.push((a, b));
     }
 
-    out
+    Ok(out)
 }
 
 fn parse_tterm(s: &str) -> TTerm {
