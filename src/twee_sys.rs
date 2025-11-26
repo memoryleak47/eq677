@@ -50,7 +50,7 @@ fn stringify_term(t: &TTerm) -> String {
         TTerm::Var(v) => v.to_string(),
         TTerm::Fun(symb, args) => {
             if args.is_empty() { return symb.to_string() };
-            
+
             let mut s = format!("{symb}(");
             for (i, a) in args.iter().enumerate() {
                 s.push_str(&stringify_term(a));
