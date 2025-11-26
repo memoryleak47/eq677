@@ -62,7 +62,8 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = db_get("7/0").canonicalize();
-    m.cycle_dump();
-    m.column_cycle_dump();
+    for i in 5.. {
+        dbg!(i);
+        c_run(i);
+    }
 }
