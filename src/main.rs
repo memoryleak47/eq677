@@ -64,10 +64,12 @@ pub use analysis::*;
 mod one_orbit;
 pub use one_orbit::*;
 
+mod autom_search;
+pub use autom_search::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m0 = db_get("25/24");
-    m0.canonicalize2().dump();
+    db_autom_search();
 }

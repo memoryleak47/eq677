@@ -1,6 +1,6 @@
 use crate::c_dpll::*;
 
-pub fn build_ctxt(n: usize) -> Ctxt {
+pub fn build_ctxt(n: usize, automs: Vec<Vec<E>>) -> Ctxt {
     let class_xy = ClassXY {
         value: E::MAX,
         cs: SmallVec::new(),
@@ -19,10 +19,11 @@ pub fn build_ctxt(n: usize) -> Ctxt {
         classes_xy: std::iter::repeat(class_xy)
             .take(n*n)
             .collect(),
-        nonfresh: 0,
+        nonfresh: if automs.is_empty() { 0 } else { n as E },
         propagate_queue: Vec::new(),
         chosen_per_row: std::iter::repeat(0).take(n).collect(),
         yxx: std::iter::repeat(E::MAX).take(n).collect(),
+        forced_automs: automs,
     };
     for x in 0..ctxt.n {
         for y in 0..ctxt.n {

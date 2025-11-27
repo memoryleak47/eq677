@@ -9,8 +9,8 @@ fn threading_depth(n: E) -> E { n + 1 }
 static RUNS_STARTED: AtomicUsize = AtomicUsize::new(0);
 static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
-pub fn c_run(n: usize) {
-    let models = split_models(build_ctxt(n));
+pub fn c_run(n: usize, automs: Vec<Vec<E>>) {
+    let models = split_models(build_ctxt(n, automs));
     into_par_for_each(models, |mut ctxt| {
         prerun(0, &mut ctxt);
     });
@@ -18,7 +18,7 @@ pub fn c_run(n: usize) {
 
 pub fn c_search() {
     for i in 0.. {
-        c_run(i);
+        c_run(i, Vec::new());
     }
 }
 
@@ -205,6 +205,20 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    prove_triple_impl(x, y, z, ctxt)?;
+    for g in ctxt.forced_automs.clone() {
+        let (mut x, mut y, mut z) = (x, y, z);
+        for _ in 0..ctxt.n {
+            x = g[x as usize];
+            y = g[y as usize];
+            z = g[z as usize];
+            prove_triple_impl(x, y, z, ctxt)?;
+        }
+    }
+    Ok(())
+}
+
+pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
     let xy = *xy_ref;
     if xy == z { return Ok(()) }

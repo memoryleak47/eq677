@@ -38,7 +38,7 @@ pub fn semitinv_run(n: usize) {
 
 pub fn semitinv_search() {
     for i in 0.. {
-        c_run(i);
+        semitinv_run(i);
     }
 }
 

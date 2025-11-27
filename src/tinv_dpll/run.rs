@@ -18,7 +18,7 @@ pub fn tinv_run(n: usize) {
 
 pub fn tinv_search() {
     for i in 0.. {
-        c_run(i);
+        tinv_run(i);
     }
 }
 

@@ -43,6 +43,7 @@ struct Ctxt {
     propagate_queue: Vec<(E, E, E)>,
     chosen_per_row: Box<[E]>,
     yxx: Box<[E]>, // y := yxx[x] where y*x = x, E::MAX means undefined.
+    forced_automs: Vec<Vec<E>>,
 }
 
 #[derive(Clone)]

@@ -7,10 +7,12 @@ pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
 
     {
         let mut ctxt = ctxt.clone();
-        ctxt.nonfresh = 2;
-        assert!(prove_triple(0, 0, 1, &mut ctxt).is_ok());
-        assert!(propagate(&mut ctxt).is_ok());
-        out.push(ctxt);
+        ctxt.nonfresh = ctxt.nonfresh.max(2);
+        if prove_triple(0, 0, 1, &mut ctxt).is_ok() {
+            if propagate(&mut ctxt).is_ok() {
+                out.push(ctxt);
+            }
+        }
     }
 
     {
