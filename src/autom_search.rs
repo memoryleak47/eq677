@@ -11,7 +11,20 @@ pub fn db_autom_search() {
             println!();
         }
         println!("group computed!");
-        let grp = grp.into_iter().map(|x| x.into_iter().map(|y| y as E).collect()).collect();
-        c_run(m.n, grp);
+        if grp.len() < 2 && m.n >= 25 {
+            println!("The group is probably not useful enough to restrict the search space!");
+            continue
+        }
+        let grp: Vec<Vec<E>> = grp.into_iter().map(|x| x.into_iter().map(|y| y as E).collect()).collect();
+        if m.n < 16 && grp.len() > 1 {
+            for g in grp {
+                println!("Single-perm search for:");
+                draw_cycle(0, m.n, |i| g[i] as usize);
+                println!();
+                c_run(m.n, vec![g]);
+            }
+        } else {
+            c_run(m.n, grp);
+        }
     }
 }
