@@ -1,6 +1,7 @@
 use crate::c_dpll::*;
 
 pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
+    if !ctxt.forced_automs.is_empty() { return vec![ctxt] }
     if ctxt.n <= 1 { return vec![ctxt] }
 
     let mut out = Vec::new();
