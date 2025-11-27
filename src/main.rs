@@ -68,8 +68,6 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for i in 0.. {
-        dbg!(i);
-        one_orbit_run(i);
-    }
+    let m0 = db_get("25/24");
+    m0.canonicalize2().dump();
 }

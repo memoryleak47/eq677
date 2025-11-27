@@ -40,19 +40,23 @@ pub fn db() -> Vec<(&'static str, MatrixMagma)> {
 
 #[test]
 fn db_canon() {
-    for (_, m) in db() {
-        assert!(m.canonicalize2() == m);
+    for (name, m) in db() {
+        if m.canonicalize2() != m {
+            panic!("magma {name} is not canonicalized!");
+        }
     }
 }
 
 #[test]
 fn db_unique() {
-    use std::collections::HashSet;
+    use std::collections::HashMap;
 
-    let db = db();
-    let n = dbg!(db.len());
-    let s: HashSet<MatrixMagma> = db.iter().map(|(_, m)| m).cloned().collect();
-    assert_eq!(n, s.len());
+    let mut map: HashMap<MatrixMagma, &'static str> = HashMap::default();
+    for (name, m) in db() {
+        if let Some(name2) = map.insert(m, name.clone()) {
+            panic!("Redundant Magmas {name} = {name2}");
+        }
+    }
 }
 
 #[test]

@@ -25,8 +25,8 @@ pub fn conj(m: &MatrixMagma) {
     conj_unique_cycle_size(m);
     conj_db_complete(m);
 
-    false_conj_right_cancellative(m);
-    false_conj_d_bij(m);
+    // false_conj_d_bij(m);
+    // false_conj_right_cancellative(m);
     // false_conj_exists_idempotence(m);
     // false_conj_tinv_or_semitinv(m);
 }
