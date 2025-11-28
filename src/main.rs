@@ -67,9 +67,16 @@ pub use one_orbit::*;
 mod autom_search;
 pub use autom_search::*;
 
+mod load;
+pub use load::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    db_autom_search();
+    for (name, m) in db() {
+        if !LINEAR_MAGMAS.contains(&name) {
+            dbg!(name);
+        }
+    }
 }
