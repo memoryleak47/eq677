@@ -34,7 +34,7 @@ pub fn conj(m: &MatrixMagma) {
 // Conjectures:
 
 fn conj_db_complete(m: &MatrixMagma) {
-    if m.n > 50 { return }
+    if m.n > 100 { return }
 
     let m = m.canonicalize2();
     for (_, m2) in db() {
