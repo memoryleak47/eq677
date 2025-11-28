@@ -48,6 +48,18 @@ fn db_canon() {
 }
 
 #[test]
+fn db_naming() {
+    for (name, m) in db() {
+        let n = m.n;
+        let s = format!("{n}/");
+        if !name.starts_with(&s) {
+            println!("Name is {name}, but n={n}");
+            assert!(false);
+        }
+    }
+}
+
+#[test]
 fn db_unique() {
     use std::collections::HashMap;
 
