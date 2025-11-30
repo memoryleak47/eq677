@@ -31,6 +31,9 @@ pub use composite::*;
 mod db;
 pub use db::*;
 
+mod db2;
+pub use db2::*;
+
 mod conj;
 pub use conj::*;
 
