@@ -30,6 +30,9 @@ pub fn db_add(m: MatrixMagma) -> MagmaName {
     }
     let j = magmas[i].len();
     magmas[i].push(m.clone());
+    let s = m.to_string();
     db_handle.map.insert(m, (i, j));
+    let path = format!("db/{i}/{j}");
+    std::fs::write(&path, s).unwrap();
     (i, j)
 }

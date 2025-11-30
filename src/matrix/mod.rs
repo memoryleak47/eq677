@@ -92,21 +92,28 @@ impl MatrixMagma {
         c
     }
 
-    pub fn dump(&self) {
-        if self.n == 0 { return }
+    pub fn to_string(&self) -> String {
+        if self.n == 0 { return String::new() }
+
+        let mut s = String::new();
 
         let div = self.n.ilog10() as usize + 2;
         for x in 0..self.n {
             for y in 0..self.n {
                 let z = self.f(x, y);
                 if z == usize::MAX {
-                    print!("{:<width$}", '-', width = div);
+                    s.push_str(&format!("{:<width$}", '-', width = div));
                 } else {
-                    print!("{:<width$}", z, width = div);
+                    s.push_str(&format!("{:<width$}", z, width = div));
                 }
             }
-            println!("");
+            s.push('\n');
         }
+        s
+    }
+
+    pub fn dump(&self) {
+        print!("{}", self.to_string());
     }
 
     // Prints a magma, but displays every row x as the bijection spanned by
