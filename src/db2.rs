@@ -2,36 +2,40 @@ use crate::*;
 use std::collections::HashMap;
 use std::sync::{OnceLock, RwLock};
 
-static DB: OnceLock<RwLock<DB>> = OnceLock::new();
+static DB: RwLock<Vec<DB>> = RwLock::new(Vec::new());
 
 pub type MagmaName = (usize, usize);
 
+// Each magma size has its own DB.
+#[derive(Clone)]
 struct DB {
-    magmas: Vec<Vec<MatrixMagma>>,
-    map: HashMap<MatrixMagma, MagmaName>,
+    magmas: Vec<MatrixMagma>,
+    map: HashMap<MatrixMagma, usize>,
 }
 
 pub fn db_get((i, j): MagmaName) -> MatrixMagma {
-    let db_handle = DB.get().unwrap().read().unwrap();
-    db_handle.magmas[i][j].clone()
+    let handle = DB.read().unwrap();
+    handle[i].magmas[j].clone()
 }
 
 pub fn db_add(m: MatrixMagma) -> MagmaName {
     let i = m.n;
-    let db_handle = DB.get().unwrap().read().unwrap();
-    if let Some((i, j)) = db_handle.map.get(&m) { return (*i, *j); }
-    drop(db_handle);
+    let handle = DB.read().unwrap();
+    if let Some(j) = handle[i].map.get(&m) { return (i, *j); }
+    drop(handle);
 
-    let mut db_handle = DB.get().unwrap().write().unwrap();
-    if let Some((i, j)) = db_handle.map.get(&m) { return (*i, *j); }
-    let magmas = &mut db_handle.magmas;
-    while magmas.len() <= i {
-        magmas.push(Vec::new());
+    let mut handle = DB.write().unwrap();
+    if let Some(j) = handle[i].map.get(&m) { return (i, *j); }
+    while handle.len() <= i {
+        handle.push(DB {
+            magmas: Default::default(),
+            map: Default::default(),
+        });
     }
-    let j = magmas[i].len();
-    magmas[i].push(m.clone());
+    let j = handle[i].magmas.len();
+    handle[i].magmas.push(m.clone());
     let s = m.to_string();
-    db_handle.map.insert(m, (i, j));
+    handle[i].map.insert(m, j);
     let path = format!("db/{i}/{j}");
     std::fs::write(&path, s).unwrap();
     (i, j)
