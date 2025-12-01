@@ -23,8 +23,8 @@ define_language! {
 }
 
 pub fn db_analyze() {
-    for (n, x) in db() {
-        println!("{n}:");
+    for (name, x) in db() {
+        println!("{name}:");
         analyze(&x, 20);
         println!();
     }

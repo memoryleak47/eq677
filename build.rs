@@ -18,7 +18,7 @@ fn main() {
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let dest = Path::new(&out_dir).join("db_sources.rs");
 
-    let mut out = String::from("pub static DB_SOURCES: &[(&str, &str)] = &[");
+    let mut out = String::from("pub static DB_SOURCES: &[((usize, usize), &str)] = &[");
 
     let mut files = Vec::new();
 
@@ -34,7 +34,7 @@ fn main() {
 
     for (i, f) in files {
         out.push_str(&format!(
-            "(\"{i}/{f}\", include_str!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/db/{i}/{f}\"))),\n",
+            "(({i}, {f}), include_str!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/db/{i}/{f}\"))),\n",
         ));
     }
 

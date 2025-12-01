@@ -124,11 +124,13 @@ fn mk_e(i: usize, x: &TTerm) -> TTerm {
     TTerm::Fun(e, Box::new([x.clone()]))
 }
 
+#[allow(non_snake_case)]
 fn mk_X() -> TTerm {
     let x = Symbol::from("X");
     TTerm::Var(x)
 }
 
+#[allow(non_snake_case)]
 fn mk_Y() -> TTerm {
     let y = Symbol::from("Y");
     TTerm::Var(y)

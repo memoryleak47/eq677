@@ -15,7 +15,6 @@ pub fn conj(m: &MatrixMagma) {
     conj_idempotence(m);
     conj_diag_orbit_size(m);
     conj_cycle_size(m);
-    conj_cycle2(m);
     conj_cycles_divide_n(m);
     conj_cycles_summary(m);
     conj_bijective_or_constant(m);
@@ -25,6 +24,7 @@ pub fn conj(m: &MatrixMagma) {
     conj_unique_cycle_size(m);
     conj_db_complete(m);
 
+    // false_conj_cycle2(m);
     // false_conj_d_bij(m);
     // false_conj_right_cancellative(m);
     // false_conj_exists_idempotence(m);
@@ -286,7 +286,7 @@ fn conj_cycle_size(m: &MatrixMagma) {
     }
 }
 
-fn conj_cycle2(m: &MatrixMagma) {
+fn false_conj_cycle2(m: &MatrixMagma) {
     for x in 0..m.n {
         for y in 0..m.n {
             let a = m.f(x, y);
