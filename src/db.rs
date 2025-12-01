@@ -156,7 +156,8 @@ impl Display for Name {
 pub static LINEAR_MODELS: &[Name] = &[
     Name(5, 0),
     Name(7, 0), Name(7, 1),
-    Name(9, 0), Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
+    Name(9, 0),
+    Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
     Name(13, 0),
     Name(16, 0), Name(16, 1),
     Name(19, 0), Name(19, 1),
