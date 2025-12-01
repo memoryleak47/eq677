@@ -18,12 +18,12 @@ pub fn conj(m: &MatrixMagma) {
     conj_cycles_divide_n(m);
     conj_cycles_summary(m);
     conj_bijective_or_constant(m);
-    conj_not_rigid(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
     conj_unique_cycle_size(m);
     conj_db_complete(m);
 
+    // false_conj_not_rigid(m);
     // false_conj_cycle2(m);
     // false_conj_d_bij(m);
     // false_conj_right_cancellative(m);
@@ -205,13 +205,16 @@ fn is_prime(n: usize) -> bool {
     true
 }
 
-fn conj_not_rigid(m: &MatrixMagma) {
+fn false_conj_not_rigid(m: &MatrixMagma) {
     if m.n < 2 { return }
 
     // for performance
     if m.n > 80 { return }
 
-    assert!(m.autom_stats().grpsize() > 1.5);
+    if m.autom_stats().grpsize() <= 1.5 {
+        m.dump();
+        panic!();
+    }
 }
 
 // Note: This is equivalent to 255, as you can see here:

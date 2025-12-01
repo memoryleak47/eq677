@@ -117,6 +117,8 @@ pub fn db_get(MagmaName(i, j): MagmaName) -> MatrixMagma {
 pub fn db_intern(m: &MatrixMagma) -> (MagmaName, /*fresh*/ bool) {
     let m = m.canonicalize2();
     let i = m.n;
+    if i > 100 { panic!("Interning is only supported up to n=100"); }
+
     let handle = DB_REF.read().unwrap();
     if let Some(j) = handle[i].map.get(&m) { return (MagmaName(i, *j), false); }
     drop(handle);
@@ -139,8 +141,8 @@ pub fn db_intern(m: &MatrixMagma) -> (MagmaName, /*fresh*/ bool) {
 }
 
 
-#[derive(Clone, Copy)]
-pub struct MagmaName(usize, usize);
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub struct MagmaName(pub usize, pub usize);
 
 use std::fmt::*;
 
@@ -149,3 +151,11 @@ impl Display for MagmaName {
         write!(f, "{}/{}", self.0, self.1)
     }
 }
+
+pub static LINEAR_MODELS: &[MagmaName] = &[
+    MagmaName(5, 0), MagmaName(7, 0), MagmaName(7, 1), MagmaName(9, 0), MagmaName(11, 0), MagmaName(11, 1), MagmaName(11, 2), MagmaName(11, 3), MagmaName(13, 0), MagmaName(16, 0), MagmaName(16, 1), MagmaName(19, 0), MagmaName(19, 1), MagmaName(25, 3), MagmaName(31, 1), MagmaName(31, 2), MagmaName(31, 3), MagmaName(31, 4), MagmaName(31, 5), MagmaName(37, 0), MagmaName(37, 1), MagmaName(41, 7), MagmaName(41, 8), MagmaName(41, 9), MagmaName(41, 10), MagmaName(43, 0), MagmaName(43, 1), MagmaName(43, 2), MagmaName(43, 3), MagmaName(49, 0), MagmaName(49, 1), MagmaName(49, 3), MagmaName(61, 0), MagmaName(61, 1), MagmaName(61, 2), MagmaName(61, 3), MagmaName(67, 0), MagmaName(67, 1), MagmaName(71, 0), MagmaName(71, 1), MagmaName(71, 2), MagmaName(71, 3), MagmaName(73, 0), MagmaName(73, 1), MagmaName(81, 0), MagmaName(81, 1), MagmaName(97, 0), MagmaName(97, 1),
+];
+
+pub static LINEAR_EXTENSIONS: &[MagmaName] = &[
+    MagmaName(25, 8), MagmaName(35, 12), MagmaName(35, 13), MagmaName(35, 14), MagmaName(35, 15), MagmaName(35, 16), MagmaName(35, 17), MagmaName(35, 18), MagmaName(35, 19), MagmaName(35, 20), MagmaName(35, 21), MagmaName(45, 1), MagmaName(45, 2), MagmaName(45, 3), MagmaName(45, 4), MagmaName(49, 7), MagmaName(49, 8), MagmaName(49, 9), MagmaName(49, 10), MagmaName(49, 11), MagmaName(49, 12), MagmaName(63, 2), MagmaName(63, 3), MagmaName(63, 4), MagmaName(63, 5), MagmaName(65, 1), MagmaName(65, 2), MagmaName(65, 3), MagmaName(65, 4), MagmaName(65, 5), MagmaName(65, 6), MagmaName(77, 8), MagmaName(77, 9), MagmaName(77, 10), MagmaName(77, 11), MagmaName(77, 12), MagmaName(77, 13), MagmaName(77, 14), MagmaName(77, 15), MagmaName(77, 16), MagmaName(77, 17), MagmaName(77, 18), MagmaName(77, 19), MagmaName(77, 20), MagmaName(77, 21), MagmaName(77, 22), MagmaName(77, 23), MagmaName(77, 24), MagmaName(77, 25), MagmaName(77, 26), MagmaName(77, 27), MagmaName(77, 28), MagmaName(77, 29), MagmaName(77, 30), MagmaName(77, 31), MagmaName(77, 32), MagmaName(77, 33), MagmaName(77, 34), MagmaName(77, 35), MagmaName(77, 36), MagmaName(77, 37), MagmaName(77, 38), MagmaName(77, 39), MagmaName(77, 40), MagmaName(77, 41), MagmaName(77, 42), MagmaName(77, 43), MagmaName(77, 44), MagmaName(77, 45), MagmaName(77, 46), MagmaName(77, 47), MagmaName(77, 48), MagmaName(77, 49), MagmaName(77, 50), MagmaName(81, 2), MagmaName(81, 3), MagmaName(91, 2), MagmaName(91, 3), MagmaName(91, 4), MagmaName(91, 5), MagmaName(99, 4), MagmaName(99, 5), MagmaName(99, 6), MagmaName(99, 7), MagmaName(99, 8), MagmaName(99, 9), MagmaName(99, 10), MagmaName(99, 11), MagmaName(99, 12), MagmaName(99, 13), MagmaName(99, 14), MagmaName(99, 15), MagmaName(99, 16), MagmaName(99, 17), MagmaName(99, 18), MagmaName(99, 19), MagmaName(99, 20), MagmaName(99, 21), MagmaName(99, 22), MagmaName(99, 23), MagmaName(99, 24), MagmaName(99, 25), MagmaName(99, 26), MagmaName(99, 27), MagmaName(99, 28), MagmaName(99, 29), MagmaName(99, 30), MagmaName(99, 31), MagmaName(99, 32), MagmaName(99, 33),
+];
