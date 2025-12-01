@@ -19,7 +19,6 @@ pub fn conj(m: &MatrixMagma) {
     conj_singleton_cycle(m);
     conj_2_orbit(m);
     conj_unique_cycle_size(m);
-    conj_db_complete(m);
 
     // false_conj_cycles_summary(m);
     // false_conj_cycles_divide_n(m);
@@ -32,19 +31,6 @@ pub fn conj(m: &MatrixMagma) {
 }
 
 // Conjectures:
-
-fn conj_db_complete(m: &MatrixMagma) {
-    if m.n > 100 { return }
-
-    let m = m.canonicalize2();
-    for (_, m2) in db() {
-        if m == m2 { return }
-    }
-    println!("==================================================");
-    println!("=== This model is new, please add it to the db ===");
-    println!("==================================================");
-    assert!(false);
-}
 
 fn bij_to_cycles(n: usize, bij: impl Fn(usize) -> usize) -> Vec<Vec<usize>> {
     let mut out = Vec::new();

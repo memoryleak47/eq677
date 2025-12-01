@@ -20,6 +20,8 @@ pub fn db_cart_search() {
     for (name1, m1) in db() {
         for (name2, m2) in db() {
             if m1.n * m2.n > 1000 { continue }
+            if m1.n <= 1 { continue }
+            if m2.n <= 1 { continue }
 
             let m = cartesian(&m1, &m2);
             let s = format!("db-cartesian: {name1} ⨯ {name2}");
