@@ -74,5 +74,14 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    tinv_search();
+    println!("Potentially interesting models:");
+    for (name, m) in db() {
+        if LINEAR_MODELS.contains(&name) { continue }
+        if LINEAR_EXTENSIONS.contains(&name) { continue }
+
+        // filter out S(2,5,_) gluing models.
+        if m.n % 20 == 1 || m.n % 20 == 5 { continue }
+
+        println!("{name}");
+    }
 }
