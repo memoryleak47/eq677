@@ -114,14 +114,15 @@ pub fn db_get(MagmaName(i, j): MagmaName) -> MatrixMagma {
     handle[i].magmas[j].clone()
 }
 
-pub fn db_add(m: MatrixMagma) -> MagmaName {
+pub fn db_intern(m: &MatrixMagma) -> (MagmaName, /*fresh*/ bool) {
+    let m = m.canonicalize2();
     let i = m.n;
     let handle = DB_REF.read().unwrap();
-    if let Some(j) = handle[i].map.get(&m) { return MagmaName(i, *j); }
+    if let Some(j) = handle[i].map.get(&m) { return (MagmaName(i, *j), false); }
     drop(handle);
 
     let mut handle = DB_REF.write().unwrap();
-    if let Some(j) = handle[i].map.get(&m) { return MagmaName(i, *j); }
+    if let Some(j) = handle[i].map.get(&m) { return (MagmaName(i, *j), false); }
     while handle.len() <= i {
         handle.push(DB {
             magmas: Default::default(),
@@ -134,7 +135,7 @@ pub fn db_add(m: MatrixMagma) -> MagmaName {
     handle[i].map.insert(m, j);
     let path = format!("db/{i}/{j}");
     std::fs::write(&path, s).unwrap();
-    MagmaName(i, j)
+    (MagmaName(i, j), true)
 }
 
 

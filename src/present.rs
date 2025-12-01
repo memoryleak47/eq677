@@ -3,7 +3,6 @@ use std::collections::HashSet;
 use std::sync::Mutex;
 
 lazy_static::lazy_static! {
-    static ref DB: Mutex<HashSet<MatrixMagma>> = Mutex::new(HashSet::new());
     pub static ref PRINT_MUTEX: Mutex<()> = Mutex::new(());
 }
 
@@ -14,14 +13,8 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     let magma = MatrixMagma::by_fn(n, f);
 
     if n <= 100 {
-        let canon = magma.canonicalize2();
-
-        let mut handle = DB.lock().unwrap();
-        if handle.contains(&canon) {
-            return;
-        }
-
-        handle.insert(canon);
+        let (name, new) = db_intern(&magma);
+        if !new { return; }
     }
 
     let mut print_handle = PRINT_MUTEX.lock().unwrap();
