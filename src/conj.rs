@@ -275,8 +275,8 @@ fn conj_cycle_size(m: &MatrixMagma) {
     for x in 0..m.n {
         for z in 0..m.n {
             let i = c(m, x, z);
-            // It seems there are no 3 or 4 cycles?
-            assert!(i != 3 && i != 4);
+            // It seems there are no 4 cycles?
+            assert!(i != 4);
 
             // Known values:
             // assert!(i == 1 || i == 2 || i == 5 || i == 6 || i == 7 || i == 8 || i == 9
