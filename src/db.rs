@@ -28,12 +28,12 @@ pub fn db_cart_search() {
     }
 }
 
-pub fn db() -> Vec<(MagmaName, MatrixMagma)> {
+pub fn db() -> Vec<(Name, MatrixMagma)> {
     let mut out = Vec::new();
     let db = DB_REF.read().unwrap();
     for (i, dbs) in db.iter().enumerate() {
         for (j, m) in dbs.magmas.iter().enumerate() {
-            out.push((MagmaName(i, j), m.clone()));
+            out.push((Name(i, j), m.clone()));
         }
     }
     out
@@ -63,7 +63,7 @@ fn db_naming() {
 fn db_unique() {
     use std::collections::HashMap;
 
-    let mut map: HashMap<MatrixMagma, MagmaName> = HashMap::default();
+    let mut map: HashMap<MatrixMagma, Name> = HashMap::default();
     for (name, m) in db() {
         if let Some(name2) = map.insert(m, name.clone()) {
             panic!("Redundant Magmas {name} = {name2}");
@@ -109,22 +109,22 @@ struct DB {
     map: HashMap<MatrixMagma, usize>,
 }
 
-pub fn db_get(MagmaName(i, j): MagmaName) -> MatrixMagma {
+pub fn db_get(Name(i, j): Name) -> MatrixMagma {
     let handle = DB_REF.read().unwrap();
     handle[i].magmas[j].clone()
 }
 
-pub fn db_intern(m: &MatrixMagma) -> (MagmaName, /*fresh*/ bool) {
+pub fn db_intern(m: &MatrixMagma) -> (Name, /*fresh*/ bool) {
     let m = m.canonicalize2();
     let i = m.n;
     if i > 100 { panic!("Interning is only supported up to n=100"); }
 
     let handle = DB_REF.read().unwrap();
-    if let Some(j) = handle[i].map.get(&m) { return (MagmaName(i, *j), false); }
+    if let Some(j) = handle[i].map.get(&m) { return (Name(i, *j), false); }
     drop(handle);
 
     let mut handle = DB_REF.write().unwrap();
-    if let Some(j) = handle[i].map.get(&m) { return (MagmaName(i, *j), false); }
+    if let Some(j) = handle[i].map.get(&m) { return (Name(i, *j), false); }
     while handle.len() <= i {
         handle.push(DB {
             magmas: Default::default(),
@@ -137,25 +137,52 @@ pub fn db_intern(m: &MatrixMagma) -> (MagmaName, /*fresh*/ bool) {
     handle[i].map.insert(m, j);
     let path = format!("db/{i}/{j}");
     std::fs::write(&path, s).unwrap();
-    (MagmaName(i, j), true)
+    (Name(i, j), true)
 }
 
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct MagmaName(pub usize, pub usize);
+// The name of a magma (up to isomorphism).
+pub struct Name(pub usize, pub usize);
 
 use std::fmt::*;
 
-impl Display for MagmaName {
+impl Display for Name {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{}/{}", self.0, self.1)
     }
 }
 
-pub static LINEAR_MODELS: &[MagmaName] = &[
-    MagmaName(5, 0), MagmaName(7, 0), MagmaName(7, 1), MagmaName(9, 0), MagmaName(11, 0), MagmaName(11, 1), MagmaName(11, 2), MagmaName(11, 3), MagmaName(13, 0), MagmaName(16, 0), MagmaName(16, 1), MagmaName(19, 0), MagmaName(19, 1), MagmaName(25, 3), MagmaName(31, 1), MagmaName(31, 2), MagmaName(31, 3), MagmaName(31, 4), MagmaName(31, 5), MagmaName(37, 0), MagmaName(37, 1), MagmaName(41, 7), MagmaName(41, 8), MagmaName(41, 9), MagmaName(41, 10), MagmaName(43, 0), MagmaName(43, 1), MagmaName(43, 2), MagmaName(43, 3), MagmaName(49, 0), MagmaName(49, 1), MagmaName(49, 3), MagmaName(61, 0), MagmaName(61, 1), MagmaName(61, 2), MagmaName(61, 3), MagmaName(67, 0), MagmaName(67, 1), MagmaName(71, 0), MagmaName(71, 1), MagmaName(71, 2), MagmaName(71, 3), MagmaName(73, 0), MagmaName(73, 1), MagmaName(81, 0), MagmaName(81, 1), MagmaName(97, 0), MagmaName(97, 1),
+pub static LINEAR_MODELS: &[Name] = &[
+    Name(5, 0),
+    Name(7, 0), Name(7, 1),
+    Name(9, 0), Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
+    Name(13, 0),
+    Name(16, 0), Name(16, 1),
+    Name(19, 0), Name(19, 1),
+    Name(25, 3),
+    Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4), Name(31, 5),
+    Name(37, 0), Name(37, 1),
+    Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10),
+    Name(43, 0), Name(43, 1), Name(43, 2), Name(43, 3),
+    Name(49, 0), Name(49, 1), Name(49, 3),
+    Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3),
+    Name(67, 0), Name(67, 1),
+    Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
+    Name(73, 0), Name(73, 1),
+    Name(81, 0), Name(81, 1),
+    Name(97, 0), Name(97, 1),
 ];
 
-pub static LINEAR_EXTENSIONS: &[MagmaName] = &[
-    MagmaName(25, 8), MagmaName(35, 12), MagmaName(35, 13), MagmaName(35, 14), MagmaName(35, 15), MagmaName(35, 16), MagmaName(35, 17), MagmaName(35, 18), MagmaName(35, 19), MagmaName(35, 20), MagmaName(35, 21), MagmaName(45, 1), MagmaName(45, 2), MagmaName(45, 3), MagmaName(45, 4), MagmaName(49, 7), MagmaName(49, 8), MagmaName(49, 9), MagmaName(49, 10), MagmaName(49, 11), MagmaName(49, 12), MagmaName(63, 2), MagmaName(63, 3), MagmaName(63, 4), MagmaName(63, 5), MagmaName(65, 1), MagmaName(65, 2), MagmaName(65, 3), MagmaName(65, 4), MagmaName(65, 5), MagmaName(65, 6), MagmaName(77, 8), MagmaName(77, 9), MagmaName(77, 10), MagmaName(77, 11), MagmaName(77, 12), MagmaName(77, 13), MagmaName(77, 14), MagmaName(77, 15), MagmaName(77, 16), MagmaName(77, 17), MagmaName(77, 18), MagmaName(77, 19), MagmaName(77, 20), MagmaName(77, 21), MagmaName(77, 22), MagmaName(77, 23), MagmaName(77, 24), MagmaName(77, 25), MagmaName(77, 26), MagmaName(77, 27), MagmaName(77, 28), MagmaName(77, 29), MagmaName(77, 30), MagmaName(77, 31), MagmaName(77, 32), MagmaName(77, 33), MagmaName(77, 34), MagmaName(77, 35), MagmaName(77, 36), MagmaName(77, 37), MagmaName(77, 38), MagmaName(77, 39), MagmaName(77, 40), MagmaName(77, 41), MagmaName(77, 42), MagmaName(77, 43), MagmaName(77, 44), MagmaName(77, 45), MagmaName(77, 46), MagmaName(77, 47), MagmaName(77, 48), MagmaName(77, 49), MagmaName(77, 50), MagmaName(81, 2), MagmaName(81, 3), MagmaName(91, 2), MagmaName(91, 3), MagmaName(91, 4), MagmaName(91, 5), MagmaName(99, 4), MagmaName(99, 5), MagmaName(99, 6), MagmaName(99, 7), MagmaName(99, 8), MagmaName(99, 9), MagmaName(99, 10), MagmaName(99, 11), MagmaName(99, 12), MagmaName(99, 13), MagmaName(99, 14), MagmaName(99, 15), MagmaName(99, 16), MagmaName(99, 17), MagmaName(99, 18), MagmaName(99, 19), MagmaName(99, 20), MagmaName(99, 21), MagmaName(99, 22), MagmaName(99, 23), MagmaName(99, 24), MagmaName(99, 25), MagmaName(99, 26), MagmaName(99, 27), MagmaName(99, 28), MagmaName(99, 29), MagmaName(99, 30), MagmaName(99, 31), MagmaName(99, 32), MagmaName(99, 33),
+pub static LINEAR_EXTENSIONS: &[Name] = &[
+    Name(25, 8),
+    Name(35, 12), Name(35, 13), Name(35, 14), Name(35, 15), Name(35, 16), Name(35, 17), Name(35, 18), Name(35, 19), Name(35, 20), Name(35, 21),
+    Name(45, 1), Name(45, 2), Name(45, 3), Name(45, 4),
+    Name(49, 7), Name(49, 8), Name(49, 9), Name(49, 10), Name(49, 11), Name(49, 12),
+    Name(63, 2), Name(63, 3), Name(63, 4), Name(63, 5),
+    Name(65, 1), Name(65, 2), Name(65, 3), Name(65, 4), Name(65, 5), Name(65, 6),
+    Name(77, 8), Name(77, 9), Name(77, 10), Name(77, 11), Name(77, 12), Name(77, 13), Name(77, 14), Name(77, 15), Name(77, 16), Name(77, 17), Name(77, 18), Name(77, 19), Name(77, 20), Name(77, 21), Name(77, 22), Name(77, 23), Name(77, 24), Name(77, 25), Name(77, 26), Name(77, 27), Name(77, 28), Name(77, 29), Name(77, 30), Name(77, 31), Name(77, 32), Name(77, 33), Name(77, 34), Name(77, 35), Name(77, 36), Name(77, 37), Name(77, 38), Name(77, 39), Name(77, 40), Name(77, 41), Name(77, 42), Name(77, 43), Name(77, 44), Name(77, 45), Name(77, 46), Name(77, 47), Name(77, 48), Name(77, 49), Name(77, 50),
+    Name(81, 2), Name(81, 3),
+    Name(91, 2), Name(91, 3), Name(91, 4), Name(91, 5),
+    Name(99, 4), Name(99, 5), Name(99, 6), Name(99, 7), Name(99, 8), Name(99, 9), Name(99, 10), Name(99, 11), Name(99, 12), Name(99, 13), Name(99, 14), Name(99, 15), Name(99, 16), Name(99, 17), Name(99, 18), Name(99, 19), Name(99, 20), Name(99, 21), Name(99, 22), Name(99, 23), Name(99, 24), Name(99, 25), Name(99, 26), Name(99, 27), Name(99, 28), Name(99, 29), Name(99, 30), Name(99, 31), Name(99, 32), Name(99, 33),
 ];
