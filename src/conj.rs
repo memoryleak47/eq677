@@ -15,14 +15,14 @@ pub fn conj(m: &MatrixMagma) {
     conj_idempotence(m);
     conj_diag_orbit_size(m);
     conj_cycle_size(m);
-    conj_cycles_divide_n(m);
-    conj_cycles_summary(m);
     conj_bijective_or_constant(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
     conj_unique_cycle_size(m);
     conj_db_complete(m);
 
+    // false_conj_cycles_summary(m);
+    // false_conj_cycles_divide_n(m);
     // false_conj_not_rigid(m);
     // false_conj_cycle2(m);
     // false_conj_d_bij(m);
@@ -150,7 +150,7 @@ fn false_conj_one_orbit(m: &MatrixMagma) {
 }
 
 // conj_cycles_summary is a stronger version of this.
-fn conj_cycles_divide_n(m: &MatrixMagma) {
+fn false_conj_cycles_divide_n(m: &MatrixMagma) {
     if m.n % 7 == 0 { return } // Why %7?
 
     let mut s = 0;
@@ -162,7 +162,7 @@ fn conj_cycles_divide_n(m: &MatrixMagma) {
     assert!(s % m.n == 0);
 }
 
-fn conj_cycles_summary(m: &MatrixMagma) {
+fn false_conj_cycles_summary(m: &MatrixMagma) {
     if m.n % 7 == 0 { return } // Why %7?
 
     let a = c_summary(m, 0);
