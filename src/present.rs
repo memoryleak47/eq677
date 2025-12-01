@@ -12,18 +12,21 @@ const SHOW_AUTOM: bool = false;
 pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) {
     let magma = MatrixMagma::by_fn(n, f);
 
+    let mut new_str = "";
     if n <= 100 {
-        let (name, new) = db_intern(&magma);
-        if !new { return; }
+        let (name_, new_) = db_intern(&magma);
+        if new_ {
+            new_str = "New ";
+        }
     }
 
     let mut print_handle = PRINT_MUTEX.lock().unwrap();
 
     if n <= 100 {
-        println!("Model of size {n} found by {finder}:");
+        println!("{new_str}Model of size {n} found by {finder}:");
         magma.canonicalize2().dump();
     } else {
-        println!("Model of size {n} found by {finder}");
+        println!("{new_str}Model of size {n} found by {finder}");
     }
 
     if CHECK_COMPOSITE {

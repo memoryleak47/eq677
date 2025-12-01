@@ -74,5 +74,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    load_and_dump_file("677_probably_nonlinear.txt");
+    tinv_search();
 }
