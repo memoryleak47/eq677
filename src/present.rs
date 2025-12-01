@@ -18,6 +18,14 @@ pub fn get_present_db() -> Vec<MagmaName> {
     v
 }
 
+pub fn dump_present_db() {
+    println!("present db:");
+    for name in get_present_db() {
+        print!("MagmaName({}, {}), ", name.0, name.1);
+    }
+    println!();
+}
+
 pub fn present_db_contains(name: MagmaName) -> bool {
     let handle = PRESENT_DB.lock().unwrap();
     handle.contains(&name)

@@ -1,11 +1,9 @@
 use crate::*;
 
-use std::collections::{HashMap, HashSet};
+pub fn load_file(file: &str) {
+    let ss = &format!("Loaded from '{file}'");
 
-fn parse_all(s: String) -> Vec<MatrixMagma> {
-    let mut out = Vec::new();
-
-    let mut s = s;
+    let mut s = std::fs::read_to_string(file).unwrap();
 
     let mut current = String::new();
     for line in s.split("\n") {
@@ -15,36 +13,10 @@ fn parse_all(s: String) -> Vec<MatrixMagma> {
         } else {
             current = current.trim().to_string();
             if !current.is_empty() {
-                out.push(MatrixMagma::parse(&current));
+                let m = MatrixMagma::parse(&current);
+                present_model(m.n, &ss, |x, y| m.f(x, y));
                 current = String::new();
             }
         }
     }
-    out
-}
-
-pub fn load_file(file: &str) -> Vec<MagmaName> {
-    let mut out = HashSet::new();
-
-    let s = std::fs::read_to_string(file).unwrap();
-    for m in parse_all(s) {
-        if m.n > 100 { continue }
-
-        let (n, new) = db_intern(&m);
-        out.insert(n);
-        if new {
-            println!("New magma of size {}!", m.n);
-            m.dump();
-        }
-    }
-    let mut out: Vec<MagmaName> = out.into_iter().collect();
-    out.sort();
-    out
-}
-
-pub fn load_and_dump_file(file: &str) {
-    for x in load_file(file) {
-        print!("MagmaName({}, {}), ", x.0, x.1);
-    }
-    println!();
 }
