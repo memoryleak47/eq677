@@ -40,21 +40,23 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     let magma = MatrixMagma::by_fn(n, f);
 
     let mut globally_new_str = "";
+    let mut name_str = String::new();
     if n <= 100 {
         let (name, globally_new) = db_intern(&magma);
         if !present_db_add(name) { return; }
         if globally_new {
             globally_new_str = "New ";
         }
+        name_str = format!("\"{name}\" ");
     }
 
     let mut print_handle = PRINT_MUTEX.lock().unwrap();
 
     if n <= 100 {
-        println!("{globally_new_str}Model of size {n} found by {finder}:");
+        println!("{globally_new_str}Model {name_str}of size {n} found by {finder}:");
         magma.canonicalize2().dump();
     } else {
-        println!("{globally_new_str}Model of size {n} found by {finder}");
+        println!("{globally_new_str}Model {name_str}of size {n} found by {finder}");
     }
 
     if CHECK_COMPOSITE {
