@@ -115,12 +115,16 @@ fn submit_model(ctxt: &Ctxt) {
         draw_cycle(0, n as usize, |i| ctxt.classes_h[i as usize].value as usize);
         println!();
 
-        let b = ctxt.classes_h[0].value;
-        let a = ctxt.classes_h[1].value - ctxt.classes_h[0].value;
+        let b = ctxt.classes_h[0].value as usize;
+        let a = ((n + ctxt.classes_h[1].value - ctxt.classes_h[0].value)%n) as usize;
         // h[i] = a*x + b;
-        let linear = (0..n).all(|i| ctxt.classes_h[i as usize].value == (a*i + b)%n);
-        let selfinv = (0..n).all(|i| ctxt.classes_h[i as usize].value == ctxt.classes_hinv[i as usize].value);
-        println!("linear = {linear}");
+        let linear = (0..(n as usize)).all(|i| ctxt.classes_h[i as usize].value as usize == (a*i + b)%(n as usize));
+        let selfinv = (0..(n as usize)).all(|i| ctxt.classes_h[i as usize].value as usize == ctxt.classes_hinv[i as usize].value as usize);
+        if linear {
+            println!("linear: h(i) = {}*i + {}", a, b);
+        } else {
+            println!("not linear");
+        }
         println!("self-inverse = {selfinv}");
         println!();
     }
