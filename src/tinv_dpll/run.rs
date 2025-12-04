@@ -111,13 +111,13 @@ fn select_p(ctxt: &Ctxt) -> Option<E> {
 fn submit_model(ctxt: &Ctxt) {
     let n = ctxt.n;
     if DUMP_INFOS && n > 2 {
+        print!("h: ");
+        draw_cycle(0, n as usize, |i| ctxt.classes_h[i as usize].value as usize);
+        println!();
+
         let b = ctxt.classes_h[0].value;
         let a = ctxt.classes_h[1].value - ctxt.classes_h[0].value;
         // h[i] = a*x + b;
-        for i in 0..n {
-            print!("h[{i}] = {}, ", ctxt.classes_h[i as usize].value);
-        }
-        println!();
         let linear = (0..n).all(|i| ctxt.classes_h[i as usize].value == (a*i + b)%n);
         let selfinv = (0..n).all(|i| ctxt.classes_h[i as usize].value == ctxt.classes_hinv[i as usize].value);
         println!("linear = {linear}");
