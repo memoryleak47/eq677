@@ -38,6 +38,7 @@ def f_from_g(g):
     print("len(autos) = " + str(len(autos)) +  ", iterating over a space of " + str(size))
     if size > 100_000:
         print("too big!")
+        sys.stdout.flush()
         return
 
     sys.stdout.flush()
