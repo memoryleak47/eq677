@@ -29,17 +29,26 @@ def check_f(f, g):
                 return False
     return True
 
-def f_from_g(g):
-    c = g.order() ** len(g.gens())
-    size = c**2 * g.order()
-    if size > 100_000: return
+def is_auto(e, g):
+    for x in g:
+        if x == g[0]: continue
+        if e(x) == g[0]: return False
+    return True
 
-    h = list(endos(g))
-    assert(len(h) == c)
-    print("len(h) = " + str(c) + ", iterating over a space of " + str(size))
+def filter_autos(es, g):
+    for e in es:
+        if is_auto(e, g):
+            yield e
+
+def f_from_g(g):
+    es = list(endos(g))
+    autos = list(filter_autos(es, g))
+    size = len(es) * len(autos) * g.order()
+    if size > 100_000: return
+    print("len(es) = " + str(len(es)) + ", len(autos) = " + str(len(autos)) +  ", iterating over a space of " + str(size))
     sys.stdout.flush()
-    for a in h:
-        for b in h:
+    for a in autos:
+        for b in es:
             for c in g:
                 def f(x, y):
                     return a(x) + b(y) + c
