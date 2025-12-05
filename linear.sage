@@ -30,8 +30,13 @@ def check_f(f, g):
     return True
 
 def f_from_g(g):
+    c = g.order() ** len(g.gens())
+    size = c**2 * g.order()
+    if size > 100_000: return
+
     h = list(endos(g))
-    print("len(h) = " + str(len(h)) + ", iterating over a space of " + str(len(h)**2 * len(list(g))))
+    assert(len(h) == c)
+    print("len(h) = " + str(c) + ", iterating over a space of " + str(size))
     sys.stdout.flush()
     for a in h:
         for b in h:
