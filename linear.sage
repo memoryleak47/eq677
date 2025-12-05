@@ -1,4 +1,5 @@
 import itertools
+import sys
 
 def direct_product(g1, g2):
     return AdditiveAbelianGroup(list(g1.invariants()) + list(g2.invariants()), remember_generators=False)
@@ -21,13 +22,6 @@ def groups_of_n(n):
         out = out2
     return out
 
-def groups_up_to_n(n):
-    out = []
-    for i in range(1, 100+1):
-        for g in groups_of_n(i):
-            out.append(g)
-    return g
-
 def check_f(f, g):
     for x in g:
         for y in g:
@@ -37,10 +31,11 @@ def check_f(f, g):
 
 def f_from_g(g):
     h = list(endos(g))
+    print("len(h) = " + str(len(h)) + ", iterating over a space of " + str(len(h)**2 * len(list(g))))
+    sys.stdout.flush()
     for a in h:
         for b in h:
             for c in g:
-                if c != g[0]: continue
                 def f(x, y):
                     return a(x) + b(y) + c
                 yield (f, (a, b, c))
@@ -60,9 +55,12 @@ def endos(G):
     for gs in itertools.product(*([G] * n)):
         yield Endo(list(gs))
 
-for i in range(1, 21):
-    for g in groups_of_n(i):
-        if len(g.gens()) > 2: continue
+for n in range(1, 100+1):
+    for g in groups_of_n(n):
+        print()
+        print("looking at group:", g)
+        print()
+        sys.stdout.flush()
         for (f, (a, b, c)) in f_from_g(g):
             if check_f(f, g):
                 print()
@@ -77,3 +75,4 @@ for i in range(1, 21):
                         i = ll.index(z)
                         print(i, end=" ")
                     print()
+                sys.stdout.flush()
