@@ -1,0 +1,79 @@
+import itertools
+
+def direct_product(g1, g2):
+    return AdditiveAbelianGroup(list(g1.invariants()) + list(g2.invariants()), remember_generators=False)
+
+def primepower_groups(p, n, min=1):
+    if n == 0:
+        yield AdditiveAbelianGroup([])
+    for i in range(min, n+1):
+        for rest in primepower_groups(p, n-i, min=i):
+            one = AdditiveAbelianGroup([p ** i])
+            yield direct_product(one, rest)
+
+def groups_of_n(n):
+    out = [AdditiveAbelianGroup([])]
+    for (p, i) in factor(n):
+        out2 = []
+        for o in out:
+            for g in primepower_groups(p, i):
+                out2.append(direct_product(o, g))
+        out = out2
+    return out
+
+def groups_up_to_n(n):
+    out = []
+    for i in range(1, 100+1):
+        for g in groups_of_n(i):
+            out.append(g)
+    return g
+
+def check_f(f, g):
+    for x in g:
+        for y in g:
+            if x != f(y, f(x, f(f(y, x), y))):
+                return False
+    return True
+
+def f_from_g(g):
+    h = list(endos(g))
+    for a in h:
+        for b in h:
+            for c in g:
+                if c != g[0]: continue
+                def f(x, y):
+                    return a(x) + b(y) + c
+                yield (f, (a, b, c))
+
+class Endo:
+    def __init__(self, d):
+        self.d = d
+
+    def __call__(self, x):
+        return sum(y*(self.d)[i] for i, y in enumerate(x._vector_()))
+
+    def __str__(self):
+        return "Endo(" + str(self.d) + ")"
+
+def endos(G):
+    n = len(G.gens())
+    for gs in itertools.product(*([G] * n)):
+        yield Endo(list(gs))
+
+for i in range(1, 21):
+    for g in groups_of_n(i):
+        if len(g.gens()) > 2: continue
+        for (f, (a, b, c)) in f_from_g(g):
+            if check_f(f, g):
+                print()
+                print("Model found!")
+                print(g)
+                print("f(x, y) = " + str(a.d) + "(x) + " + str(b.d) + "(y) + " + str(c))
+                ll = list(g)
+                n = len(ll)
+                for x in range(n):
+                    for y in range(n):
+                        z = f(g[x], g[y])
+                        i = ll.index(z)
+                        print(i, end=" ")
+                    print()
