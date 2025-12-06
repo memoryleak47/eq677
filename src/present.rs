@@ -53,10 +53,10 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
     let mut print_handle = PRINT_MUTEX.lock().unwrap();
 
     if n <= 100 {
-        println!("{globally_new_str}Model {name_str}of size {n} found by {finder}:");
+        println!("{globally_new_str}Model {name_str}found by {finder}:");
         magma.canonicalize2().dump();
     } else {
-        println!("{globally_new_str}Model {name_str}of size {n} found by {finder}");
+        println!("{globally_new_str}Model {name_str}found by {finder}");
     }
 
     if CHECK_COMPOSITE {
