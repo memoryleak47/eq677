@@ -136,6 +136,23 @@ impl MatrixMagma {
         }
     }
 
+    fn zxy(&self, z: usize, x: usize) -> usize {
+        for y in 0..self.n {
+            if self.f(x, y) == z { return y }
+        }
+        unreachable!()
+    }
+
+    pub fn z_cycle_dump(&self) {
+        assert!(self.is_right_cancellative());
+        let ctxt = self;
+        for z in 0..ctxt.n {
+            print!("{z} = ");
+            draw_cycle(z, ctxt.n, |i| self.zxy(z, i));
+            println!();
+        }
+    }
+
     pub fn autom_dump(&self) {
         println!("AUTOM:");
         let g = self.autom_group_mini();
