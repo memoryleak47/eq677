@@ -21,42 +21,47 @@ type V = [usize; 2];
 
 pub fn affmat_search() {
     for p in 0.. {
-        for m1 in p_mats(p) {
-            for m2 in p_mats(p) {
-                for c0 in 0..p {
-                    for c1 in 0..p {
-                        let m12 = mm(m1, m1, p);
-                        let m22 = mm(m2, m2, p);
+        affmat_run(p);
+    }
+}
 
-                        // 0 = M1 + M2^2 M1^2 + M2^3
-                        let m22_12 = mm(m22, m12, p);
-                        let m2_3 = mm(m2, m22, p);
-                        let o = mplus(m1, mplus(m22_12, m2_3, p), p);
-                        if o != [[0, 0], [0, 0]] { continue }
+pub fn affmat_run(p: usize) {
+    dbg!(p);
+    for m1 in p_mats(p) {
+        for m2 in p_mats(p) {
+            for c0 in 0..p {
+                for c1 in 0..p {
+                    let m12 = mm(m1, m1, p);
+                    let m22 = mm(m2, m2, p);
 
-                        // => I = M2 M1 + M2^2 M1 M2
-                        let m2m1 = mm(m2, m1, p);
-                        let m22_1_2 = mm(m22, mm(m1, m2, p), p);
-                        let i = mplus(m2m1, m22_1_2, p);
-                        if i != [[1, 0], [0, 1]] { continue }
+                    // 0 = M1 + M2^2 M1^2 + M2^3
+                    let m22_12 = mm(m22, m12, p);
+                    let m2_3 = mm(m2, m22, p);
+                    let o = mplus(m1, mplus(m22_12, m2_3, p), p);
+                    if o != [[0, 0], [0, 0]] { continue }
 
-                        // 0 = (M2^2*M1 + M2^2 + M2 + 1)*c
-                        let m22_1 = mm(m22, m1, p);
-                        let id = [[1, 0], [0, 1]];
-                        let a = mplus(m22_1, m22, p);
-                        let a = mplus(a, m2, p);
-                        let a = mplus(a, id, p);
-                        if a != [[0, 0], [0, 0]] { continue }
+                    // => I = M2 M1 + M2^2 M1 M2
+                    let m2m1 = mm(m2, m1, p);
+                    let m22_1_2 = mm(m22, mm(m1, m2, p), p);
+                    let i = mplus(m2m1, m22_1_2, p);
+                    if i != [[1, 0], [0, 1]] { continue }
 
-                        present_model(p*p, "affmat", |x, y| {
-                            let x = [x%p, x/p];
-                            let y = [y%p, y/p];
-                            let v = vplus(mv(m1, x, p), mv(m2, y, p), p);
-                            let v = vplus(v, [c0, c1], p);
-                            v[0] + p*v[1]
-                        });
+                    // 0 = (M2^2*M1 + M2^2 + M2 + 1)*c
+                    let m22_1 = mm(m22, m1, p);
+                    let id = [[1, 0], [0, 1]];
+                    let a = mplus(m22_1, m22, p);
+                    let a = mplus(a, m2, p);
+                    let a = mplus(a, id, p);
+                    if a != [[0, 0], [0, 0]] { continue }
 
-                    }
+                    present_model(p*p, "affmat", |x, y| {
+                        let x = [x%p, x/p];
+                        let y = [y%p, y/p];
+                        let v = vplus(mv(m1, x, p), mv(m2, y, p), p);
+                        let v = vplus(v, [c0, c1], p);
+                        v[0] + p*v[1]
+                    });
+
                 }
             }
         }

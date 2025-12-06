@@ -155,7 +155,7 @@ impl Display for Name {
     }
 }
 
-pub static LINEAR_MODELS: &[Name] = &[
+pub static AFFINE_MODELS: &[Name] = &[
     Name(5, 0),
     Name(7, 0), Name(7, 1),
     Name(9, 0),
@@ -169,15 +169,53 @@ pub static LINEAR_MODELS: &[Name] = &[
     Name(37, 0), Name(37, 1),
     Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10),
     Name(43, 0), Name(43, 1), Name(43, 2), Name(43, 3),
-    Name(49, 0), Name(49, 1), Name(49, 3), Name(49, 4), Name(49, 5),
+    Name(45, 0),
+    Name(49, 0), Name(49, 1), Name(49, 2), Name(49, 3), Name(49, 4), Name(49, 5),
     Name(55, 0), Name(55, 1), Name(55, 2), Name(55, 3),
     Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3),
+    Name(63, 0), Name(63, 1),
+    Name(65, 0),
     Name(67, 0), Name(67, 1),
     Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
     Name(73, 0), Name(73, 1),
+    Name(77, 0), Name(77, 1), Name(77, 2), Name(77, 3), Name(77, 4), Name(77, 5), Name(77, 6), Name(77, 7),
+    Name(80, 0), Name(80, 1),
     Name(81, 0), Name(81, 1),
+    Name(91, 0), Name(91, 1),
+    Name(95, 0), Name(95, 1),
     Name(97, 0), Name(97, 1),
+    Name(99, 0), Name(99, 1), Name(99, 2), Name(99, 3),
 ];
+
+pub fn find_affine_models() {
+    for p in 0..101 {
+        affine_run(p);
+    }
+    for p in 0..11 {
+        affmat_run(p);
+    }
+
+    { // Some other models for p=2 or p=3 could be missing.
+        let add = |name| {
+            let m = db_get(name);
+            present_model(m.n, "add", |x, y| m.f(x, y));
+        };
+        add(Name(16, 0));
+        add(Name(16, 1));
+        add(Name(81, 1));
+    }
+
+    let d: Vec<_> = get_present_db().into_iter().map(db_get).collect();
+    for m1 in d.iter() {
+        for m2 in d.iter() {
+            let m = cartesian(m1, m2);
+            if m1.n * m2.n > 100 { continue }
+            present_model(m.n, "add", |x, y| m.f(x, y));
+        }
+    }
+
+    dump_present_db();
+}
 
 pub static LINEAR_EXTENSIONS: &[Name] = &[
     Name(25, 8),
