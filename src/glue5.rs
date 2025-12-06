@@ -8,15 +8,30 @@ pub fn glue5_chk(m: &MatrixMagma) -> bool {
     for x in 0..m.n {
         for y in 0..m.n {
             if x == y { continue }
-
-            let mut set = HashSet::new();
-            set.insert(x);
-            set.insert(y);
-            complete(m, &mut set);
-            if set.len() != 5 { return false }
+            if !induces5(m, x, y) { return false }
         }
     }
     true
+}
+
+pub fn contains5(m: &MatrixMagma) -> bool {
+    for x in 0..m.n {
+        for y in 0..m.n {
+            if induces5(m, x, y) { return true}
+        }
+    }
+    false
+}
+
+fn induces5(m: &MatrixMagma, x: usize, y: usize) -> bool {
+    let mut set = HashSet::new();
+    set.insert(x);
+    set.insert(y);
+    complete(m, &mut set);
+
+    // no need to check what magma it is.
+    // If it's an induced submagma of size 5, it has to be 5/0.
+    set.len() == 5
 }
 
 fn complete(m: &MatrixMagma, set: &mut HashSet<usize>) {
