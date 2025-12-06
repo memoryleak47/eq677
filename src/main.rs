@@ -70,18 +70,19 @@ pub use autom_search::*;
 mod load;
 pub use load::*;
 
+mod glue5;
+pub use glue5::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-
     println!("Potentially interesting models:");
     for (name, m) in db() {
+        if m.n < 2 { continue }
         if AFFINE_MODELS.contains(&name) { continue }
         if LINEAR_EXTENSIONS.contains(&name) { continue }
-
-        // filter out S(2,5,_) gluing models.
-        if m.n % 20 == 1 || m.n % 20 == 5 { continue }
+        if GLUE5_MODELS.contains(&name) { continue }
 
         println!("{name}");
     }
