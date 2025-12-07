@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 const USE_COUNTER: bool = false;
 const DUMP_INFOS: bool = false;
 const SELF_INVERSE: bool = false;
+const ANTI_255: bool = false;
 
 fn threading_depth(n: E) -> E { 4 }
 
@@ -184,6 +185,8 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_pair(i: E, v: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+    if ANTI_255 && i == v { return Err(()) }
+
     prove_pair_impl(i, v, ctxt)?;
     if SELF_INVERSE {
         prove_pair_impl(v, i, ctxt)?;
