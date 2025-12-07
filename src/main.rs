@@ -112,4 +112,6 @@ fn main() {
     m.column_cycle_dump();
     println!("------");
     m.z_cycle_dump();
+    println!("------");
+    m.autom_dump();
 }
