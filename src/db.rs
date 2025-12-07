@@ -223,6 +223,18 @@ pub static TINV: &[Name] = &[
     Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4),
 ];
 
+// h = h⁻¹.
+// is probably incomplete even w.r.t. the db. I scrambled it together from git histories.
+pub static TINV_HHINV: &[Name] = &[
+    Name(5, 0),
+    Name(21, 0),
+    Name(41, 0), Name(41, 1), Name(41, 2), Name(41, 3), Name(41, 4), Name(41, 5), Name(41, 6), Name(41, 11),
+    Name(61, 4), Name(61, 5), Name(61, 6), Name(61, 7), Name(61, 8), Name(61, 9), Name(61, 10), Name(61, 11), Name(61, 12), Name(61, 13), Name(61, 14), Name(61, 15), Name(61, 16), Name(61, 17), Name(61, 18), Name(61, 19), Name(61, 20), Name(61, 21), Name(61, 22), Name(61, 23), Name(61, 24), Name(61, 25), Name(61, 26), Name(61, 27), Name(61, 28), Name(61, 29), Name(61, 30), Name(61, 31), Name(61, 32), Name(61, 33), Name(61, 34),
+    Name(65, 7), Name(65, 8), Name(65, 9), Name(65, 10), Name(65, 11), Name(65, 12), Name(65, 13), Name(65, 14), Name(65, 15),
+    Name(81, 4), Name(81, 5), Name(81, 6), Name(81, 7), Name(81, 8), Name(81, 9), Name(81, 10), Name(81, 11), Name(81, 12), Name(81, 13), Name(81, 14), Name(81, 15), Name(81, 16), Name(81, 17), Name(81, 18), Name(81, 19),
+    Name(85, 0), Name(85, 1), Name(85, 2), Name(85, 3), Name(85, 4), Name(85, 5), Name(85, 6),
+];
+
 pub fn find_affine_models() {
     for p in 0..101 {
         affine_run(p);
