@@ -264,3 +264,13 @@ pub fn find_affine_models() {
 
     dump_present_db();
 }
+
+pub fn dump_potentially_interesting_models() {
+    for (name, _) in db() {
+        if name.0 < 2 { continue; }
+        if AFFINE_MODELS.contains(&name) { continue; }
+        if GLUE5_MODELS.contains(&name) { continue; }
+        if LINEAR_EXTENSIONS.contains(&name) { continue; }
+        println!("{name}");
+    }
+}
