@@ -167,26 +167,45 @@ impl MatrixMagma {
     }
 }
 
+pub fn bij_to_cycles(x: usize, n: usize, f: impl Fn(usize) -> usize) -> Vec<Vec<usize>> {
+    let mut out = Vec::new();
+    let mut seen = vec![false; n];
+    let mut current = Vec::new();
+    for i in (x..n).chain(0..x) {
+        if seen[i] { continue }
+        let mut cc = i;
+        loop {
+            current.push(cc);
+            seen[cc] = true;
+            cc = f(cc);
+            if cc == usize::MAX {
+                current.push(usize::MAX);
+                break;
+            }
+            if seen[cc] {
+                out.push(current);
+                current = Vec::new();
+                break;
+            }
+        }
+    }
+    out
+}
+
 pub fn draw_cycle_string(x: usize, n: usize, f: impl Fn(usize) -> usize) -> String {
     use std::fmt::Write;
 
     let mut out = String::new();
-    let mut seen = vec![false; n];
-    for i in (x..n).chain(0..x) {
-        if seen[i] { continue }
-        let mut cc = i;
+    for cycle in bij_to_cycles(x, n, f) {
         write!(out, "(");
-        loop {
-            write!(out, "{cc}");
-            seen[cc] = true;
-            cc = f(cc);
-            if cc == usize::MAX {
-                write!(out, " ...");
-                break
+        for a in cycle {
+            if a == usize::MAX {
+                write!(out, "... ");
+            } else {
+                write!(out, "{a} ");
             }
-            if seen[cc] { break }
-            write!(out, " ");
         }
+        let _ = out.pop();
         write!(out, ") ");
     }
     let _ = out.pop();
