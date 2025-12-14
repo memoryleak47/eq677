@@ -378,4 +378,14 @@ impl MatrixMagma {
         }
         true
     }
+
+    // For tinv models, this is equivalent to h=h⁻¹.
+    pub fn is_double_left_cancellative(&self) -> bool {
+        for x in 0..self.n {
+            for y in 0..self.n {
+                if self.f(x, self.f(x, y)) != y { return false }
+            }
+        }
+        true
+    }
 }
