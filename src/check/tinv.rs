@@ -26,6 +26,7 @@ pub fn tinv_chk(m: &MatrixMagma) -> Option<Vec<H>> {
     }
 
     if outs.is_empty() { return None }
+    outs.sort();
     Some(outs)
 }
 
