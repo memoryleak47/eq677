@@ -104,7 +104,7 @@ impl MatrixMagma {
                 if z == usize::MAX {
                     s.push_str(&format!("{:<width$}", '-', width = div));
                 } else {
-                    s.push_str(&format!("{:<width$}", z, width = div));
+                    s.push_str(&format!("{:<width$}", fmt(z), width = div));
                 }
             }
             s.push('\n');
@@ -132,7 +132,7 @@ impl MatrixMagma {
         let ctxt = self;
         for x in 0..ctxt.n {
             draw_cycle(x, ctxt.n, |i| ctxt.f(i, x));
-            print!(":{x}\n");
+            print!(":{}\n", fmt(x));
         }
     }
 
@@ -147,7 +147,7 @@ impl MatrixMagma {
         assert!(self.is_right_cancellative());
         let ctxt = self;
         for z in 0..ctxt.n {
-            print!("{z} = ");
+            print!("{} = ", fmt(z));
             draw_cycle(z, ctxt.n, |i| self.zxy(z, i));
             println!();
         }
@@ -202,7 +202,7 @@ pub fn draw_cycle_string(x: usize, n: usize, f: impl Fn(usize) -> usize) -> Stri
             if a == usize::MAX {
                 write!(out, "... ");
             } else {
-                write!(out, "{a} ");
+                write!(out, "{} ", fmt(a));
             }
         }
         let _ = out.pop();
@@ -224,4 +224,14 @@ pub fn cartesian(m0: &MatrixMagma, m1: &MatrixMagma) -> MatrixMagma {
         let (z0, z1) = (m0.f(x0, y0), m1.f(x1, y1));
         z0 + z1*m0.n
     })
+}
+
+
+pub const FIXED_WIDTH: bool = true;
+pub fn fmt(x: usize) -> String {
+    if FIXED_WIDTH {
+        format!("{x:02}")
+    } else {
+        x.to_string()
+    }
 }
