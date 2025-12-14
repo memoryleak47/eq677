@@ -129,7 +129,8 @@ fn submit_model(ctxt: &Ctxt) {
         println!("self-inverse = {selfinv}");
         println!();
     }
-    present_model(n as usize, "tinv_dpll", |x, y| f(x as E, y as E, ctxt) as usize );
+    let string = format!("tinv_dpll: h = {}", draw_cycle_string(0, n as usize, |i| ctxt.classes_h[i as usize].value as usize));
+    present_model(n as usize, &string, |x, y| f(x as E, y as E, ctxt) as usize );
 }
 
 fn main_branch(ctxt: &mut Ctxt) {

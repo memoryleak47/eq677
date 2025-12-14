@@ -167,25 +167,34 @@ impl MatrixMagma {
     }
 }
 
-pub fn draw_cycle(x: usize, n: usize, f: impl Fn(usize) -> usize) {
+pub fn draw_cycle_string(x: usize, n: usize, f: impl Fn(usize) -> usize) -> String {
+    use std::fmt::Write;
+
+    let mut out = String::new();
     let mut seen = vec![false; n];
     for i in (x..n).chain(0..x) {
         if seen[i] { continue }
         let mut cc = i;
-        print!("(");
+        write!(out, "(");
         loop {
-            print!("{cc}");
+            write!(out, "{cc}");
             seen[cc] = true;
             cc = f(cc);
             if cc == usize::MAX {
-                print!(" ...");
+                write!(out, " ...");
                 break
             }
             if seen[cc] { break }
-            print!(" ");
+            write!(out, " ");
         }
-        print!(") ");
+        write!(out, ") ");
     }
+    let _ = out.pop();
+    out
+}
+
+pub fn draw_cycle(x: usize, n: usize, f: impl Fn(usize) -> usize) {
+    print!("{}", draw_cycle_string(x, n, f));
 }
 
 pub fn cartesian(m0: &MatrixMagma, m1: &MatrixMagma) -> MatrixMagma {

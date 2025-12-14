@@ -77,5 +77,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    dump_potentially_interesting_models();
+    tinv_search();
 }
