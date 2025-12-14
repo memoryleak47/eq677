@@ -24,25 +24,27 @@ pub fn tinv_chk2(m: &MatrixMagma) -> bool {
 
     // phi is only one big cycle:
     for x in 0..n {
+        // This gives less info, but is empirically faster.
         if x != 0 { continue }
 
-        for i in 1..n {
+        write!(s, "(assert (distinct ");
+
+        for i in 0..n {
             let mut st = format!("e{x}");
             for _ in 0..i {
                 st = format!("(phi {st})");
             }
-            writeln!(s, "(assert (not (= {st} e{x})))");
+            write!(s, "{st} ");
         }
+        writeln!(s, "))");
     }
 
     // phi injective.
+    write!(s, "(assert (distinct ");
     for x in 0..n {
-        for y in 0..n {
-            if x != y {
-                writeln!(s, "(assert (not (= (phi e{x}) (phi e{y}))))");
-            }
-        }
+        write!(s, "(phi e{x}) ");
     }
+    writeln!(s, "))");
 
     // phi homomorphism:
     for x in 0..n {
