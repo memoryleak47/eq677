@@ -13,6 +13,7 @@ nauty-pet = "0.13.0"
 petgraph = "0.7.1"
 rayon = "1.11.0"
 smallvec = "1.15.1"
+z3 = "0.19.6"
 
 [features]
 flamegraph = []

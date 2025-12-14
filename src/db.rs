@@ -281,6 +281,20 @@ pub fn find_affine_models() {
     dump_present_db();
 }
 
+pub fn find_tinv_models() {
+    for (name, m) in db() {
+        if name.0 < 2 { continue }
+        println!("{name}");
+
+        if tinv_chk(&m) {
+            present_model(m.n, "tinv-chk", |x, y| m.f(x, y));
+        }
+    }
+
+    dump_present_db();
+}
+
+
 pub fn dump_potentially_interesting_models() {
     for (name, _) in db() {
         if name.0 < 2 { continue; }
