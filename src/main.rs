@@ -77,10 +77,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for name in FULL_TINV() {
-        println!("{name}:");
-        let m = db_get(name);
-        let h = tinv_chk(&m).unwrap();
-        println!("h = {}", draw_cycle_string(0, m.n, |i| h[i]));
-    }
+    tinv_dump();
 }

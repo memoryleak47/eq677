@@ -1,22 +1,40 @@
 use crate::*;
 use std::fmt::Write;
 
-pub fn tinv_chk(m: &MatrixMagma) -> Option<Vec<usize>> {
+type H = Vec<usize>;
+
+pub fn tinv_chk(m: &MatrixMagma) -> Option<Vec<H>> {
     let n = m.n;
     let g = m.autom_group();
-    let p: Vec<usize> = g.iter().find_map(|g| {
-        let mut cycles = bij_to_cycles(0, m.n, |i| g[i]);
-        if cycles.len() != 1 { return None }
 
-        cycles.pop()
-    })?;
+    let mut outs = Vec::new();
+    for p in g.iter() {
+        let mut cycles = bij_to_cycles(0, m.n, |i| p[i]);
+        if cycles.len() != 1 { continue }
+        let p = cycles.pop().unwrap();
 
-    let m2 = m.permute(p);
+        let m2 = m.permute(p);
 
-    let h: Vec<_> = (0..n).map(|i| m2.f(0, i)).collect();
-    let m3 = MatrixMagma::by_fn(n, |x, y| (x + h[(y+n-x)%n])%n);
+        let h: H = (0..n).map(|i| m2.f(0, i)).collect();
+        if outs.contains(&h) { continue }
 
-    assert!(m3 == m2);
-    assert!(m3.canonicalize2() == m.canonicalize2());
-    Some(h)
+        let m3 = MatrixMagma::by_fn(n, |x, y| (x + h[(y+n-x)%n])%n);
+
+        assert!(m3 == m2);
+        assert!(m3.canonicalize2() == m.canonicalize2());
+        outs.push(h);
+    }
+
+    if outs.is_empty() { return None }
+    Some(outs)
+}
+
+pub fn tinv_dump() {
+    for name in FULL_TINV() {
+        println!("{name}:");
+        let m = db_get(name);
+        for h in tinv_chk(&m).unwrap() {
+            println!("h = {}", draw_cycle_string(0, m.n, |i| h[i]));
+        }
+    }
 }
