@@ -223,6 +223,15 @@ pub static TINV: &[Name] = &[
     Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4),
 ];
 
+pub static DIVTINV: &[Name] = &[
+    Name(5, 0),
+    Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
+    Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4),
+    Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10),
+    Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3),
+    Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
+];
+
 // h = h⁻¹.
 // is probably incomplete even w.r.t. the db. I scrambled it together from git histories.
 pub static TINV_HHINV: &[Name] = &[

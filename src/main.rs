@@ -77,5 +77,6 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    tinv_dump();
+    divtinv_search();
+    // tinv_dump();
 }
