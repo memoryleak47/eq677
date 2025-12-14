@@ -70,12 +70,17 @@ pub use autom_search::*;
 mod load;
 pub use load::*;
 
-mod glue5;
-pub use glue5::*;
+mod check;
+pub use check::*;
 
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    tinv_search();
+    for name in TINV {
+        println!("{name}:");
+        let m = db_get(*name);
+        let h = tinv_chk(&m).unwrap();
+        println!("h = {}", draw_cycle_string(0, m.n, |i| h[i]));
+    }
 }
