@@ -214,6 +214,7 @@ pub static LINEAR_EXTENSIONS: &[Name] = &[
     Name(99, 4), Name(99, 5), Name(99, 6), Name(99, 7), Name(99, 8), Name(99, 9), Name(99, 10), Name(99, 11), Name(99, 12), Name(99, 13), Name(99, 14), Name(99, 15), Name(99, 16), Name(99, 17), Name(99, 18), Name(99, 19), Name(99, 20), Name(99, 21), Name(99, 22), Name(99, 23), Name(99, 24), Name(99, 25), Name(99, 26), Name(99, 27), Name(99, 28), Name(99, 29), Name(99, 30), Name(99, 31), Name(99, 32), Name(99, 33),
 ];
 
+// state 14.12.2025, all magmas from the db of size < 80 were checked whether they were tinv (using chk_tinv2), and added to TINV accordingly.
 pub static TINV: &[Name] = &[
     Name(5, 0),
     Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
@@ -221,6 +222,7 @@ pub static TINV: &[Name] = &[
     Name(29, 0),
     Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4),
     Name(41, 0), Name(41, 1), Name(41, 2), Name(41, 3), Name(41, 4), Name(41, 5), Name(41, 6), Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10), Name(41, 11),
+    Name(55, 0), Name(55, 1), Name(55, 2), Name(55, 3),
     Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3), Name(61, 4), Name(61, 5), Name(61, 6), Name(61, 7), Name(61, 8), Name(61, 9), Name(61, 10), Name(61, 11), Name(61, 12), Name(61, 13), Name(61, 14), Name(61, 15), Name(61, 16), Name(61, 17), Name(61, 18), Name(61, 19), Name(61, 20), Name(61, 21), Name(61, 22), Name(61, 23), Name(61, 24), Name(61, 25), Name(61, 26), Name(61, 27), Name(61, 28), Name(61, 29), Name(61, 30), Name(61, 31), Name(61, 32), Name(61, 33), Name(61, 34),
     Name(65, 7), Name(65, 8), Name(65, 9), Name(65, 10), Name(65, 11), Name(65, 12), Name(65, 13), Name(65, 14), Name(65, 15),
     Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
@@ -261,7 +263,6 @@ pub fn find_tinv_models() {
     for (name, m) in db() {
         if name.0 < 2 { continue }
         println!("{name}");
-
         if tinv_chk2(&m) {
             present_model(m.n, "tinv-chk", |x, y| m.f(x, y));
         }
