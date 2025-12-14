@@ -167,7 +167,7 @@ impl MatrixMagma {
     }
 }
 
-pub fn bij_to_cycles(x: usize, n: usize, f: impl Fn(usize) -> usize) -> Vec<Vec<usize>> {
+pub fn bij_to_cycles(x: usize, n: usize, sort: bool, f: impl Fn(usize) -> usize) -> Vec<Vec<usize>> {
     let mut out = Vec::new();
     let mut seen = vec![false; n];
     let mut current = Vec::new();
@@ -189,6 +189,9 @@ pub fn bij_to_cycles(x: usize, n: usize, f: impl Fn(usize) -> usize) -> Vec<Vec<
             }
         }
     }
+    if sort {
+        out.sort_by_key(|x| x.len());
+    }
     out
 }
 
@@ -196,7 +199,7 @@ pub fn draw_cycle_string(x: usize, n: usize, f: impl Fn(usize) -> usize) -> Stri
     use std::fmt::Write;
 
     let mut out = String::new();
-    for cycle in bij_to_cycles(x, n, f) {
+    for cycle in bij_to_cycles(x, n, true, f) {
         write!(out, "(");
         for a in cycle {
             if a == usize::MAX {

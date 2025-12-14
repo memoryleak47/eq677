@@ -9,7 +9,7 @@ pub fn tinv_chk(m: &MatrixMagma) -> Option<Vec<H>> {
 
     let mut outs = Vec::new();
     for p in g.iter() {
-        let mut cycles = bij_to_cycles(0, m.n, |i| p[i]);
+        let mut cycles = bij_to_cycles(0, m.n, false, |i| p[i]);
         if cycles.len() != 1 { continue }
         let p = cycles.pop().unwrap();
 
