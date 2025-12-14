@@ -47,3 +47,37 @@ pub fn linear_search() {
         }
     }
 }
+
+pub fn piecewise_linear_search() {
+    for p in 0.. {
+        dbg!(p);
+
+        let mut residues = vec![false; p];
+        for x in 0..p {
+            residues[(x*x)%p] = true;
+        }
+        // for (a1, b1, c1, a2, b2, c2) in itertools::iproduct!(0..p, 0..p, 0..p, 0..p, 0..p, 0..p) {
+        for (a1, a2) in itertools::iproduct!(0..p, 0..p) {
+            let b1 = (1+p-a1)%p;
+            let b2 = (1+p-a2)%p;
+            let c1 = 0;
+            let c2 = 0;
+            // if b1 != (1+p-a1)%p { continue }
+            // if b2 != (1+p-a2)%p { continue }
+            // if c1 != 0 { continue }
+            // if c2 != 0 { continue }
+
+            let f = |x, y| {
+                if residues[(y+p-x)%p] {
+                    (a1*x + b1*y + c1)%p
+                } else {
+                    (a2*x + b2*y + c2)%p
+                }
+            };
+            let m = MatrixMagma::by_fn(p, f);
+            if m.is677() {
+                present_model(p, "piecewise linear: ", |x, y| m.f(x, y));
+            }
+        }
+    }
+}

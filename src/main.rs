@@ -77,11 +77,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for (name, m) in db() {
-        if !TINV.contains(&name) { continue }
-
-        if GLUE5_MODELS.contains(&name) { continue }
-        if AFFINE_MODELS_MOD.contains(&name) { continue }
-        print!("{name}, ");
-    }
+    piecewise_linear_search();
 }
