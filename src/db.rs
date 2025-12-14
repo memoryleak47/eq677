@@ -286,7 +286,7 @@ pub fn find_tinv_models() {
         if name.0 < 2 { continue }
         println!("{name}");
 
-        if tinv_chk(&m) {
+        if tinv_chk2(&m) {
             present_model(m.n, "tinv-chk", |x, y| m.f(x, y));
         }
     }
