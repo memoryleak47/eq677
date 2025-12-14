@@ -77,15 +77,11 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let implies = |x: bool, y: bool| !x || y;
-
     for (name, m) in db() {
-        let a = GLUE5_MODELS.contains(&name);
-        let b = TINV.contains(&name);
-        let c = m.is_double_left_cancellative();
-        assert!(implies(a, c));
-        assert!(implies(b && c, a));
-        if a && !b { print!("{name}, "); }
-    }
+        if !TINV.contains(&name) { continue }
 
+        if GLUE5_MODELS.contains(&name) { continue }
+        if AFFINE_MODELS_MOD.contains(&name) { continue }
+        print!("{name}, ");
+    }
 }

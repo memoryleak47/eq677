@@ -155,8 +155,35 @@ impl Display for Name {
     }
 }
 
+// models of the form f(x, y) = (ax + by + c)%n in Z/pZ.
+pub static AFFINE_MODELS_MOD: &[Name] = &[
+    Name(5, 0),
+    Name(7, 0), Name(7, 1),
+    Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
+    Name(13, 0),
+    Name(19, 0), Name(19, 1),
+    Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4), Name(31, 5),
+    Name(35, 0), Name(35, 1),
+    Name(37, 0), Name(37, 1),
+    Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10),
+    Name(43, 0), Name(43, 1), Name(43, 2), Name(43, 3),
+    Name(49, 4), Name(49, 5),
+    Name(55, 0), Name(55, 1), Name(55, 2), Name(55, 3),
+    Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3),
+    Name(65, 0),
+    Name(67, 0), Name(67, 1),
+    Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
+    Name(73, 0), Name(73, 1),
+    Name(77, 0), Name(77, 1), Name(77, 2), Name(77, 3), Name(77, 4), Name(77, 5), Name(77, 6), Name(77, 7),
+    Name(91, 0), Name(91, 1),
+    Name(95, 0), Name(95, 1),
+    Name(97, 0), Name(97, 1),
+
+];
+
 // could miss some models with p=2, or p=3 (and cartesian products thereof).
-pub static AFFINE_MODELS: &[Name] = &[
+// affine (there called "linear") models in the sense of Lemma 13.3: https://teorth.github.io/equational_theories/blueprint/677-chapter.html
+pub static AFFINE_MODELS_13_3: &[Name] = &[
     Name(5, 0),
     Name(7, 0), Name(7, 1),
     Name(9, 0),
@@ -275,9 +302,16 @@ pub fn find_tinv_models() {
 pub fn dump_potentially_interesting_models() {
     for (name, _) in db() {
         if name.0 < 2 { continue; }
-        if AFFINE_MODELS.contains(&name) { continue; }
+        if AFFINE_MODELS_13_3.contains(&name) { continue; }
         if GLUE5_MODELS.contains(&name) { continue; }
         if LINEAR_EXTENSIONS.contains(&name) { continue; }
         println!("{name}");
+    }
+}
+
+#[test]
+fn affine_subset() {
+    for x in AFFINE_MODELS_MOD {
+        assert!(AFFINE_MODELS_13_3.contains(x));
     }
 }
