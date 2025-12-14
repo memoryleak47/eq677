@@ -214,7 +214,7 @@ pub static LINEAR_EXTENSIONS: &[Name] = &[
     Name(99, 4), Name(99, 5), Name(99, 6), Name(99, 7), Name(99, 8), Name(99, 9), Name(99, 10), Name(99, 11), Name(99, 12), Name(99, 13), Name(99, 14), Name(99, 15), Name(99, 16), Name(99, 17), Name(99, 18), Name(99, 19), Name(99, 20), Name(99, 21), Name(99, 22), Name(99, 23), Name(99, 24), Name(99, 25), Name(99, 26), Name(99, 27), Name(99, 28), Name(99, 29), Name(99, 30), Name(99, 31), Name(99, 32), Name(99, 33),
 ];
 
-// doesn't include the separate h=h⁻¹ tinv search.
+// doesn't include the separate h=h⁻¹ tinv search. Use FULL_TINV for that.
 pub static TINV: &[Name] = &[
     Name(5, 0),
     Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
@@ -234,6 +234,13 @@ pub static TINV_HHINV: &[Name] = &[
     Name(81, 4), Name(81, 5), Name(81, 6), Name(81, 7), Name(81, 8), Name(81, 9), Name(81, 10), Name(81, 11), Name(81, 12), Name(81, 13), Name(81, 14), Name(81, 15), Name(81, 16), Name(81, 17), Name(81, 18), Name(81, 19),
     Name(85, 0), Name(85, 1), Name(85, 2), Name(85, 3), Name(85, 4), Name(85, 5), Name(85, 6),
 ];
+
+pub fn FULL_TINV() -> Vec<Name> {
+    let mut v: Vec<_> = TINV.iter().chain(TINV_HHINV.iter()).copied().collect();
+    v.sort();
+    v.dedup();
+    v
+}
 
 pub fn find_affine_models() {
     for p in 0..101 {
