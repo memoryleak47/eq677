@@ -147,6 +147,12 @@ pub fn db_intern(m: &MatrixMagma) -> (M, /*fresh*/ bool) {
 // The name of a magma (up to isomorphism).
 pub struct M(pub usize, pub usize);
 
+impl M {
+    pub fn get(self) -> MatrixMagma {
+        db_get(self)
+    }
+}
+
 use std::fmt::*;
 
 impl Display for M {
