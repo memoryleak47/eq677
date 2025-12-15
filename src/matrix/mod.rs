@@ -97,7 +97,9 @@ impl MatrixMagma {
 
         let mut s = String::new();
 
-        let div = self.n.ilog10() as usize + 2;
+        let mut div = self.n.ilog10() as usize + 2;
+        if FIXED_WIDTH { div = div.max(3); }
+
         for x in 0..self.n {
             for y in 0..self.n {
                 let z = self.f(x, y);

@@ -77,8 +77,10 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    c_run(9, Vec::new());
-    dump_present_db();
+    db_get(M(7, 0)).cycle_dump();
+    println!("--");
+    db_get(M(7, 1)).cycle_dump();
+
     // dump_induced_submagmas();
     // piecewise_linear_search();
 }
