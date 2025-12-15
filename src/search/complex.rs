@@ -55,7 +55,7 @@ impl<E, F> Magma for GenericMagma<E, F> where F: Fn(E, E) -> E, E: Copy + Eq {
 }
 
 impl<E, F> GenericMagma<E, F> where F: Fn(E, E) -> E, E: Copy + Eq {
-    fn to_matrix(&self) -> MatrixMagma {
+    pub fn to_matrix(&self) -> MatrixMagma {
         MatrixMagma::by_fn(self.elems.len(), |x, y| {
             let x = self.elems[x];
             let y = self.elems[y];

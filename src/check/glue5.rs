@@ -23,6 +23,46 @@ pub fn contains5(m: &MatrixMagma) -> bool {
     false
 }
 
+pub fn get_induced_submagmas(m: &MatrixMagma) -> Vec<MatrixMagma> {
+    let mut v = Vec::new();
+    for x in 0..m.n {
+        for y in 0..m.n {
+            if x == y { continue }
+
+            let mut set = HashSet::new();
+            set.insert(x);
+            set.insert(y);
+            complete(m, &mut set);
+
+            if set.len() == m.n { continue }
+
+            let sub = GenericMagma {
+                elems: set.iter().copied().collect(),
+                f_def: |x, y| m.f(x, y),
+            }.to_matrix().canonicalize2();
+
+            if !v.contains(&sub) {
+                v.push(sub);
+            }
+        }
+    }
+
+    v
+}
+
+pub fn dump_induced_submagmas() {
+    for (name, m) in db() {
+        print!("{name}: ");
+        let comps = get_induced_submagmas(&m);
+        for mm in comps {
+            print!("{}, ", db_intern(&mm).0);
+            // present_model(mm.n, "", |x, y| mm.f(x, y));
+        }
+        println!();
+    }
+}
+
+
 fn induces5(m: &MatrixMagma, x: usize, y: usize) -> bool {
     let mut set = HashSet::new();
     set.insert(x);
@@ -41,6 +81,7 @@ fn complete(m: &MatrixMagma, set: &mut HashSet<usize>) {
         for x in s.iter() {
             for y in s.iter() {
                 set.insert(m.f(*x, *y));
+                if set.len() == m.n { return; }
             }
         }
 

@@ -77,5 +77,6 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    piecewise_linear_search();
+    dump_induced_submagmas();
+    // piecewise_linear_search();
 }
