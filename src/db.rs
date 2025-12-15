@@ -30,12 +30,12 @@ pub fn db_cart_search() {
     }
 }
 
-pub fn db() -> Vec<(Name, MatrixMagma)> {
+pub fn db() -> Vec<(M, MatrixMagma)> {
     let mut out = Vec::new();
     let db = DB_REF.read().unwrap();
     for (i, dbs) in db.iter().enumerate() {
         for (j, m) in dbs.magmas.iter().enumerate() {
-            out.push((Name(i, j), m.clone()));
+            out.push((M(i, j), m.clone()));
         }
     }
     out
@@ -55,7 +55,7 @@ fn db_naming() {
     for (name, m) in db() {
         let n = m.n;
         if name.0 != n {
-            println!("Name is {name}, but n={n}");
+            println!("M is {name}, but n={n}");
             assert!(false);
         }
     }
@@ -65,7 +65,7 @@ fn db_naming() {
 fn db_unique() {
     use std::collections::HashMap;
 
-    let mut map: HashMap<MatrixMagma, Name> = HashMap::default();
+    let mut map: HashMap<MatrixMagma, M> = HashMap::default();
     for (name, m) in db() {
         if let Some(name2) = map.insert(m, name.clone()) {
             panic!("Redundant Magmas {name} = {name2}");
@@ -111,22 +111,22 @@ struct DB {
     map: HashMap<MatrixMagma, usize>,
 }
 
-pub fn db_get(Name(i, j): Name) -> MatrixMagma {
+pub fn db_get(M(i, j): M) -> MatrixMagma {
     let handle = DB_REF.read().unwrap();
     handle[i].magmas[j].clone()
 }
 
-pub fn db_intern(m: &MatrixMagma) -> (Name, /*fresh*/ bool) {
+pub fn db_intern(m: &MatrixMagma) -> (M, /*fresh*/ bool) {
     let m = m.canonicalize2();
     let i = m.n;
     if i > 100 { panic!("Interning is only supported up to n=100"); }
 
     let handle = DB_REF.read().unwrap();
-    if let Some(j) = handle[i].map.get(&m) { return (Name(i, *j), false); }
+    if let Some(j) = handle[i].map.get(&m) { return (M(i, *j), false); }
     drop(handle);
 
     let mut handle = DB_REF.write().unwrap();
-    if let Some(j) = handle[i].map.get(&m) { return (Name(i, *j), false); }
+    if let Some(j) = handle[i].map.get(&m) { return (M(i, *j), false); }
     while handle.len() <= i {
         handle.push(DB {
             magmas: Default::default(),
@@ -139,121 +139,127 @@ pub fn db_intern(m: &MatrixMagma) -> (Name, /*fresh*/ bool) {
     handle[i].map.insert(m, j);
     let path = format!("db/{i}/{j}");
     std::fs::write(&path, s).unwrap();
-    (Name(i, j), true)
+    (M(i, j), true)
 }
 
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 // The name of a magma (up to isomorphism).
-pub struct Name(pub usize, pub usize);
+pub struct M(pub usize, pub usize);
 
 use std::fmt::*;
 
-impl Display for Name {
+impl Display for M {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{}/{}", self.0, self.1)
     }
 }
 
+impl Debug for M {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result {
+        write!(f, "M({}, {})", self.0, self.1)
+    }
+}
+
 // models of the form f(x, y) = (ax + by + c)%n in Z/pZ.
-pub static AFFINE_MODELS_MOD: &[Name] = &[
-    Name(5, 0),
-    Name(7, 0), Name(7, 1),
-    Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
-    Name(13, 0),
-    Name(19, 0), Name(19, 1),
-    Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4), Name(31, 5),
-    Name(35, 0), Name(35, 1),
-    Name(37, 0), Name(37, 1),
-    Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10),
-    Name(43, 0), Name(43, 1), Name(43, 2), Name(43, 3),
-    Name(49, 4), Name(49, 5),
-    Name(55, 0), Name(55, 1), Name(55, 2), Name(55, 3),
-    Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3),
-    Name(65, 0),
-    Name(67, 0), Name(67, 1),
-    Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
-    Name(73, 0), Name(73, 1),
-    Name(77, 0), Name(77, 1), Name(77, 2), Name(77, 3), Name(77, 4), Name(77, 5), Name(77, 6), Name(77, 7),
-    Name(91, 0), Name(91, 1),
-    Name(95, 0), Name(95, 1),
-    Name(97, 0), Name(97, 1),
+pub static AFFINE_MODELS_MOD: &[M] = &[
+    M(5, 0),
+    M(7, 0), M(7, 1),
+    M(11, 0), M(11, 1), M(11, 2), M(11, 3),
+    M(13, 0),
+    M(19, 0), M(19, 1),
+    M(31, 0), M(31, 1), M(31, 2), M(31, 3), M(31, 4), M(31, 5),
+    M(35, 0), M(35, 1),
+    M(37, 0), M(37, 1),
+    M(41, 7), M(41, 8), M(41, 9), M(41, 10),
+    M(43, 0), M(43, 1), M(43, 2), M(43, 3),
+    M(49, 4), M(49, 5),
+    M(55, 0), M(55, 1), M(55, 2), M(55, 3),
+    M(61, 0), M(61, 1), M(61, 2), M(61, 3),
+    M(65, 0),
+    M(67, 0), M(67, 1),
+    M(71, 0), M(71, 1), M(71, 2), M(71, 3),
+    M(73, 0), M(73, 1),
+    M(77, 0), M(77, 1), M(77, 2), M(77, 3), M(77, 4), M(77, 5), M(77, 6), M(77, 7),
+    M(91, 0), M(91, 1),
+    M(95, 0), M(95, 1),
+    M(97, 0), M(97, 1),
 
 ];
 
 // could miss some models with p=2, or p=3 (and cartesian products thereof).
 // affine (there called "linear") models in the sense of Lemma 13.3: https://teorth.github.io/equational_theories/blueprint/677-chapter.html
-pub static AFFINE_MODELS_13_3: &[Name] = &[
-    Name(5, 0),
-    Name(7, 0), Name(7, 1),
-    Name(9, 0),
-    Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
-    Name(13, 0),
-    Name(16, 0), Name(16, 1),
-    Name(19, 0), Name(19, 1),
-    Name(25, 3),
-    Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4), Name(31, 5),
-    Name(35, 0), Name(35, 1),
-    Name(37, 0), Name(37, 1),
-    Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10),
-    Name(43, 0), Name(43, 1), Name(43, 2), Name(43, 3),
-    Name(45, 0),
-    Name(49, 0), Name(49, 1), Name(49, 2), Name(49, 3), Name(49, 4), Name(49, 5),
-    Name(55, 0), Name(55, 1), Name(55, 2), Name(55, 3),
-    Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3),
-    Name(63, 0), Name(63, 1),
-    Name(65, 0),
-    Name(67, 0), Name(67, 1),
-    Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
-    Name(73, 0), Name(73, 1),
-    Name(77, 0), Name(77, 1), Name(77, 2), Name(77, 3), Name(77, 4), Name(77, 5), Name(77, 6), Name(77, 7),
-    Name(80, 0), Name(80, 1),
-    Name(81, 0), Name(81, 1),
-    Name(91, 0), Name(91, 1),
-    Name(95, 0), Name(95, 1),
-    Name(97, 0), Name(97, 1),
-    Name(99, 0), Name(99, 1), Name(99, 2), Name(99, 3),
+pub static AFFINE_MODELS_13_3: &[M] = &[
+    M(5, 0),
+    M(7, 0), M(7, 1),
+    M(9, 0),
+    M(11, 0), M(11, 1), M(11, 2), M(11, 3),
+    M(13, 0),
+    M(16, 0), M(16, 1),
+    M(19, 0), M(19, 1),
+    M(25, 3),
+    M(31, 0), M(31, 1), M(31, 2), M(31, 3), M(31, 4), M(31, 5),
+    M(35, 0), M(35, 1),
+    M(37, 0), M(37, 1),
+    M(41, 7), M(41, 8), M(41, 9), M(41, 10),
+    M(43, 0), M(43, 1), M(43, 2), M(43, 3),
+    M(45, 0),
+    M(49, 0), M(49, 1), M(49, 2), M(49, 3), M(49, 4), M(49, 5),
+    M(55, 0), M(55, 1), M(55, 2), M(55, 3),
+    M(61, 0), M(61, 1), M(61, 2), M(61, 3),
+    M(63, 0), M(63, 1),
+    M(65, 0),
+    M(67, 0), M(67, 1),
+    M(71, 0), M(71, 1), M(71, 2), M(71, 3),
+    M(73, 0), M(73, 1),
+    M(77, 0), M(77, 1), M(77, 2), M(77, 3), M(77, 4), M(77, 5), M(77, 6), M(77, 7),
+    M(80, 0), M(80, 1),
+    M(81, 0), M(81, 1),
+    M(91, 0), M(91, 1),
+    M(95, 0), M(95, 1),
+    M(97, 0), M(97, 1),
+    M(99, 0), M(99, 1), M(99, 2), M(99, 3),
 ];
 
 // not a complete list, obtained via glue5_chk from the db.
-pub static GLUE5_MODELS: &[Name] = &[
-    Name(5, 0),
-    Name(21, 0),
-    Name(25, 0),
-    Name(25, 1), Name(25, 2), Name(25, 3), Name(25, 4), Name(25, 5), Name(25, 6), Name(25, 7), Name(25, 9), Name(25, 10), Name(25, 11), Name(25, 12), Name(25, 13), Name(25, 14), Name(25, 15), Name(25, 16), Name(25, 17), Name(25, 18), Name(25, 19), Name(25, 20), Name(25, 21), Name(25, 22),
-    Name(41, 0), Name(41, 1), Name(41, 2), Name(41, 3), Name(41, 4), Name(41, 5), Name(41, 6), Name(41, 11),
-    Name(61, 4), Name(61, 5), Name(61, 6), Name(61, 7), Name(61, 8), Name(61, 9), Name(61, 10), Name(61, 11), Name(61, 12), Name(61, 13), Name(61, 14), Name(61, 15), Name(61, 16), Name(61, 17), Name(61, 18), Name(61, 19), Name(61, 20), Name(61, 21), Name(61, 22), Name(61, 23), Name(61, 24), Name(61, 25), Name(61, 26), Name(61, 27), Name(61, 28), Name(61, 29), Name(61, 30), Name(61, 31), Name(61, 32), Name(61, 33), Name(61, 34),
-    Name(65, 7), Name(65, 8), Name(65, 9), Name(65, 10), Name(65, 11), Name(65, 12), Name(65, 13), Name(65, 14), Name(65, 15),
-    Name(81, 4), Name(81, 5), Name(81, 6), Name(81, 7), Name(81, 8), Name(81, 9), Name(81, 10), Name(81, 11), Name(81, 12), Name(81, 13), Name(81, 14), Name(81, 15), Name(81, 16), Name(81, 17), Name(81, 18), Name(81, 19),
-    Name(85, 0), Name(85, 1), Name(85, 2), Name(85, 3), Name(85, 4), Name(85, 5), Name(85, 6),
+pub static GLUE5_MODELS: &[M] = &[
+    M(5, 0),
+    M(21, 0),
+    M(25, 0),
+    M(25, 1), M(25, 2), M(25, 3), M(25, 4), M(25, 5), M(25, 6), M(25, 7), M(25, 9), M(25, 10), M(25, 11), M(25, 12), M(25, 13), M(25, 14), M(25, 15), M(25, 16), M(25, 17), M(25, 18), M(25, 19), M(25, 20), M(25, 21), M(25, 22),
+    M(41, 0), M(41, 1), M(41, 2), M(41, 3), M(41, 4), M(41, 5), M(41, 6), M(41, 11),
+    M(61, 4), M(61, 5), M(61, 6), M(61, 7), M(61, 8), M(61, 9), M(61, 10), M(61, 11), M(61, 12), M(61, 13), M(61, 14), M(61, 15), M(61, 16), M(61, 17), M(61, 18), M(61, 19), M(61, 20), M(61, 21), M(61, 22), M(61, 23), M(61, 24), M(61, 25), M(61, 26), M(61, 27), M(61, 28), M(61, 29), M(61, 30), M(61, 31), M(61, 32), M(61, 33), M(61, 34),
+    M(65, 7), M(65, 8), M(65, 9), M(65, 10), M(65, 11), M(65, 12), M(65, 13), M(65, 14), M(65, 15),
+    M(81, 4), M(81, 5), M(81, 6), M(81, 7), M(81, 8), M(81, 9), M(81, 10), M(81, 11), M(81, 12), M(81, 13), M(81, 14), M(81, 15), M(81, 16), M(81, 17), M(81, 18), M(81, 19),
+    M(85, 0), M(85, 1), M(85, 2), M(85, 3), M(85, 4), M(85, 5), M(85, 6),
 ];
 
-pub static LINEAR_EXTENSIONS: &[Name] = &[
-    Name(25, 8),
-    Name(35, 12), Name(35, 13), Name(35, 14), Name(35, 15), Name(35, 16), Name(35, 17), Name(35, 18), Name(35, 19), Name(35, 20), Name(35, 21),
-    Name(45, 1), Name(45, 2), Name(45, 3), Name(45, 4),
-    Name(49, 7), Name(49, 8), Name(49, 9), Name(49, 10), Name(49, 11), Name(49, 12),
-    Name(63, 2), Name(63, 3), Name(63, 4), Name(63, 5),
-    Name(65, 1), Name(65, 2), Name(65, 3), Name(65, 4), Name(65, 5), Name(65, 6),
-    Name(77, 8), Name(77, 9), Name(77, 10), Name(77, 11), Name(77, 12), Name(77, 13), Name(77, 14), Name(77, 15), Name(77, 16), Name(77, 17), Name(77, 18), Name(77, 19), Name(77, 20), Name(77, 21), Name(77, 22), Name(77, 23), Name(77, 24), Name(77, 25), Name(77, 26), Name(77, 27), Name(77, 28), Name(77, 29), Name(77, 30), Name(77, 31), Name(77, 32), Name(77, 33), Name(77, 34), Name(77, 35), Name(77, 36), Name(77, 37), Name(77, 38), Name(77, 39), Name(77, 40), Name(77, 41), Name(77, 42), Name(77, 43), Name(77, 44), Name(77, 45), Name(77, 46), Name(77, 47), Name(77, 48), Name(77, 49), Name(77, 50),
-    Name(81, 2), Name(81, 3),
-    Name(91, 2), Name(91, 3), Name(91, 4), Name(91, 5),
-    Name(99, 4), Name(99, 5), Name(99, 6), Name(99, 7), Name(99, 8), Name(99, 9), Name(99, 10), Name(99, 11), Name(99, 12), Name(99, 13), Name(99, 14), Name(99, 15), Name(99, 16), Name(99, 17), Name(99, 18), Name(99, 19), Name(99, 20), Name(99, 21), Name(99, 22), Name(99, 23), Name(99, 24), Name(99, 25), Name(99, 26), Name(99, 27), Name(99, 28), Name(99, 29), Name(99, 30), Name(99, 31), Name(99, 32), Name(99, 33),
+pub static LINEAR_EXTENSIONS: &[M] = &[
+    M(25, 8),
+    M(35, 12), M(35, 13), M(35, 14), M(35, 15), M(35, 16), M(35, 17), M(35, 18), M(35, 19), M(35, 20), M(35, 21),
+    M(45, 1), M(45, 2), M(45, 3), M(45, 4),
+    M(49, 7), M(49, 8), M(49, 9), M(49, 10), M(49, 11), M(49, 12),
+    M(63, 2), M(63, 3), M(63, 4), M(63, 5),
+    M(65, 1), M(65, 2), M(65, 3), M(65, 4), M(65, 5), M(65, 6),
+    M(77, 8), M(77, 9), M(77, 10), M(77, 11), M(77, 12), M(77, 13), M(77, 14), M(77, 15), M(77, 16), M(77, 17), M(77, 18), M(77, 19), M(77, 20), M(77, 21), M(77, 22), M(77, 23), M(77, 24), M(77, 25), M(77, 26), M(77, 27), M(77, 28), M(77, 29), M(77, 30), M(77, 31), M(77, 32), M(77, 33), M(77, 34), M(77, 35), M(77, 36), M(77, 37), M(77, 38), M(77, 39), M(77, 40), M(77, 41), M(77, 42), M(77, 43), M(77, 44), M(77, 45), M(77, 46), M(77, 47), M(77, 48), M(77, 49), M(77, 50),
+    M(81, 2), M(81, 3),
+    M(91, 2), M(91, 3), M(91, 4), M(91, 5),
+    M(99, 4), M(99, 5), M(99, 6), M(99, 7), M(99, 8), M(99, 9), M(99, 10), M(99, 11), M(99, 12), M(99, 13), M(99, 14), M(99, 15), M(99, 16), M(99, 17), M(99, 18), M(99, 19), M(99, 20), M(99, 21), M(99, 22), M(99, 23), M(99, 24), M(99, 25), M(99, 26), M(99, 27), M(99, 28), M(99, 29), M(99, 30), M(99, 31), M(99, 32), M(99, 33),
 ];
 
 // state 14.12.2025, all magmas from the db of size < 80 were checked whether they were tinv (using chk_tinv2), and added to TINV accordingly.
-pub static TINV: &[Name] = &[
-    Name(5, 0),
-    Name(11, 0), Name(11, 1), Name(11, 2), Name(11, 3),
-    Name(21, 0),
-    Name(29, 0),
-    Name(31, 0), Name(31, 1), Name(31, 2), Name(31, 3), Name(31, 4),
-    Name(41, 0), Name(41, 1), Name(41, 2), Name(41, 3), Name(41, 4), Name(41, 5), Name(41, 6), Name(41, 7), Name(41, 8), Name(41, 9), Name(41, 10), Name(41, 11),
-    Name(55, 0), Name(55, 1), Name(55, 2), Name(55, 3),
-    Name(61, 0), Name(61, 1), Name(61, 2), Name(61, 3), Name(61, 4), Name(61, 5), Name(61, 6), Name(61, 7), Name(61, 8), Name(61, 9), Name(61, 10), Name(61, 11), Name(61, 12), Name(61, 13), Name(61, 14), Name(61, 15), Name(61, 16), Name(61, 17), Name(61, 18), Name(61, 19), Name(61, 20), Name(61, 21), Name(61, 22), Name(61, 23), Name(61, 24), Name(61, 25), Name(61, 26), Name(61, 27), Name(61, 28), Name(61, 29), Name(61, 30), Name(61, 31), Name(61, 32), Name(61, 33), Name(61, 34),
-    Name(65, 7), Name(65, 8), Name(65, 9), Name(65, 10), Name(65, 11), Name(65, 12), Name(65, 13), Name(65, 14), Name(65, 15),
-    Name(71, 0), Name(71, 1), Name(71, 2), Name(71, 3),
-    Name(81, 4), Name(81, 5), Name(81, 6), Name(81, 7),
+pub static TINV: &[M] = &[
+    M(5, 0),
+    M(11, 0), M(11, 1), M(11, 2), M(11, 3),
+    M(21, 0),
+    M(29, 0),
+    M(31, 0), M(31, 1), M(31, 2), M(31, 3), M(31, 4),
+    M(41, 0), M(41, 1), M(41, 2), M(41, 3), M(41, 4), M(41, 5), M(41, 6), M(41, 7), M(41, 8), M(41, 9), M(41, 10), M(41, 11),
+    M(55, 0), M(55, 1), M(55, 2), M(55, 3),
+    M(61, 0), M(61, 1), M(61, 2), M(61, 3), M(61, 4), M(61, 5), M(61, 6), M(61, 7), M(61, 8), M(61, 9), M(61, 10), M(61, 11), M(61, 12), M(61, 13), M(61, 14), M(61, 15), M(61, 16), M(61, 17), M(61, 18), M(61, 19), M(61, 20), M(61, 21), M(61, 22), M(61, 23), M(61, 24), M(61, 25), M(61, 26), M(61, 27), M(61, 28), M(61, 29), M(61, 30), M(61, 31), M(61, 32), M(61, 33), M(61, 34),
+    M(65, 7), M(65, 8), M(65, 9), M(65, 10), M(65, 11), M(65, 12), M(65, 13), M(65, 14), M(65, 15),
+    M(71, 0), M(71, 1), M(71, 2), M(71, 3),
+    M(81, 4), M(81, 5), M(81, 6), M(81, 7),
 ];
 
 pub fn find_affine_models() {
@@ -269,9 +275,9 @@ pub fn find_affine_models() {
             let m = db_get(name);
             present_model(m.n, "add", |x, y| m.f(x, y));
         };
-        add(Name(16, 0));
-        add(Name(16, 1));
-        add(Name(81, 1));
+        add(M(16, 0));
+        add(M(16, 1));
+        add(M(81, 1));
     }
 
     let d: Vec<_> = get_present_db().into_iter().map(db_get).collect();

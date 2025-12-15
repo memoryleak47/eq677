@@ -4,13 +4,13 @@ use std::sync::Mutex;
 
 lazy_static::lazy_static! {
     pub static ref PRINT_MUTEX: Mutex<()> = Mutex::new(());
-    pub static ref PRESENT_DB: Mutex<HashSet<Name>> = Mutex::new(HashSet::new());
+    pub static ref PRESENT_DB: Mutex<HashSet<M>> = Mutex::new(HashSet::new());
 }
 
 const CHECK_COMPOSITE: bool = false;
 const SHOW_AUTOM: bool = false;
 
-pub fn get_present_db() -> Vec<Name> {
+pub fn get_present_db() -> Vec<M> {
     let handle = PRESENT_DB.lock().unwrap();
     let mut v: Vec<_> = (*handle).iter().cloned().collect();
     drop(handle);
@@ -21,17 +21,17 @@ pub fn get_present_db() -> Vec<Name> {
 pub fn dump_present_db() {
     println!("present db:");
     for name in get_present_db() {
-        print!("Name({}, {}), ", name.0, name.1);
+        print!("M({}, {}), ", name.0, name.1);
     }
     println!();
 }
 
-pub fn present_db_contains(name: Name) -> bool {
+pub fn present_db_contains(name: M) -> bool {
     let handle = PRESENT_DB.lock().unwrap();
     handle.contains(&name)
 }
 
-pub fn present_db_add(name: Name) -> bool {
+pub fn present_db_add(name: M) -> bool {
     let mut handle = PRESENT_DB.lock().unwrap();
     handle.insert(name)
 }
