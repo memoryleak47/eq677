@@ -181,7 +181,7 @@ fn conj_idempotence(m: &MatrixMagma) {
 
 // Falsified conjectures:
 
-fn is_prime(n: usize) -> bool {
+pub fn is_prime(n: usize) -> bool {
     if n < 2 { return false }
 
     for i in 2.. {

@@ -12,12 +12,6 @@ use crate::*;
   => 1 = ba + bbba
 */
 
-fn is_prime(p: usize) -> bool {
-    if p < 2 { return false }
-
-    (2..p).all(|d| p%d != 0)
-}
-
 fn modpow(mut b: usize, mut e: usize, p: usize) -> usize {
     let mut res = 1;
     while (e > 0) {

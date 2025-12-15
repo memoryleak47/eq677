@@ -13,13 +13,6 @@ fn div(x: usize, k: usize, p: usize) -> usize {
     panic!()
 }
 
-fn is_prime(x: usize) -> bool {
-    for i in 2..x {
-        if x%i == 0 { return false }
-    }
-    true
-}
-
 pub fn divtinv_search() {
     for p in 3..100 {
         if !is_prime(p) { continue }
