@@ -83,8 +83,9 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = MatrixMagma::by_fn(31, |x, y| (5*x + 27*y + 1)%31);
-    enumerate_dump(&m);
+    tinv_search();
+    // let m = MatrixMagma::by_fn(31, |x, y| (5*x + 27*y + 1)%31);
+    // enumerate_dump(&m);
 
     // dump_induced_submagmas();
     // piecewise_linear_search();

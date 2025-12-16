@@ -6,6 +6,7 @@ const USE_COUNTER: bool = false;
 const DUMP_INFOS: bool = false;
 const SELF_INVERSE: bool = false;
 const ANTI_255: bool = false;
+const H0_0_OR_1: bool = true; // force h(0) in [0, 1].
 
 fn threading_depth(n: E) -> E { 4 }
 
@@ -14,7 +15,21 @@ static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
 
 pub fn tinv_run(n: usize) {
     let mut ctxt = build_ctxt(n);
-    prerun(0, &mut ctxt);
+    if H0_0_OR_1 && n > 1 {
+        let mut ctxts = Vec::new();
+        for a in [0, 1] {
+            let mut ctxt = ctxt.clone();
+            prove_pair(0, a, &mut ctxt).unwrap();
+            propagate(&mut ctxt).unwrap();
+            ctxts.push(ctxt);
+        }
+        into_par_for_each(ctxts, |mut ctxt| {
+            prerun(0, &mut ctxt);
+        });
+
+    } else {
+        prerun(0, &mut ctxt);
+    }
 }
 
 pub fn tinv_search() {
