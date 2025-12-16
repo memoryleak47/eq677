@@ -8,8 +8,6 @@ pub fn prop_combo(m: &MatrixMagma) -> bool {
     for x in 0..m.n {
         for y in 0..m.n {
             if f(x, f(x, y)) != f(f(y, x), x) { return false }
-
-            // These are merely consequences (or equivalent) to the above:
             if x != f(f(f(y, f(x, y)), x), y) { return false }
             if f(f(x, y), y) != f(f(f(x, f(x, y)), x), x) { return false }
         }
