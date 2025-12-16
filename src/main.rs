@@ -81,7 +81,7 @@ fn main() {
     let _timer = Timer::new();
 
     for (name, m) in db() {
-        if prop_combo2(&m) {
+        if prop_combo(&m) {
             print!("{name}, ");
         }
     }
