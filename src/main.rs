@@ -76,15 +76,15 @@ pub use check::*;
 mod prop_combo;
 pub use prop_combo::*;
 
+mod enumerate;
+pub use enumerate::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for (name, m) in db() {
-        if prop_combo(&m) {
-            print!("{name}, ");
-        }
-    }
+    let m = MatrixMagma::by_fn(31, |x, y| (5*x + 27*y + 1)%31);
+    enumerate_dump(&m);
 
     // dump_induced_submagmas();
     // piecewise_linear_search();
