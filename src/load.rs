@@ -2,8 +2,19 @@ use crate::*;
 
 pub fn load_file(file: &str) {
     let ss = &format!("Loaded from '{file}'");
+    for m in magmas_from_file(file) {
+        present_model(m.n, &ss, |x, y| m.f(x, y));
+    }
+}
 
+pub fn magma_from_file(file: &str) -> MatrixMagma {
+    let v = magmas_from_file(file);
+    v.into_iter().next().unwrap()
+}
+
+pub fn magmas_from_file(file: &str) -> Vec<MatrixMagma> {
     let mut s = std::fs::read_to_string(file).unwrap();
+    let mut out = Vec::new();
 
     let mut current = String::new();
     for line in s.split("\n") {
@@ -14,9 +25,10 @@ pub fn load_file(file: &str) {
             current = current.trim().to_string();
             if !current.is_empty() {
                 let m = MatrixMagma::parse(&current);
-                present_model(m.n, &ss, |x, y| m.f(x, y));
+                out.push(m);
                 current = String::new();
             }
         }
     }
+    out
 }
