@@ -73,13 +73,18 @@ pub use load::*;
 mod check;
 pub use check::*;
 
+mod prop_combo;
+pub use prop_combo::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    db_get(M(7, 0)).cycle_dump();
-    println!("--");
-    db_get(M(7, 1)).cycle_dump();
+    for (name, m) in db() {
+        if prop_combo2(&m) {
+            print!("{name}, ");
+        }
+    }
 
     // dump_induced_submagmas();
     // piecewise_linear_search();
