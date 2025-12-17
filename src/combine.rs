@@ -18,6 +18,9 @@ pub fn combine_search() {
             for g in &goodies {
                 if g.n < 2 { continue }
                 if g.n > 20 { continue }
+                let a = a.shuffle();
+                let b = b.shuffle();
+                let g = g.shuffle();
                 let m = GenericMagma {
                     elems: itertools::iproduct!(0..g.n, 0..a.n).collect(),
                     f_def: |x: (usize, usize), y: (usize, usize)| {
