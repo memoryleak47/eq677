@@ -82,10 +82,21 @@ pub use enumerate::*;
 mod combine;
 pub use combine::*;
 
+mod uf;
+pub use uf::*;
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    duo_combine_search();
-    // funny_extend2();
+    for (name, m) in db() {
+        println!("{name}:");
+        for v in uf(&m) {
+            for a in v {
+                print!("{a:?}, ");
+            }
+            println!("");
+        }
+        
+    }
 }
