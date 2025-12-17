@@ -31,7 +31,7 @@ pub fn funny_extend2() {
         for (a, b) in itertools::iproduct!(0..q, 0..q) {
             let f = |x: EE, y: EE| -> EE {
                 let o = (y.0 + 5 - x.0)%5;
-                if o == 0 {
+                if o != 0 {
                     ((2*x.0+4*y.0)%5, (a*x.1 + b*y.1)%q)
                 } else {
                     ((2*x.0+4*y.0)%5, (a*x.1 + b*y.1 + 1)%q)

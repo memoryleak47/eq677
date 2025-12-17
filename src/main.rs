@@ -79,9 +79,30 @@ pub use prop_combo::*;
 mod enumerate;
 pub use enumerate::*;
 
+mod combine;
+pub use combine::*;
+
+fn good(m: &MatrixMagma) -> bool {
+    if !m.is_idempotent() { return false }
+    for x in 0..m.n {
+        for y in 0..m.n {
+            if x == y { continue }
+            let mut eq = false;
+            let f = |x, y| {
+                if x == y { eq = true; }
+                m.f(x, y)
+            };
+            assert!(x == m.f(y, m.f(x, m.f(m.f(y, x), y))));
+            if eq { return false }
+        }
+    }
+    true
+}
+
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    funny_extend2();
+    combine_search();
+    // funny_extend2();
 }
