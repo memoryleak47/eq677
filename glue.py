@@ -1,10 +1,18 @@
-# This generates a random gluing model of multiple 11-sized models glued together.
-# The steiner system is the affine plane of order 11.
+# This generates a random gluing model of multiple 5 or 11-sized models glued together.
+# The steiner system is the affine plane of order 5 or 11.
 
 import random
 
 # If you want another model, change this seed.
 random.seed(1)
+
+# Choose 5 or 11
+n = 5
+
+def choose_block_magma():
+    if n == 5: return "5/0"
+    if n == 11: return random.choice(["11/0", "11/1", "11/2", "11/3"])
+    return None
 
 def load_magma(m):
     l = open("db/" + m).read()
@@ -31,8 +39,7 @@ def dump(m):
             print(points.index(z), end=" ")
         print()
 
-def generate_affine_plane_order_11():
-    n = 11
+def generate_affine_plane():
     points = [(x, y) for x in range(n) for y in range(n)]
     blocks = []
 
@@ -58,15 +65,14 @@ def random_glue(points, blocks):
         m[(a, a)] = a
 
     for block in blocks:
-        i = random.choice([0, 1, 2, 3])
-        m11 = load_magma("11/" + str(i))
+        m5 = load_magma(choose_block_magma())
         random.shuffle(block)
-        for x in range(11):
-            for y in range(11):
-                m[(block[x], block[y])] = block[m11[(x, y)]]
+        for x in range(n):
+            for y in range(n):
+                m[(block[x], block[y])] = block[m5[(x, y)]]
     return m
 
-points, blocks = generate_affine_plane_order_11()
+points, blocks = generate_affine_plane()
 m = random_glue(points, blocks)
 
 check677(m)
