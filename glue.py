@@ -115,7 +115,8 @@ def random_glue(points, blocks):
     return m
 
 points, blocks = generate_projective_plane_order_4()
-m = random_glue(points, blocks)
-
-check677(m)
-dump(m)
+for _ in range(2000):
+    m = random_glue(points, blocks)
+    check677(m)
+    dump(m)
+    print("--")
