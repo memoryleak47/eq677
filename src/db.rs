@@ -228,11 +228,11 @@ pub static AFFINE_MODELS_13_3: &[M] = &[
 ];
 
 // not a complete list, obtained via glue5_chk from the db.
+// might get outdated repeatedly. Using glue5_chk to check for gluing models is safer.
 pub static GLUE5_MODELS: &[M] = &[
     M(5, 0),
-    M(21, 0),
-    M(25, 0),
-    M(25, 1), M(25, 2), M(25, 3), M(25, 4), M(25, 5), M(25, 6), M(25, 7), M(25, 9), M(25, 10), M(25, 11), M(25, 12), M(25, 13), M(25, 14), M(25, 15), M(25, 16), M(25, 17), M(25, 18), M(25, 19), M(25, 20), M(25, 21), M(25, 22),
+    M(21, 0), M(21, 1),
+    M(25, 0), M(25, 1), M(25, 2), M(25, 3), M(25, 4), M(25, 5), M(25, 6), M(25, 7), M(25, 9), M(25, 10), M(25, 11), M(25, 12), M(25, 13), M(25, 14), M(25, 15), M(25, 16), M(25, 17), M(25, 18), M(25, 19), M(25, 20), M(25, 21), M(25, 22), M(25, 26),
     M(41, 0), M(41, 1), M(41, 2), M(41, 3), M(41, 4), M(41, 5), M(41, 6), M(41, 11),
     M(61, 4), M(61, 5), M(61, 6), M(61, 7), M(61, 8), M(61, 9), M(61, 10), M(61, 11), M(61, 12), M(61, 13), M(61, 14), M(61, 15), M(61, 16), M(61, 17), M(61, 18), M(61, 19), M(61, 20), M(61, 21), M(61, 22), M(61, 23), M(61, 24), M(61, 25), M(61, 26), M(61, 27), M(61, 28), M(61, 29), M(61, 30), M(61, 31), M(61, 32), M(61, 33), M(61, 34),
     M(65, 7), M(65, 8), M(65, 9), M(65, 10), M(65, 11), M(65, 12), M(65, 13), M(65, 14), M(65, 15),
@@ -304,6 +304,18 @@ pub fn find_tinv_models() {
         println!("{name}");
         if tinv_chk2(&m) {
             present_model(m.n, "tinv-chk", |x, y| m.f(x, y));
+        }
+    }
+
+    dump_present_db();
+}
+
+pub fn find_gluing_models() {
+    for (name, m) in db() {
+        if name.0 < 2 { continue }
+        println!("{name}");
+        if glue5_chk(&m) {
+            present_model(m.n, "glue5-chk", |x, y| m.f(x, y));
         }
     }
 

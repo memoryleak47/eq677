@@ -83,7 +83,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = magma_from_file("glued");
-    dbg!(m.is677());
-    dbg!(m.autom_stats().grpsize());
+    find_gluing_models();
 }
