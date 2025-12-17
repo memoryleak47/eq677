@@ -1,27 +1,18 @@
 use crate::c_dpll::*;
 
 pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
-    if !ctxt.forced_automs.is_empty() { return vec![ctxt] }
-    if ctxt.n <= 1 { return vec![ctxt] }
-
     let mut out = Vec::new();
 
-    {
+    for a in [1, 2, 3] {
         let mut ctxt = ctxt.clone();
-        ctxt.nonfresh = ctxt.nonfresh.max(2);
-        if prove_triple(0, 0, 1, &mut ctxt).is_ok() {
-            if propagate(&mut ctxt).is_ok() {
-                out.push(ctxt);
-            }
-        }
-    }
+        prove_triple(0, 0, 1, &mut ctxt).unwrap();
+        prove_triple(1, 0, 2, &mut ctxt).unwrap();
+        prove_triple(2, 0, a, &mut ctxt).unwrap();
+        propagate(&mut ctxt).unwrap();
 
-    {
-        let mut ctxt = ctxt.clone();
-        for i in 0..ctxt.n {
-            assert!(prove_triple(i, i, i, &mut ctxt).is_ok());
-        }
-        assert!(propagate(&mut ctxt).is_ok());
+        ctxt.nonfresh = 3;
+        if a == 3 { ctxt.nonfresh = 4; }
+
         out.push(ctxt);
     }
 

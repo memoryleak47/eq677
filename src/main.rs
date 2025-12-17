@@ -83,5 +83,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    find_gluing_models();
+    c_run(100, Vec::new());
 }

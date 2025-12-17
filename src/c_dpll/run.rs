@@ -91,7 +91,7 @@ pub fn compute_base_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
     let x0_score = X0_SCORE * (x == 0) as i32;
     let pos_score = pos_score(x, y, ctxt);
 
-    cs_score + x0_score + pos_score
+    cs_score // + x0_score + pos_score
 }
 
 // returns None if we are done.
@@ -115,7 +115,13 @@ fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     }
 
     if best_score == -1 { None }
-    else { Some(best) }
+    else {
+        if best_score < 1000 {
+            ctxt.dump();
+            assert!(false, "{best_score}");
+        }
+        Some(best)
+    }
 }
 
 fn submit_model(ctxt: &Ctxt) {
