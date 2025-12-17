@@ -11,13 +11,13 @@ pub fn combine_search() {
 
     for (_, a) in db() {
         if a.n < 2 { continue }
-        if a.n > 11 { continue }
+        if a.n > 20 { continue }
         for (_, b) in db() {
             if a.n != b.n { continue }
 
             for g in &goodies {
                 if g.n < 2 { continue }
-                if g.n > 11 { continue }
+                if g.n > 20 { continue }
                 let m = GenericMagma {
                     elems: itertools::iproduct!(0..g.n, 0..a.n).collect(),
                     f_def: |x: (usize, usize), y: (usize, usize)| {
