@@ -79,8 +79,6 @@ pub use prop_combo::*;
 mod enumerate;
 pub use enumerate::*;
 
-type EE = (usize, usize);
-
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();

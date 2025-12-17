@@ -1,5 +1,7 @@
 use crate::*;
 
+type EE = (usize, usize);
+
 pub fn funny_extend() {
     for q in 1.. {
         dbg!(q);
