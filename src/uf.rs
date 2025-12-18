@@ -74,6 +74,7 @@ fn pick_random(magmas: &[MatrixMagma]) -> MatrixMagma {
 pub fn uf_search() {
     for (_, m) in db() {
         if m.n < 2 { continue }
+        if m.n > 50 { continue }
         let uf: Vec<Vec<E2>> = uf(&m);
 
         for k in 2..(200/m.n+2) {
