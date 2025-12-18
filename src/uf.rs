@@ -33,31 +33,10 @@ pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
         }
     }
 
-
-    if let Equ::E255 = eq {
-        for x in 0..m.n {
-            // f(f(f(x, x), x), x)
-            // a b c
-            let c = m.f(x, x);
-            let b = m.f(c, x);
-            let a = m.f(b, x);
-            merge((x, x), (c, x), &mut map);
-            merge((x, x), (b, x), &mut map);
-        }
-    } else {
-        for x in 0..m.n {
-            for y in 0..m.n {
-                // f(y, f(x, f(f(y, x), y)))
-                // a    b    c d
-
-                let d = m.f(y, x);
-                let c = m.f(d, y);
-                let b = m.f(x, c);
-                let a = m.f(y, b);
-                merge((y, x), (d, y), &mut map);
-                merge((y, x), (x, c), &mut map);
-                merge((y, x), (y, b), &mut map);
-            }
+    for t in eq.traces(m) {
+        let fst = t[0];
+        for other in &t[1..] {
+            merge(fst, *other, &mut map);
         }
     }
 
@@ -122,9 +101,49 @@ pub fn uf_search() {
                     (z0, z1)
                 },
             }.to_matrix();
-            if mag.is677() {
-                present_model(mag.n, "kk", |x, y| mag.f(x, y));
-            }
+            assert!(mag.is677());
+            present_model(mag.n, "kk", |x, y| mag.f(x, y));
         }
+    }
+}
+
+
+
+// x*(y*((x*y)*x))
+pub fn trace677(m: &MatrixMagma, x: E, y: E) -> [E2; 4] {
+    let xy = m.f(x, y);
+    let xyx = m.f(xy, x);
+    let yxyx = m.f(y, xyx);
+    [(x, y), (xy, x), (y, xyx), (x, yxyx)]
+}
+
+// ((x*x)*x)*x
+pub fn trace255(m: &MatrixMagma, x: E) -> [E2; 3] {
+    let xx = m.f(x, x);
+    let xxx = m.f(xx, x);
+    [(x, x), (xx, x), (xxx, x)]
+}
+
+impl Equ {
+    // A trace always starts with the source pair, whose m.f-computation you are tracing.
+    fn traces(self, m: &MatrixMagma) -> Vec<Vec<E2>> {
+        let mut out = Vec::new();
+        match self {
+            Equ::E677 => {
+                for x in 0..m.n {
+                    for y in 0..m.n {
+                        let v = trace677(m, x, y).into_iter().collect();
+                        out.push(v);
+                    }
+                }
+            },
+            Equ::E255 => {
+                for x in 0..m.n {
+                    let v = trace255(m, x).into_iter().collect();
+                    out.push(v);
+                }
+            },
+        }
+        out
     }
 }
