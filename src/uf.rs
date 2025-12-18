@@ -62,3 +62,50 @@ pub fn uf(m: &MatrixMagma) -> Vec<Vec<E2>> {
 
     out
 }
+
+fn pick_random(magmas: &[MatrixMagma]) -> MatrixMagma {
+    use rand::prelude::*;
+
+    let mut rng = rand::rng();
+    let i: usize = rng.gen_range(0..magmas.len());
+    magmas[i].clone()
+}
+
+pub fn uf_search() {
+    for (_, m) in db() {
+        if m.n < 2 { continue }
+        let uf: Vec<Vec<E2>> = uf(&m);
+
+        for k in 2..(200/m.n+2) {
+            let mut mag_opts = Vec::new();
+            for (_, m) in db() {
+                if m.n != k { continue }
+                mag_opts.push(m);
+            }
+            if mag_opts.is_empty() { continue }
+
+            let mut mags = Vec::new();
+            for _ in 0..uf.len() {
+                let m2 = pick_random(&mag_opts);
+                let m2 = m2.shuffle();
+                mags.push(m2);
+            }
+
+            let mag = GenericMagma {
+                elems: itertools::iproduct!(0..m.n, 0..k).collect(),
+                f_def: |x: E2, y: E2| {
+                    let i = uf.iter().position(|u| u.contains(&(x.0, y.0))).unwrap();
+                    let mm = &mags[i];
+
+                    let z0 = m.f(x.0, y.0);
+                    let z1 = mm.f(x.1, y.1);
+
+                    (z0, z1)
+                },
+            }.to_matrix();
+            if mag.is677() {
+                present_model(mag.n, "kk", |x, y| mag.f(x, y));
+            }
+        }
+    }
+}

@@ -89,14 +89,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for (name, m) in db() {
-        println!("{name}:");
-        for v in uf(&m) {
-            for a in v {
-                print!("{a:?}, ");
-            }
-            println!("");
-        }
-        
-    }
+    uf_search();
 }
