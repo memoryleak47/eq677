@@ -10,6 +10,11 @@ fn find(a: E2, map: &Map) -> E2 {
     find(map[&a], map)
 }
 
+pub enum Equ {
+    E255,
+    E677,
+}
+
 fn merge(a: E2, b: E2, map: &mut Map) {
     let a = find(a, map);
     let b = find(b, map);
@@ -20,7 +25,7 @@ fn merge(a: E2, b: E2, map: &mut Map) {
     }
 }
 
-pub fn uf(m: &MatrixMagma) -> Vec<Vec<E2>> {
+pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
     let mut map = HashMap::new();
     for x in 0..m.n {
         for y in 0..m.n {
@@ -28,18 +33,31 @@ pub fn uf(m: &MatrixMagma) -> Vec<Vec<E2>> {
         }
     }
 
-    for x in 0..m.n {
-        for y in 0..m.n {
-            // f(y, f(x, f(f(y, x), y)))
-            // a    b    c d
 
-            let d = m.f(y, x);
-            let c = m.f(d, y);
-            let b = m.f(x, c);
-            let a = m.f(y, b);
-            merge((y, x), (d, y), &mut map);
-            merge((y, x), (x, c), &mut map);
-            merge((y, x), (y, b), &mut map);
+    if let Equ::E255 = eq {
+        for x in 0..m.n {
+            // f(f(f(x, x), x), x)
+            // a b c
+            let c = m.f(x, x);
+            let b = m.f(c, x);
+            let a = m.f(b, x);
+            merge((x, x), (c, x), &mut map);
+            merge((x, x), (b, x), &mut map);
+        }
+    } else {
+        for x in 0..m.n {
+            for y in 0..m.n {
+                // f(y, f(x, f(f(y, x), y)))
+                // a    b    c d
+
+                let d = m.f(y, x);
+                let c = m.f(d, y);
+                let b = m.f(x, c);
+                let a = m.f(y, b);
+                merge((y, x), (d, y), &mut map);
+                merge((y, x), (x, c), &mut map);
+                merge((y, x), (y, b), &mut map);
+            }
         }
     }
 
@@ -75,7 +93,7 @@ pub fn uf_search() {
     for (_, m) in db() {
         if m.n < 2 { continue }
         if m.n > 50 { continue }
-        let uf: Vec<Vec<E2>> = uf(&m);
+        let uf: Vec<Vec<E2>> = uf(&m, Equ::E677);
 
         for k in 2..(200/m.n+2) {
             let mut mag_opts = Vec::new();

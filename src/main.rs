@@ -89,5 +89,18 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    uf_search();
+    for (name, m) in db() {
+        println!("{name}:");
+        let pairs: Vec<(usize, usize)> = itertools::iproduct!(0..m.n, 0..m.n).collect();
+        let uf_255 = uf(&m, Equ::E255);
+        let uf_677 = uf(&m, Equ::E677);
+        for p1 in &pairs {
+            for p2 in &pairs {
+                let eq_255 = uf_255.iter().any(|x| x.contains(&p1) && x.contains(&p2));
+                let eq_677 = uf_677.iter().any(|x| x.contains(&p1) && x.contains(&p2));
+                let implies = |x: bool, y: bool| (!x || y);
+                assert!(implies(eq_255, eq_677));
+            }
+        }
+    }
 }
