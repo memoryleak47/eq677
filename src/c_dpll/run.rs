@@ -18,7 +18,6 @@ pub fn c_run(n: usize, automs: Vec<Vec<E>>) {
 
 // Completes a partial magma.
 pub fn c_complete(mpart: &MatrixMagma) {
-    let mpart = mpart.clone();
     let n = mpart.n;
     let mut ctxt = build_ctxt(n, Vec::new());
     ctxt.nonfresh = n as _;
