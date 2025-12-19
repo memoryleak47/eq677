@@ -16,6 +16,25 @@ pub fn c_run(n: usize, automs: Vec<Vec<E>>) {
     });
 }
 
+// Completes a partial magma.
+pub fn c_complete(mpart: &MatrixMagma) {
+    let mpart = mpart.clone();
+    let n = mpart.n;
+    let mut ctxt = build_ctxt(n, Vec::new());
+    ctxt.nonfresh = n as _;
+    for x in 0..n {
+        for y in 0..n {
+            let z = mpart.f(x, y);
+            if z != usize::MAX {
+                if prove_triple(x as E, y as E, z as E, &mut ctxt).is_err() { return }
+            }
+        }
+    }
+    if propagate(&mut ctxt).is_err() { return }
+
+    prerun(0, &mut ctxt);
+}
+
 pub fn c_search() {
     for i in 0.. {
         c_run(i, Vec::new());

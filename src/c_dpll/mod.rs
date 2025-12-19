@@ -12,7 +12,7 @@ use split::*;
 
 mod run;
 use run::*;
-pub use run::{c_run, c_search};
+pub use run::{c_run, c_search, c_complete};
 
 mod twee;
 pub use twee::*;
