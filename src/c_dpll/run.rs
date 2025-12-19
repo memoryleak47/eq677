@@ -34,6 +34,20 @@ pub fn c_complete(mpart: &MatrixMagma) {
     prerun(0, &mut ctxt);
 }
 
+// Completes a partial magma, will try to extend if not possible.
+pub fn c_complete_extended(m: &MatrixMagma) {
+    for nn in m.n..m.n+30 {
+        dbg!(nn);
+        let mut m2 = MatrixMagma::undefined(nn);
+        for x in 0..m.n {
+            for y in 0..m.n {
+                m2.set_f(x, y, m.f(x, y));
+            }
+        }
+        c_complete(&m2);
+    }
+}
+
 pub fn c_search() {
     for i in 0.. {
         c_run(i, Vec::new());

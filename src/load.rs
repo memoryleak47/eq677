@@ -18,7 +18,7 @@ pub fn magmas_from_file(file: &str) -> Vec<MatrixMagma> {
 
     let mut current = String::new();
     for line in s.split("\n") {
-        if line.chars().all(|x| x.is_whitespace() || x.is_digit(10)) && line.trim().len() > 4 {
+        if line.chars().all(|x| x.is_whitespace() || x.is_digit(10) || x == '-') && line.trim().len() > 4 {
             current.push_str(&line);
             current.push('\n');
         } else {
