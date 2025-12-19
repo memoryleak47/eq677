@@ -239,7 +239,9 @@ pub fn cartesian(m0: &MatrixMagma, m1: &MatrixMagma) -> MatrixMagma {
         let (y0, y1) = (y%m0.n, y/m0.n);
 
         let (z0, z1) = (m0.f(x0, y0), m1.f(x1, y1));
-        z0 + z1*m0.n
+
+        if z0 == usize::MAX || z1 == usize::MAX { usize::MAX }
+        else { z0 + z1*m0.n }
     })
 }
 

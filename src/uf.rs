@@ -107,29 +107,31 @@ pub fn uf_search() {
     }
 }
 
-pub fn partial_dump() {
+pub fn partial_dump_magma(m: &MatrixMagma) {
+    let mut set = HashSet::new();
+
+    for x in 0..m.n {
+        for y in 0..m.n {
+            // These are boring:
+            if x == y && m.f(x, x) == x { continue }
+
+            let mm = partial_677_magma((x, y), &m);
+            if set.insert(mm.canonicalize2()) {
+                println!("({x}, {y}) generate:");
+                mm.dump();
+            }
+        }
+    }
+}
+
+pub fn partial_dump_db() {
     for (name, m) in db() {
-        let mut set = HashSet::new();
         println!();
         println!("====================");
         println!("{name}:");
         println!("====================");
 
-        let stdin = std::io::stdin();
-        stdin.read_line(&mut String::new()).unwrap();
-
-        for x in 0..m.n {
-            for y in 0..m.n {
-                // These are boring:
-                if x == y && m.f(x, x) == x { continue }
-
-                let mm = partial_677_magma((x, y), &m);
-                if set.insert(mm.canonicalize2()) {
-                    println!("({x}, {y}) generate:");
-                    mm.dump();
-                }
-            }
-        }
+        partial_dump_magma(&m);
     }
 }
 
