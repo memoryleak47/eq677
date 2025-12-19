@@ -112,7 +112,8 @@ pub fn partial_dump() {
         let mut set = HashSet::new();
         println!();
         println!("====================");
-        println!("{name}");
+        println!("{name}:");
+        println!("====================");
 
         let stdin = std::io::stdin();
         stdin.read_line(&mut String::new()).unwrap();
@@ -123,10 +124,9 @@ pub fn partial_dump() {
                 if x == y && m.f(x, x) == x { continue }
 
                 let mm = partial_677_magma((x, y), &m);
-                let mm = mm.canonicalize2();
-                if set.insert(mm.clone()) {
+                if set.insert(mm.canonicalize2()) {
+                    println!("({x}, {y}) generate:");
                     mm.dump();
-                    println!("---");
                 }
             }
         }
