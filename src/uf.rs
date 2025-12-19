@@ -140,7 +140,9 @@ pub fn partial_dump_magma(m: &MatrixMagma) {
             if x == y && m.f(x, x) == x { continue }
 
             let mm = partial_677_magma((x, y), &m);
-            if set.insert(mm.canonicalize2()) {
+            let mm = shrink_partial_to_fit(&mm);
+            let mm = mm.canonicalize2();
+            if set.insert(mm.clone()) {
                 println!("({x}, {y}) generate:");
                 mm.dump();
             }
@@ -221,4 +223,28 @@ impl Equ {
         }
         out
     }
+}
+
+// Finds the elements that are actually used in this magma.
+pub fn elements_of_partial(m: &MatrixMagma) -> Vec<usize> {
+    let mut v = Vec::new();
+    for x in 0..m.n {
+        for y in 0..m.n {
+            let z = m.f(x, y);
+            if z != usize::MAX {
+                if !v.contains(&x) { v.push(x); }
+                if !v.contains(&y) { v.push(y); }
+                if !v.contains(&z) { v.push(z); }
+            }
+        }
+    }
+    v
+}
+
+pub fn shrink_partial_to_fit(m: &MatrixMagma) -> MatrixMagma {
+    let v = elements_of_partial(m);
+    GenericMagma {
+        elems: v,
+        f_def: |x, y| m.f(x, y),
+    }.to_matrix()
 }

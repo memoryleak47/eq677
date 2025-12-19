@@ -60,7 +60,7 @@ impl<E, F> GenericMagma<E, F> where F: Fn(E, E) -> E, E: Copy + Eq {
             let x = self.elems[x];
             let y = self.elems[y];
             let z = self.f(x, y);
-            self.elems.iter().position(|zz| *zz == z).unwrap()
+            self.elems.iter().position(|zz| *zz == z).unwrap_or(usize::MAX)
         })
     }
 }
