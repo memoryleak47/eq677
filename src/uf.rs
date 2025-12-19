@@ -107,7 +107,45 @@ pub fn uf_search() {
     }
 }
 
+pub fn partial_dump() {
+    for (name, m) in db() {
+        println!();
+        println!("====================");
+        println!("{name}");
+        for x in 0..m.n {
+            for y in 0..m.n {
+                let mm = partial_677_magma((x, y), &m);
+                mm.dump();
+                println!("---");
+            }
+        }
+    }
+}
 
+pub fn partial_677_magma(xy: E2, m: &MatrixMagma) -> MatrixMagma {
+    let mut v = vec![xy];
+
+    'outer: loop {
+        let mut dirty = false;
+        for (x, y) in v.clone() {
+            for xy2 in trace677(m, x, y) {
+                if !v.contains(&xy2) {
+                    v.push(xy2);
+                    dirty = true;
+                }
+            }
+        }
+        if !dirty { break }
+    }
+
+    let mut out = MatrixMagma::undefined(m.n);
+    for (x, y) in v {
+        let z = m.f(x, y);
+        out.set_f(x, y, z);
+    }
+
+    out
+}
 
 // x*(y*((x*y)*x))
 pub fn trace677(m: &MatrixMagma, x: E, y: E) -> [E2; 4] {

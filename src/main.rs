@@ -89,5 +89,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    uf_search();
+    partial_dump();
 }
