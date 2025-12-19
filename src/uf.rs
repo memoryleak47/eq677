@@ -107,6 +107,30 @@ pub fn uf_search() {
     }
 }
 
+pub fn partial_completion_search() {
+    use std::collections::HashSet;
+    let mut set = HashSet::new();
+    for (name, m) in db() {
+        println!("====================");
+        println!("{name}:");
+        println!("====================");
+        for x in 0..m.n {
+            for y in 0..m.n {
+                // These are boring:
+                if x == y && m.f(x, x) == x { continue }
+
+                let mm = partial_677_magma((x, y), &m);
+                if mm.count_defined() > m.n*m.n/2 {
+                    let mm = mm.canonicalize2();
+                    if set.insert(mm.clone()) {
+                        c_complete(&mm);
+                    }
+                }
+            }
+        }
+    }
+}
+
 pub fn partial_dump_magma(m: &MatrixMagma) {
     let mut set = HashSet::new();
 
