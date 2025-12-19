@@ -123,6 +123,7 @@ pub fn partial_dump() {
                 if x == y && m.f(x, x) == x { continue }
 
                 let mm = partial_677_magma((x, y), &m);
+                let mm = mm.canonicalize2();
                 if set.insert(mm.clone()) {
                     mm.dump();
                     println!("---");

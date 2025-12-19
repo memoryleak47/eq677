@@ -67,10 +67,12 @@ fn graphify(m: &MatrixMagma) -> Graph {
     for x in 0..m.n {
         for y in 0..m.n {
             let z = m.f(x, y);
-            let xyz = g.add_node(NodeType::XYZ);
-            g.add_edge(xyz, nodes[x], EdgeType::X);
-            g.add_edge(xyz, nodes[y], EdgeType::Y);
-            g.add_edge(xyz, nodes[z], EdgeType::Z);
+            if z != usize::MAX {
+                let xyz = g.add_node(NodeType::XYZ);
+                g.add_edge(xyz, nodes[x], EdgeType::X);
+                g.add_edge(xyz, nodes[y], EdgeType::Y);
+                g.add_edge(xyz, nodes[z], EdgeType::Z);
+            }
         }
     }
     g
@@ -84,7 +86,7 @@ fn de_graphify(g: &Graph) -> MatrixMagma {
         }
     }
 
-    let mut m = MatrixMagma::zeros(nodes.len());
+    let mut m = MatrixMagma::undefined(nodes.len());
 
     for idx in g.node_indices() {
         if g[idx] == NodeType::XYZ {
