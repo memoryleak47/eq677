@@ -89,5 +89,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    partial_completion_search();
+    partial_db();
 }

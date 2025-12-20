@@ -248,3 +248,23 @@ pub fn shrink_partial_to_fit(m: &MatrixMagma) -> MatrixMagma {
         f_def: |x, y| m.f(x, y),
     }.to_matrix()
 }
+
+// Constructs a partial model db.
+pub fn partial_db() -> HashSet<MatrixMagma> {
+    let mut set: HashSet<MatrixMagma> = HashSet::new();
+    for (name, m) in db() {
+        println!("Looking in {name}:");
+        for x in 0..m.n {
+            for y in 0..m.n {
+                let mm = partial_677_magma((x, y), &m);
+                let mm = shrink_partial_to_fit(&mm);
+                let mm = mm.canonicalize2();
+                if set.insert(mm.clone()) {
+                    println!("size={}, defined={}:", mm.n, mm.count_defined());
+                    mm.dump();
+                }
+            }
+        }
+    }
+    set
+}
