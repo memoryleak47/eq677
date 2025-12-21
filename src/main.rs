@@ -91,13 +91,8 @@ fn main() {
 
     let m = MatrixMagma::by_fn(5, |x, y| (2*x + 4*y)%5);
 
-    let mut uf = init_uf(m.n);
-    for x in 0..5 {
-        for y in 0..5 {
-            merge((x, y), ((x+1)%5, (y+1)%5), &mut uf);
-        }
+    for uf in useful_classes(&m) {
+        colored_dump(&m, &uf);
+        println!();
     }
-
-    rebuild_c_classes(&m, &mut uf);
-    colored_dump(&m, &uf);
 }
