@@ -310,14 +310,7 @@ fn get_colors() -> Vec<String> {
         }
     }
 
-    use rand::seq::SliceRandom;
-    use rand::thread_rng;
-    use rand::rngs::StdRng;
-    use rand::SeedableRng;
-
-    let seed = [0u8; 32]; // 32-byte seed
-    let mut rng = StdRng::from_seed(seed);
-    combinations.shuffle(&mut rng);
+    shuf(0, &mut combinations);
     combinations
 }
 
@@ -353,4 +346,45 @@ pub fn colored_dump(m: &MatrixMagma, map: &Map) {
         }
         println!();
     }
+}
+
+fn shuf<T>(seed: u8, v: &mut Vec<T>) {
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+
+    let seed = [seed; 32]; // 32-byte seed
+    let mut rng = StdRng::from_seed(seed);
+    v.shuffle(&mut rng);
+}
+
+pub fn random_classes(m: &MatrixMagma) -> Map {
+    let mut uf = init_uf(m.n);
+    rebuild_c_classes(&m, &mut uf);
+
+    'outer: for i in 0.. {
+        dbg!(i);
+        let mut lv1 = leaders(m.n, &uf);
+        let mut lv2 = lv1.clone();
+        shuf(0, &mut lv1);
+        shuf(1, &mut lv2);
+
+        for l1 in lv1.iter() {
+            for l2 in lv2.iter() {
+                if l1 == l2 { continue }
+                let mut uf2 = uf.clone();
+                merge(*l1, *l2, &mut uf2);
+                rebuild_c_classes(&m, &mut uf2);
+                if leaders(m.n, &uf2).len() > m.n + 5 {
+                    uf = uf2;
+                    continue 'outer;
+                }
+            }
+        }
+        println!("Stopped iteration with i={i}");
+        break;
+    }
+
+    uf
 }
