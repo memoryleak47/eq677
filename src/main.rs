@@ -89,7 +89,8 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = M(25, 24).get();
+    let m = M(5, 0).get();
+    let m = cartesian(&m, &m);
     let uf = random_classes(&m);
     colored_dump(&m, &uf);
 }

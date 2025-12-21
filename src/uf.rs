@@ -368,7 +368,7 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
         let mut lv1 = leaders(m.n, &uf);
         let mut lv2 = lv1.clone();
         shuf(0, &mut lv1);
-        shuf(1, &mut lv2);
+        shuf(2, &mut lv2);
 
         for l1 in lv1.iter() {
             for l2 in lv2.iter() {
