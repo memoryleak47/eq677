@@ -31,6 +31,20 @@ def check677(m):
             f = lambda x, y: m[(x, y)]
             assert(x == f(y, f(x, f(f(y, x), y))))
 
+# funny equivalent way to write 677
+def check677_alt(m):
+    points = list(set(m.values()))
+    for x in points:
+        for y in points:
+            l = lambda x, y: m[(x, y)]
+            r = lambda x, y: m[(y, x)]
+
+            a = y
+            for fn in [l, r]:
+                for b in [x, y]:
+                    a = fn(a, b)
+            assert(x == a)
+
 def dump(m):
     points = list(set(m.values()))
     for x in points:
@@ -118,5 +132,6 @@ points, blocks = generate_projective_plane_order_4()
 for _ in range(2000):
     m = random_glue(points, blocks)
     check677(m)
+    check677_alt(m)
     dump(m)
     print("--")
