@@ -89,8 +89,15 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = M(5, 0).get();
-    let m = cartesian(&m, &m);
-    let uf = random_classes(&m);
+    let m = MatrixMagma::by_fn(5, |x, y| (2*x + 4*y)%5);
+
+    let mut uf = init_uf(m.n);
+    for x in 0..5 {
+        for y in 0..5 {
+            merge((x, y), ((x+1)%5, (y+1)%5), &mut uf);
+        }
+    }
+
+    rebuild_c_classes(&m, &mut uf);
     colored_dump(&m, &uf);
 }
