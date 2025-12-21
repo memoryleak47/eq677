@@ -5,7 +5,7 @@ type E = usize;
 type E2 = (E, E);
 type Map = HashMap<E2, E2>;
 
-fn find(a: E2, map: &Map) -> E2 {
+pub fn find(a: E2, map: &Map) -> E2 {
     if map[&a] == a { return a }
     find(map[&a], map)
 }
@@ -15,7 +15,7 @@ pub enum Equ {
     E677,
 }
 
-fn merge(a: E2, b: E2, map: &mut Map) {
+pub fn merge(a: E2, b: E2, map: &mut Map) {
     let a = find(a, map);
     let b = find(b, map);
     if a < b {
@@ -25,13 +25,30 @@ fn merge(a: E2, b: E2, map: &mut Map) {
     }
 }
 
-pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
+pub fn init_uf(n: usize) -> Map {
     let mut map = HashMap::new();
-    for x in 0..m.n {
-        for y in 0..m.n {
-            map.insert((x, y), (x, y));
-        }
+    for p in e2_iter(n) {
+        map.insert(p, p);
     }
+    map
+}
+
+pub fn uf_to_vecs(n: usize, map: &Map) -> Vec<Vec<E2>> {
+    let mut out = Vec::new();
+    for xy in e2_iter(n) {
+        let mut part = Vec::new();
+        for ab in e2_iter(n) {
+            if find(ab, &map) == xy {
+                part.push(ab);
+            }
+        }
+        if !part.is_empty() { out.push(part); }
+    }
+    out
+}
+
+pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
+    let mut map = init_uf(m.n);
 
     for t in eq.traces(m) {
         let fst = t[0];
@@ -40,24 +57,11 @@ pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
         }
     }
 
-    let mut out = Vec::new();
-    for x in 0..m.n {
-        for y in 0..m.n {
-            let xy = (x, y);
-            let mut part = Vec::new();
-            for a in 0..m.n {
-                for b in 0..m.n {
-                    let ab = (a, b);
-                    if find(ab, &map) == xy {
-                        part.push(ab);
-                    }
-                }
-            }
-            if !part.is_empty() { out.push(part); }
-        }
-    }
+    uf_to_vecs(m.n, &map)
+}
 
-    out
+fn e2_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
+    (0..n).flat_map(move |x| (0..n).map(move |y| (x, y)))
 }
 
 fn pick_random(magmas: &[MatrixMagma]) -> MatrixMagma {
@@ -267,4 +271,22 @@ pub fn partial_db() -> HashSet<MatrixMagma> {
         }
     }
     set
+}
+
+pub fn rebuild_c_classes(m: &MatrixMagma, map: &mut Map) {
+    loop {
+        let mut dirty = false;
+        for p in e2_iter(m.n) {
+            let r = find(p, map);
+            let t1 = trace677(m, p.0, p.1);
+            let t2 = trace677(m, r.0, r.1);
+            for (p1, p2) in t1.into_iter().zip(t2.into_iter()) {
+                if find(p1, map) != find(p2, map) {
+                    dirty = true;
+                    merge(p1, p2, map);
+                }
+            }
+        }
+        if !dirty { break }
+    }
 }
