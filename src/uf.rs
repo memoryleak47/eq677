@@ -389,11 +389,16 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
     uf
 }
 
-pub fn useful_classes(m: &MatrixMagma) -> Vec<Map> {
-    let mut opts = vec![init_uf(m.n)];
-    let c1 = (0, 0);
-    let c2 = (0, 1);
+fn useful_classes_from(c1: E2, c2: E2, m: &MatrixMagma) -> Vec<Map> {
+    let mut uf = init_uf(m.n);
+    for p in e2_iter(m.n) {
+        if p == c2 { break }
+        merge(c1, p, &mut uf);
+    }
+    rebuild_c_classes(m, &mut uf);
+    if find(c1, &uf) == find(c2, &uf) { return Vec::new() }
 
+    let mut opts = vec![uf];
     for p in e2_iter(m.n) {
         for map in std::mem::take(&mut opts) {
             let p_lead = find(p, &map);
@@ -411,5 +416,16 @@ pub fn useful_classes(m: &MatrixMagma) -> Vec<Map> {
             }
         }
     }
+    opts
+}
+
+pub fn useful_classes(m: &MatrixMagma) -> Vec<Map> {
+    let mut opts = vec![];
+    let c1 = (0, 0);
+    for c2 in e2_iter(m.n) {
+        if c1 == c2 { continue }
+        opts.extend(useful_classes_from(c1, c2, m));
+    }
+
     opts
 }
