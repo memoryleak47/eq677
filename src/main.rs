@@ -91,9 +91,7 @@ fn main() {
 
     let m = M(25, 24).get();
     let mut uf = init_uf(m.n);
-    merge((0, 0), (0, 1), &mut uf);
+    merge((0, 0), (0, 2), &mut uf);
     rebuild_c_classes(&m, &mut uf);
-    for u in uf_to_vecs(m.n, &uf) {
-        println!("{u:?}");
-    }
+    colored_dump(&m, &uf);
 }

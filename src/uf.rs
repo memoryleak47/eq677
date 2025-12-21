@@ -290,3 +290,67 @@ pub fn rebuild_c_classes(m: &MatrixMagma, map: &mut Map) {
         if !dirty { break }
     }
 }
+
+fn get_colors() -> Vec<String> {
+    let mut combinations = Vec::new();
+
+    // Define the valid color range (excluding the black codes identified previously)
+    let valid_indices: Vec<u8> = (0..=255)
+        .filter(|&i| !matches!(i, 0 | 8 | 16 | 232..=236))
+        .collect();
+
+    for &fg in &valid_indices {
+        for &bg in &valid_indices {
+            // Skip if foreground and background are the same
+            if fg == bg {
+                continue;
+            }
+            // Format: \x1b[38;5;FG;48;5;BGm
+            combinations.push(format!("\x1b[38;5;{};48;5;{}m", fg, bg));
+        }
+    }
+
+    use rand::seq::SliceRandom;
+    use rand::thread_rng;
+    use rand::rngs::StdRng;
+    use rand::SeedableRng;
+
+    let seed = [0u8; 32]; // 32-byte seed
+    let mut rng = StdRng::from_seed(seed);
+    combinations.shuffle(&mut rng);
+    combinations
+}
+
+fn leaders(n: usize, uf: &Map) -> Vec<E2> {
+    e2_iter(n).filter(|x| *x == find(*x, uf)).collect()
+}
+
+pub fn colored_dump(m: &MatrixMagma, map: &Map) {
+    let mut div = m.n.ilog10() as usize + 2;
+    if FIXED_WIDTH { div = div.max(3); }
+
+    let colors = get_colors();
+    let l = leaders(m.n, map);
+    let mut colormap = HashMap::new();
+    if l.len() > colors.len() {
+        println!("Warning: duplicate color usage!");
+    }
+    for (i, ll) in l.iter().enumerate() {
+        colormap.insert(ll, colors[i%colors.len()].clone());
+    }
+
+    for x in 0..m.n {
+        for y in 0..m.n {
+            let z = m.f(x, y);
+            let ll = find((x, y), &map);
+            print!("{}", &colormap[&ll]);
+            if z == usize::MAX {
+                print!("{:<width$}", '-', width = div);
+            } else {
+                print!("{:<width$}", fmt(z), width = div);
+            }
+            print!("\x1b[0m");
+        }
+        println!();
+    }
+}
