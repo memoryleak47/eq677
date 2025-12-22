@@ -64,6 +64,10 @@ fn e2_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
     (0..n).flat_map(move |x| (0..n).map(move |y| (x, y)))
 }
 
+fn e2_nonidem_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
+    (0..n).flat_map(move |x| (0..n).map(move |y| (x, y))).filter(|(x, y)| x != y)
+}
+
 fn pick_random(magmas: &[MatrixMagma]) -> MatrixMagma {
     use rand::prelude::*;
 
@@ -391,7 +395,7 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
 
 fn useful_classes_from(c1: E2, c2: E2, m: &MatrixMagma) -> Vec<Map> {
     let mut uf = init_uf(m.n);
-    for p in e2_iter(m.n) {
+    for p in e2_nonidem_iter(m.n) {
         if p == c2 { break }
         merge(c1, p, &mut uf);
     }
@@ -399,7 +403,7 @@ fn useful_classes_from(c1: E2, c2: E2, m: &MatrixMagma) -> Vec<Map> {
     if find(c1, &uf) == find(c2, &uf) { return Vec::new() }
 
     let mut opts = vec![uf];
-    for p in e2_iter(m.n) {
+    for p in e2_nonidem_iter(m.n) {
         for map in std::mem::take(&mut opts) {
             let p_lead = find(p, &map);
             if p_lead == find(c1, &map) || p_lead == find(c2, &map) {
@@ -421,8 +425,8 @@ fn useful_classes_from(c1: E2, c2: E2, m: &MatrixMagma) -> Vec<Map> {
 
 pub fn useful_classes(m: &MatrixMagma) -> Vec<Map> {
     let mut opts = vec![];
-    let c1 = (0, 0);
-    for c2 in e2_iter(m.n) {
+    let c1 = (0, 1);
+    for c2 in e2_nonidem_iter(m.n) {
         if c1 == c2 { continue }
         opts.extend(useful_classes_from(c1, c2, m));
     }
