@@ -64,7 +64,7 @@ fn e2_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
     (0..n).flat_map(move |x| (0..n).map(move |y| (x, y)))
 }
 
-fn e2_nonidem_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
+pub fn e2_nonidem_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
     (0..n).flat_map(move |x| (0..n).map(move |y| (x, y))).filter(|(x, y)| x != y)
 }
 
@@ -318,7 +318,7 @@ fn get_colors() -> Vec<String> {
     combinations
 }
 
-fn leaders(n: usize, uf: &Map) -> Vec<E2> {
+pub fn leaders(n: usize, uf: &Map) -> Vec<E2> {
     e2_iter(n).filter(|x| *x == find(*x, uf)).collect()
 }
 
@@ -432,4 +432,22 @@ pub fn useful_classes(m: &MatrixMagma) -> Vec<Map> {
     }
 
     opts
+}
+
+pub fn analyze_useful_classes(m: &MatrixMagma) {
+    for uf in useful_classes(&m) {
+        colored_dump(&m, &uf);
+        for l in leaders(11, &uf) {
+            if l.0 == l.1 { continue }
+            print!("{l:?}: ");
+            for x in e2_nonidem_iter(11) {
+                if find(x, &uf) == l {
+                    print!("{x:?}, ");
+                }
+            }
+            dbg!(trace677(&m, l.0, l.1).into_iter().map(|a| find(a, &uf)).collect::<Vec<_>>());
+            println!();
+        }
+        println!();
+    }
 }
