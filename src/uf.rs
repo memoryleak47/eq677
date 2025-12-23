@@ -388,7 +388,7 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
     rebuild_c_classes(&m, &mut uf);
 
     'outer: for i in 0.. {
-        dbg!(i);
+        // dbg!(i);
         let mut lv1 = leaders(m.n, &uf);
         let mut lv2 = lv1.clone();
         shuf(0, &mut lv1);
@@ -400,13 +400,13 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
                 let mut uf2 = uf.clone();
                 merge(*l1, *l2, &mut uf2);
                 rebuild_c_classes(&m, &mut uf2);
-                if leaders(m.n, &uf2).len() > m.n + 5 {
+                if leaders(m.n, &uf2).len() > 2 {
                     uf = uf2;
                     continue 'outer;
                 }
             }
         }
-        println!("Stopped iteration with i={i}");
+        // println!("Stopped iteration with i={i}");
         break;
     }
 
