@@ -358,7 +358,7 @@ pub fn colored_dump(m: &MatrixMagma, map: &Map) {
             print!("{}X", &colormap[&a]);
         }
         print!("\x1b[0m ");
-        if i%4 == 0 { println!(); }
+        if i%4 == 3 { println!(); }
     }
     println!();
 }
