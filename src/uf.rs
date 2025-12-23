@@ -322,7 +322,7 @@ fn get_colors() -> Vec<String> {
         }
     }
 
-    shuf(0, &mut combinations);
+    shuf(Some(0), &mut combinations);
     combinations
 }
 
@@ -371,16 +371,20 @@ pub fn colored_dump(m: &MatrixMagma, map: &Map) {
     println!();
 }
 
-fn shuf<T>(seed: u8, v: &mut Vec<T>) {
+fn shuf<T>(seed: Option<u8>, v: &mut Vec<T>) {
     use rand::seq::SliceRandom;
     use rand::thread_rng;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
 
-    // let seed = [seed; 32]; // 32-byte seed
-    // let mut rng = StdRng::from_seed(seed);
-    let mut rng = thread_rng();
-    v.shuffle(&mut rng);
+    if let Some(seed) = seed {
+        let seed = [seed; 32];
+        let mut rng = StdRng::from_seed(seed);
+        v.shuffle(&mut rng);
+    } else {
+        let mut rng = thread_rng();
+        v.shuffle(&mut rng);
+    }
 }
 
 pub fn random_classes(m: &MatrixMagma) -> Map {
@@ -392,8 +396,8 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
         let mut lv1 = leaders(m.n, &uf);
         assert!(lv1.len() > 1);
         let mut lv2 = lv1.clone();
-        shuf(0, &mut lv1);
-        shuf(2, &mut lv2);
+        shuf(None, &mut lv1);
+        shuf(None, &mut lv2);
 
         for l1 in lv1.iter() {
             for l2 in lv2.iter() {
