@@ -90,13 +90,9 @@ fn main() {
     let _timer = Timer::new();
 
     let m = MatrixMagma::by_fn(5, |x, y| (2*x + 4*y)%5);
-
-    for (name, m) in db() {
-        if m.n < 2 { continue }
-        println!("{name}:");
-        for uf in useful_classes(&m) {
-            colored_dump(&m, &uf);
-            println!();
-        }
+    let m = cartesian(&m, &m);
+    loop {
+        let uf = random_classes(&m);
+        colored_dump(&m, &uf);
     }
 }

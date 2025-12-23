@@ -25,11 +25,19 @@ pub fn merge(a: E2, b: E2, map: &mut Map) {
     }
 }
 
-pub fn init_uf(n: usize) -> Map {
+pub fn init_uf(m: &MatrixMagma) -> Map {
     let mut map = HashMap::new();
-    for p in e2_iter(n) {
+    for p in e2_iter(m.n) {
         map.insert(p, p);
     }
+
+    // It simplifies a bit to merge all the idempotents.
+    if m.is_idempotent() {
+        for x in 1..m.n {
+            merge((0, 0), (x, x), &mut map);
+        }
+    }
+
     map
 }
 
@@ -48,7 +56,7 @@ pub fn uf_to_vecs(n: usize, map: &Map) -> Vec<Vec<E2>> {
 }
 
 pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
-    let mut map = init_uf(m.n);
+    let mut map = init_uf(m);
 
     for t in eq.traces(m) {
         let fst = t[0];
@@ -369,13 +377,14 @@ fn shuf<T>(seed: u8, v: &mut Vec<T>) {
     use rand::rngs::StdRng;
     use rand::SeedableRng;
 
-    let seed = [seed; 32]; // 32-byte seed
-    let mut rng = StdRng::from_seed(seed);
+    // let seed = [seed; 32]; // 32-byte seed
+    // let mut rng = StdRng::from_seed(seed);
+    let mut rng = thread_rng();
     v.shuffle(&mut rng);
 }
 
 pub fn random_classes(m: &MatrixMagma) -> Map {
-    let mut uf = init_uf(m.n);
+    let mut uf = init_uf(m);
     rebuild_c_classes(&m, &mut uf);
 
     'outer: for i in 0.. {
@@ -405,7 +414,7 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
 }
 
 fn useful_classes_from(c1: E2, c2: E2, m: &MatrixMagma) -> Vec<Map> {
-    let mut uf = init_uf(m.n);
+    let mut uf = init_uf(m);
     for p in e2_nonidem_iter(m.n) {
         if p == c2 { break }
         merge(c1, p, &mut uf);
