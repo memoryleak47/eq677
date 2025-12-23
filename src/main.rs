@@ -90,12 +90,24 @@ fn main() {
     let _timer = Timer::new();
 
     let m = MatrixMagma::by_fn(7, |x, y| (4*x+y)%7);
+    assert!(db_intern(&m).0 == M(7, 0));
     loop {
         let uf = random_classes(&m);
         let cnt = leaders(m.n, &uf).len();
         if dbg!(cnt) < 10 {
             colored_dump(&m, &uf);
-            return;
+            break;
+        }
+    }
+
+    let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
+    assert!(db_intern(&m).0 == M(7, 1));
+    loop {
+        let uf = random_classes(&m);
+        let cnt = leaders(m.n, &uf).len();
+        if dbg!(cnt) < 10 {
+            colored_dump(&m, &uf);
+            break;
         }
     }
 }
