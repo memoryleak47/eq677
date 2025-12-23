@@ -363,7 +363,8 @@ pub fn colored_dump(m: &MatrixMagma, map: &Map) {
     for (i, ll) in l.iter().enumerate() {
         for a in trace677(&m, ll.0, ll.1) {
             let a = find(a, map);
-            print!("{}X", &colormap[&a]);
+            let vv = l.iter().position(|xx| *xx == a).unwrap();
+            print!("{}{vv}", &colormap[&a]);
         }
         print!("\x1b[0m ");
         if i%4 == 3 { println!(); }
