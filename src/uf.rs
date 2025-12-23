@@ -18,7 +18,7 @@ pub enum Equ {
 pub fn merge(a: E2, b: E2, map: &mut Map) {
     let a = find(a, map);
     let b = find(b, map);
-    if a < b {
+    if a > b {
         map.insert(a, b);
     } else {
         map.insert(b, a);
@@ -68,7 +68,7 @@ pub fn uf(m: &MatrixMagma, eq: Equ) -> Vec<Vec<E2>> {
     uf_to_vecs(m.n, &map)
 }
 
-fn e2_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
+pub fn e2_iter(n: usize) -> impl Iterator<Item=E2> + 'static {
     (0..n).flat_map(move |x| (0..n).map(move |y| (x, y)))
 }
 
