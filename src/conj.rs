@@ -176,7 +176,7 @@ fn conj_idempotence(m: &MatrixMagma) {
     // Is there a more general statement here?
     let restrict = m.n == 5 || m.n == 11;
 
-    assert!(!restrict || m.is_idempotent());
+    assert!(!restrict || m.is_idempotent_ish());
 }
 
 // Falsified conjectures:
@@ -371,7 +371,15 @@ impl MatrixMagma {
         true
     }
 
-    pub fn is_idempotent(&self) -> bool {
+    pub fn is_idempotent2(&self) -> bool {
+        for x in 0..self.n {
+            if x != self.f(x, x) { return false }
+        }
+        true
+    }
+
+    // TODO was this ever intentional?
+    pub fn is_idempotent_ish(&self) -> bool {
         for x in 0..self.n {
             let xx = self.f(x, x);
             if self.f(xx, xx) != xx { return false }

@@ -3,7 +3,7 @@ use std::collections::HashSet;
 
 pub fn glue5_chk(m: &MatrixMagma) -> bool {
     if m.n < 5 { return false }
-    if !m.is_idempotent() { return false }
+    if !m.is_idempotent_ish() { return false }
 
     for x in 0..m.n {
         for y in 0..m.n {

@@ -89,12 +89,12 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = M(7, 0).get();
+    let m = MatrixMagma::by_fn(7, |x, y| (x*4 + y*3)%7); // (7, 0).get();
     // let m = cartesian(&m, &m);
     loop {
         let uf = random_classes(&m);
         let cnt = leaders(m.n, &uf).len();
-        if dbg!(cnt) < 32 {
+        if dbg!(cnt) < 10 {
             colored_dump(&m, &uf);
             panic!();
         }

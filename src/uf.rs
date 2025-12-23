@@ -32,7 +32,7 @@ pub fn init_uf(m: &MatrixMagma) -> Map {
     }
 
     // It simplifies a bit to merge all the idempotents.
-    if m.is_idempotent() {
+    if m.is_idempotent2() {
         for x in 1..m.n {
             merge((0, 0), (x, x), &mut map);
         }
@@ -390,6 +390,7 @@ pub fn random_classes(m: &MatrixMagma) -> Map {
     'outer: for i in 0.. {
         // dbg!(i);
         let mut lv1 = leaders(m.n, &uf);
+        assert!(lv1.len() > 1);
         let mut lv2 = lv1.clone();
         shuf(0, &mut lv1);
         shuf(2, &mut lv2);
