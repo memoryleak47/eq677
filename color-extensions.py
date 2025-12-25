@@ -1,6 +1,6 @@
 from z3 import *
 
-K = 11
+K = 5
 F = Datatype('F')
 for i in range(K):
     F.declare('z' + str(i))
@@ -18,7 +18,12 @@ for i, a in enumerate(vals):
         s.add(add(a, b) == vals[(i + j) % K])
         s.add(mul(a, b) == vals[(i * j) % K])
 
-L = ['0000', '1251', '2716', '3487', '4538', '5862', '6143', '7374', '8625']
+BASE = "7/1"
+
+if BASE == "7/0":
+    L = ['0000', '1251', '2716', '3487', '4538', '5862', '6143', '7374', '8625']
+if BASE == "7/1":
+    L = ['0000', '1241', '2718', '3826', '4634', '5582', '6377', '7455', '8163']
 
 A = [Const(f'a{i}', F) for i in range(len(L))]
 B = [Const(f'b{i}', F) for i in range(len(L))]
@@ -75,7 +80,10 @@ def check_sol(As, Bs, Cs):
             p.append((i, j))
 
     def f(x, y):
-        l = (x[0]*4 + y[0]*1)%7
+        if BASE == "7/0":
+            l = (x[0]*4 + y[0]*1)%7
+        if BASE == "7/1":
+            l = (x[0]*4 + y[0]*3)%7
         i = idx_of(x[0], y[0])
         r = (As[i]*x[1] + Bs[i]*y[1] + Cs[i])%K
         return (l, r)
