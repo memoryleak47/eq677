@@ -1,6 +1,6 @@
 from z3 import *
 
-K = 7
+K = 5
 F = Datatype('F')
 for i in range(K):
     F.declare('z' + str(i))
@@ -22,10 +22,11 @@ L = ['0000', '1251', '2716', '3487', '4538', '5862', '6143', '7374', '8625']
 
 A = [Const(f'a{i}', F) for i in range(len(L))]
 B = [Const(f'b{i}', F) for i in range(len(L))]
+C = [Const(f'c{i}', F) for i in range(len(L))]
 
 def f(tr_char, x, y):
     tr = int(tr_char)
-    return add(mul(A[tr], x), mul(B[tr], y))
+    return add(add(mul(A[tr], x), mul(B[tr], y)), C[tr])
 
 def expr(t, x, y):
     # returns f(y, f(x, f(f(y, x), y)))
@@ -37,6 +38,7 @@ def expr(t, x, y):
 
 for i in range(len(L)):
     t = L[i]
+    s.add(expr(t, F.z0, F.z0) == F.z0)
     s.add(expr(t, F.z0, F.z1) == F.z0)
     s.add(expr(t, F.z1, F.z0) == F.z1)
 
@@ -59,7 +61,7 @@ def idx_of(x, y):
     if dd==6: return 3
     raise "ohno2"
 
-def check_sol(As, Bs):
+def check_sol(As, Bs, Cs):
     p = []
     for i in range(7):
         for j in range(K):
@@ -68,7 +70,7 @@ def check_sol(As, Bs):
     def f(x, y):
         l = (x[0]*4 + y[0]*1)%7
         i = idx_of(x[0], y[0])
-        r = (As[i]*x[1] + Bs[i]*y[1])%K
+        r = (As[i]*x[1] + Bs[i]*y[1] + Cs[i])%K
         return (l, r)
 
     for x in p: 
@@ -94,15 +96,18 @@ while s.check() == sat:
 
     As = [zz(A[i]) for i in range(len(L))]
     Bs = [zz(B[i]) for i in range(len(L))]
+    Cs = [zz(C[i]) for i in range(len(L))]
     for i in range(len(L)):
         print(f"A[{i}] =", As[i])
         print(f"B[{i}] =", Bs[i])
-    check_sol(As, Bs)
+        print(f"C[{i}] =", Cs[i])
+    check_sol(As, Bs, Cs)
 
     l = []
     for i in range(len(L)):
         l.append(A[i] != vals[As[i]])
         l.append(B[i] != vals[Bs[i]])
+        l.append(C[i] != vals[Cs[i]])
     s.add(Or(*l))
 
 print("no more solutions")
