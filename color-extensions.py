@@ -1,6 +1,6 @@
 from z3 import *
 
-K = 5
+K = 11
 F = Datatype('F')
 for i in range(K):
     F.declare('z' + str(i))
@@ -26,7 +26,11 @@ C = [Const(f'c{i}', F) for i in range(len(L))]
 
 def f(tr_char, x, y):
     tr = int(tr_char)
-    return add(add(mul(A[tr], x), mul(B[tr], y)), C[tr])
+
+    a = mul(A[tr], x)
+    b = mul(B[tr], y)
+    c = C[tr]
+    return add(add(a, b), c)
 
 def expr(t, x, y):
     # returns f(y, f(x, f(f(y, x), y)))
@@ -38,9 +42,12 @@ def expr(t, x, y):
 
 for i in range(len(L)):
     t = L[i]
-    s.add(expr(t, F.z0, F.z0) == F.z0)
     s.add(expr(t, F.z0, F.z1) == F.z0)
     s.add(expr(t, F.z1, F.z0) == F.z1)
+    s.add(expr(t, F.z0, F.z0) == F.z0)
+
+    # To simplify
+    s.add(C[i] == F.z0)
 
 def inv(x):
     if x == 0: raise "ohno"
@@ -92,7 +99,7 @@ while s.check() == sat:
 
     def zz(x):
         v = m.eval(x, model_completion=True)
-        return int(str(v)[1])
+        return int(str(v)[1:])
 
     As = [zz(A[i]) for i in range(len(L))]
     Bs = [zz(B[i]) for i in range(len(L))]
