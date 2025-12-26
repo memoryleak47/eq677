@@ -146,14 +146,15 @@ def main(K, magmadef, WITH_CONSTS):
             for y in p:
                 assert(x == f(y, f(x, f(f(y, x), y))))
 
-        for x in p:
-            assert(x == f(f(f(x, x), x), x))
-
         for i, x in enumerate(p):
             for j, y in enumerate(p):
                 k = p.index(f(x, y))
                 print(k, end=" ")
             print(flush=True)
+
+        for x in p:
+            assert(x == f(f(f(x, x), x), x))
+
 
     while s.check() == sat:
         m = s.model()
