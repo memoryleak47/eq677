@@ -497,3 +497,59 @@ pub fn analyze_useful_classes(m: &MatrixMagma) {
         println!();
     }
 }
+
+pub fn color_dump_small_magmas() {
+    let m = {
+        let p = 3;
+        type Complex = (usize, usize);
+        fn mul(x: Complex, y: Complex, p: usize) -> Complex {
+            ((x.0*y.0 + (p*p - x.1*y.1))%p, (x.0*y.1 + x.1*y.0)%p)
+        }
+
+        fn add(x: Complex, y: Complex, p: usize) -> Complex {
+            ((x.0 + y.0)%p, (x.1 + y.1)%p)
+        }
+
+        let f_def = |x: Complex, y: Complex| -> Complex {
+            let lhs = mul(x, (1, 0), p);
+            let rhs = mul(y, (2, 1), p);
+            add(lhs, rhs, p)
+        };
+
+        GenericMagma {
+            elems: (0..p).map(move |x| (0..p).map(move |y| (x, y))).flatten().collect(),
+            f_def,
+        }.to_matrix()
+    };
+    assert!(db_intern(&m).0 == M(9, 0));
+    loop {
+        let uf = random_classes(&m);
+        let cnt = leaders(m.n, &uf).len();
+        if dbg!(cnt) < 12 {
+            colored_dump(&m, &uf);
+            break;
+        }
+    }
+
+    let m = MatrixMagma::by_fn(7, |x, y| (4*x+y)%7);
+    assert!(db_intern(&m).0 == M(7, 0));
+    loop {
+        let uf = random_classes(&m);
+        let cnt = leaders(m.n, &uf).len();
+        if dbg!(cnt) < 10 {
+            colored_dump(&m, &uf);
+            break;
+        }
+    }
+
+    let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
+    assert!(db_intern(&m).0 == M(7, 1));
+    loop {
+        let uf = random_classes(&m);
+        let cnt = leaders(m.n, &uf).len();
+        if dbg!(cnt) < 10 {
+            colored_dump(&m, &uf);
+            break;
+        }
+    }
+}
