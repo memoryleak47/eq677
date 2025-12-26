@@ -359,11 +359,31 @@ pub fn colored_dump(m: &MatrixMagma, map: &Map) {
         println!();
     }
 
-    println!("color traces:");
+    println!("677 color traces:");
     for (i, ll) in l.iter().enumerate() {
         for a in trace677(&m, ll.0, ll.1) {
             let a = find(a, map);
             let vv = l.iter().position(|xx| *xx == a).unwrap();
+            print!("{}{vv}", &colormap[&a]);
+        }
+        print!("\x1b[0m ");
+        if i%4 == 3 { println!(); }
+    }
+
+    println!("\n255 color traces:");
+    let mut traces255: Vec<Vec<usize>> = Vec::new();
+    for x in 0..m.n {
+        let t = trace255(&m, x).into_iter().map(|a| {
+            let a = find(a, map);
+            let vv = l.iter().position(|xx| *xx == a).unwrap();
+            vv
+        }).collect();
+        if traces255.contains(&t) { continue }
+        traces255.push(t.clone());
+    }
+    for (i, t) in traces255.iter().enumerate() {
+        for vv in t {
+            let a = l[*vv];
             print!("{}{vv}", &colormap[&a]);
         }
         print!("\x1b[0m ");
