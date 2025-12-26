@@ -541,6 +541,21 @@ pub fn color_dump_small_magmas() {
 
     let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
     show(m, M(7, 1), 10);
+
+    let m = MatrixMagma::by_fn(13, |x, y| (x*9 + y*11)%13);
+    show(m, M(13, 0), 15);
+
+    let m = M(16, 1).get();
+    show(m, M(16, 1), 18);
+
+    let m = M(19, 0).get();
+    show(m, M(19, 0), 21);
+
+    let m = M(19, 1).get();
+    show(m, M(19, 1), 21);
+
+    let m = MatrixMagma::by_fn(31, |x, y| (5*x + 27*y + 1)%31);
+    show(m, M(31, 0), 31);
 }
 
 pub fn coloring_to_python(name: M, m: &MatrixMagma, uf: &Map) {
