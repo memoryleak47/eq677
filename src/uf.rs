@@ -499,6 +499,19 @@ pub fn analyze_useful_classes(m: &MatrixMagma) {
 }
 
 pub fn color_dump_small_magmas() {
+    let show = |m: MatrixMagma, name: M, max: usize| {
+        assert!(db_intern(&m).0 == name);
+        loop {
+            let uf = random_classes(&m);
+            let cnt = leaders(m.n, &uf).len();
+            if dbg!(cnt) <= max {
+                colored_dump(&m, &uf);
+                coloring_to_python(name, &m, &uf);
+                break;
+            }
+        }
+    };
+
     let m = {
         let p = 3;
         type Complex = (usize, usize);
@@ -521,35 +534,54 @@ pub fn color_dump_small_magmas() {
             f_def,
         }.to_matrix()
     };
-    assert!(db_intern(&m).0 == M(9, 0));
-    loop {
-        let uf = random_classes(&m);
-        let cnt = leaders(m.n, &uf).len();
-        if dbg!(cnt) < 12 {
-            colored_dump(&m, &uf);
-            break;
-        }
-    }
+    show(m, M(9, 0), 11);
 
     let m = MatrixMagma::by_fn(7, |x, y| (4*x+y)%7);
-    assert!(db_intern(&m).0 == M(7, 0));
-    loop {
-        let uf = random_classes(&m);
-        let cnt = leaders(m.n, &uf).len();
-        if dbg!(cnt) < 10 {
-            colored_dump(&m, &uf);
-            break;
+    show(m, M(7, 0), 10);
+
+    let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
+    show(m, M(7, 1), 10);
+}
+
+pub fn coloring_to_python(name: M, m: &MatrixMagma, uf: &Map) {
+    let fmt_name = format!("magmadef_{}_{}", name.0, name.1);
+    let l = leaders(m.n, uf);
+    println!();
+    println!();
+    println!("def {fmt_name}():");
+    println!("    name = \"{}/{}\"", name.0, name.1);
+    println!("    n = {}", name.0);
+    println!("    m = dict()");
+    println!("    c = dict()");
+    print!("    ");
+    for i in 0..m.n {
+        for j in 0..m.n {
+            print!("m[({i}, {j})] = {}; ", m.f(i, j));
+        }
+    }
+    println!();
+    print!("    ");
+    for i in 0..m.n {
+        for j in 0..m.n {
+            let z = find((i, j), uf);
+            let z = l.iter().position(|x| *x == z).unwrap();
+            print!("c[({i}, {j})] = {z}; ");
         }
     }
 
-    let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
-    assert!(db_intern(&m).0 == M(7, 1));
-    loop {
-        let uf = random_classes(&m);
-        let cnt = leaders(m.n, &uf).len();
-        if dbg!(cnt) < 10 {
-            colored_dump(&m, &uf);
-            break;
+    println!();
+    print!("    t = [");
+    for (i, ll) in l.iter().enumerate() {
+        print!("(");
+        for a in trace677(&m, ll.0, ll.1) {
+            let a = find(a, uf);
+            let vv = l.iter().position(|xx| *xx == a).unwrap();
+            print!("{vv}, ");
         }
+        print!("), ");
     }
+    println!("]");
+    println!("    return n, name, m, c, t");
+    println!();
+    println!();
 }
