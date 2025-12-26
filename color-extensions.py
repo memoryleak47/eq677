@@ -98,7 +98,7 @@ def main(K, BASE, WITH_CONSTS):
             for j, y in enumerate(p):
                 k = p.index(f(x, y))
                 print(k, end=" ")
-            print()
+            print(flush=True)
 
     while s.check() == sat:
         m = s.model()
