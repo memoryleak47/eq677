@@ -134,6 +134,6 @@ def main(K, magmadef, WITH_CONSTS):
 
     print("no more solutions")
 
-for base in [magmadef_7_0, magmadef_7_1, magmadef_9_0]:
-    for K in range(2, 13):
+for base in [magmadef_7_0, magmadef_7_1]:#, magmadef_9_0]:
+    for K in range(2, 12):
         main(K, base, False)

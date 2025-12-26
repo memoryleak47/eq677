@@ -52,11 +52,15 @@ pub fn present_model(n: usize, finder: &str, f: impl Fn(usize, usize) -> usize) 
 
     let mut print_handle = PRINT_MUTEX.lock().unwrap();
 
+    let mut colon_str = if n <= 100 { ":" } else { "" };
+    let mut infos1_str = if magma.is_right_cancellative() { "" }
+        else { "[non-right-cancellative] " };
+    let mut infos2_str = if magma.is_idempotent2() { "" }
+        else { "[non-idempotent] " };
+
+    println!("{globally_new_str}Model {name_str}{infos1_str}{infos2_str}found by {finder}{colon_str}");
     if n <= 100 {
-        println!("{globally_new_str}Model {name_str}found by {finder}:");
         magma.canonicalize2().dump();
-    } else {
-        println!("{globally_new_str}Model {name_str}found by {finder}");
     }
 
     if CHECK_COMPOSITE {

@@ -1,7 +1,7 @@
 use crate::*;
 
 pub fn load_file(file: &str) {
-    let ss = &format!("Loaded from '{file}'");
+    let ss = &format!("File('{file}')");
     for m in magmas_from_file(file) {
         present_model(m.n, &ss, |x, y| m.f(x, y));
     }
