@@ -38,10 +38,10 @@ impl MatrixMagma {
 
     pub fn shuffle(&self) -> MatrixMagma {
         use rand::seq::SliceRandom;
-        use rand::thread_rng;
+        use rand::rng;
 
         let mut vec: Vec<usize> = (0..self.n).collect();
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         vec.shuffle(&mut rng);
 

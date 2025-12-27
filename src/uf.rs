@@ -80,7 +80,7 @@ fn pick_random(magmas: &[MatrixMagma]) -> MatrixMagma {
     use rand::prelude::*;
 
     let mut rng = rand::rng();
-    let i: usize = rng.gen_range(0..magmas.len());
+    let i: usize = rng.random_range(0..magmas.len());
     magmas[i].clone()
 }
 
@@ -394,7 +394,7 @@ pub fn colored_dump(m: &MatrixMagma, map: &Map) {
 
 fn shuf<T>(seed: Option<u8>, v: &mut Vec<T>) {
     use rand::seq::SliceRandom;
-    use rand::thread_rng;
+    use rand::rng;
     use rand::rngs::StdRng;
     use rand::SeedableRng;
 
@@ -403,7 +403,7 @@ fn shuf<T>(seed: Option<u8>, v: &mut Vec<T>) {
         let mut rng = StdRng::from_seed(seed);
         v.shuffle(&mut rng);
     } else {
-        let mut rng = thread_rng();
+        let mut rng = rng();
         v.shuffle(&mut rng);
     }
 }
