@@ -319,6 +319,19 @@ fn c_summary(m: &MatrixMagma, x: usize) -> Vec<u32> {
     v
 }
 
+// 255 is equivalent to this function always returning 1 or 3.
+fn right_cycle(m: &MatrixMagma, x: usize) -> usize {
+    let mut a = x;
+    let mut c = 0;
+    loop {
+        a = m.f(a, x);
+        c += 1;
+        if a == x { break }
+    }
+    c
+}
+
+
 impl MatrixMagma {
     pub fn is_left_cancellative(&self) -> bool {
         for a in 0..self.n {
