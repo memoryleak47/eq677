@@ -501,6 +501,7 @@ pub fn analyze_useful_classes(m: &MatrixMagma) {
 pub fn color_dump_small_magmas() {
     let show = |m: MatrixMagma, name: M, max: usize| {
         assert!(db_intern(&m).0 == name);
+        println!("\nShowing {}:\n", name);
         loop {
             let uf = random_classes(&m);
             let cnt = leaders(m.n, &uf).len();
@@ -511,6 +512,12 @@ pub fn color_dump_small_magmas() {
             }
         }
     };
+
+    let m = MatrixMagma::by_fn(7, |x, y| (4*x+y)%7);
+    show(m, M(7, 0), 10);
+
+    let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
+    show(m, M(7, 1), 10);
 
     let m = {
         let p = 3;
@@ -535,12 +542,6 @@ pub fn color_dump_small_magmas() {
         }.to_matrix()
     };
     show(m, M(9, 0), 11);
-
-    let m = MatrixMagma::by_fn(7, |x, y| (4*x+y)%7);
-    show(m, M(7, 0), 10);
-
-    let m = MatrixMagma::by_fn(7, |x, y| (4*x+3*y)%7);
-    show(m, M(7, 1), 10);
 
     let m = MatrixMagma::by_fn(13, |x, y| (x*9 + y*11)%13);
     show(m, M(13, 0), 15);
