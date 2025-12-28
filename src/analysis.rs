@@ -7,6 +7,7 @@ use std::collections::HashSet;
 const FILTER_THRESHOLD: usize = 5;
 const PHI: bool = false;
 const G: bool = false;
+const D: bool = true;
 
 type EGraph = egg::EGraph<MagmaLang, ()>;
 type RecExpr = egg::RecExpr<MagmaLang>;
@@ -15,6 +16,7 @@ define_language! {
     enum MagmaLang {
         "f" = F([Id; 2]),
         "g" = G([Id; 2]),
+        "d" = D(Id),
         "phi" = Phi(Id),
         "invphi" = InvPhi(Id),
         E(usize),
@@ -85,25 +87,9 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
     let mut eg = eggify(m);
     let mut out = None;
 
+    // add variables.
     eg.add(MagmaLang::X);
     eg.add(MagmaLang::Y);
-
-    for x in 0..m.n {
-        eg.add(MagmaLang::E(x));
-    }
-
-    if PHI {
-        for x in 0..m.n {
-            let xx = eg.lookup(MagmaLang::E(x)).unwrap();
-            let yy = eg.lookup(MagmaLang::E((x+1)%m.n)).unwrap();
-
-            let phi_xx = eg.add(MagmaLang::Phi(xx));
-            eg.union(yy, phi_xx);
-
-            let invphi_yy = eg.add(MagmaLang::InvPhi(yy));
-            eg.union(xx, invphi_yy);
-        }
-    }
 
     for x in 0..m.n {
         for y in 0..m.n {
@@ -126,6 +112,14 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
 
     let eg = out.unwrap();
     let ex = Extractor::new(&eg, MySize);
+
+    if PHI {
+        let x = eg.lookup(MagmaLang::X).unwrap();
+        if let Some(phi_x) = eg.lookup(MagmaLang::Phi(x)) {
+            let phi_def = ex.find_best(phi_x).1;
+            println!("phi(X) = {phi_def}");
+        }
+    }
 
     if PHI {
         let x = eg.lookup(MagmaLang::X).unwrap();
@@ -158,9 +152,13 @@ pub fn analyze(m: &MatrixMagma, count: usize) {
 
 fn eggify(m: &MatrixMagma) -> EGraph {
     let mut eg = EGraph::new(());
+
+    // add elements.
     for x in 0..m.n {
         eg.add(MagmaLang::E(x));
     }
+
+    // add f.
     for x in 0..m.n {
         for y in 0..m.n {
             let x_ = eg.lookup(MagmaLang::E(x)).unwrap();
@@ -169,13 +167,50 @@ fn eggify(m: &MatrixMagma) -> EGraph {
             let fxy_ = eg.add(MagmaLang::F([x_, y_]));
             let z_ = eg.lookup(MagmaLang::E(m.f(x, y))).unwrap();
             eg.union(z_, fxy_);
+        }
+    }
 
-            if G {
+    // add g.
+    if G {
+        for x in 0..m.n {
+            for y in 0..m.n {
+                let x_ = eg.lookup(MagmaLang::E(x)).unwrap();
+                let y_ = eg.lookup(MagmaLang::E(y)).unwrap();
+
+                let z_ = eg.lookup(MagmaLang::E(m.f(x, y))).unwrap();
                 let gxz_ = eg.add(MagmaLang::G([x_, z_]));
                 eg.union(y_, gxz_);
             }
         }
     }
+
+    // add phi.
+    if PHI {
+        for x in 0..m.n {
+            let xx = eg.lookup(MagmaLang::E(x)).unwrap();
+            let yy = eg.lookup(MagmaLang::E((x+1)%m.n)).unwrap();
+
+            let phi_xx = eg.add(MagmaLang::Phi(xx));
+            eg.union(yy, phi_xx);
+
+            let invphi_yy = eg.add(MagmaLang::InvPhi(yy));
+            eg.union(xx, invphi_yy);
+        }
+    }
+
+    // add d with d(x) = f(f(x,x),x).
+    if D {
+        for x in 0..m.n {
+            let x_ = eg.lookup(MagmaLang::E(x)).unwrap();
+
+            let d = m.f(m.f(x, x), x);
+            let d_ = eg.lookup(MagmaLang::E(d)).unwrap();
+            let d2 = eg.add(MagmaLang::D(x_));
+
+            eg.union(d_, d2);
+        }
+    }
+
     eg.rebuild();
     assert_eq!(eg.classes().len(), m.n);
 
@@ -190,10 +225,16 @@ impl CostFunction<MagmaLang> for MySize {
     fn cost<C>(&mut self, enode: &MagmaLang, mut costs: C) -> usize where C: FnMut(Id) -> usize {
         match *enode {
             MagmaLang::F([a, b]) => costs(a) + costs(b),
+
             MagmaLang::G([a, b]) => costs(a) + costs(b) + 3, // often cancels out with f in useless ways.
+
+            MagmaLang::D(a) => costs(a) + 1,
+
             MagmaLang::Phi(a) => costs(a) + 1,
             MagmaLang::InvPhi(a) => costs(a) + 4, // often cancels out with phi in useless ways.
+
             MagmaLang::E(_) => 3,
+
             MagmaLang::X => 1,
             MagmaLang::Y => 1,
         }

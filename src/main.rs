@@ -89,5 +89,6 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    color_dump_small_magmas();
+    let m = M(31, 0).get();
+    analyze(&m, 20);
 }
