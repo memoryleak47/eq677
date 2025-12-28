@@ -32,7 +32,7 @@ pub fn init_uf(m: &MatrixMagma) -> Map {
     }
 
     // It simplifies a bit to merge all the idempotents.
-    if m.is_idempotent2() {
+    if m.is_idempotent() {
         for x in 1..m.n {
             merge((0, 0), (x, x), &mut map);
         }
@@ -506,7 +506,7 @@ pub fn color_dump_small_magmas() {
             let cnt = leaders(m.n, &uf).len();
             if dbg!(cnt) <= max {
                 colored_dump(&m, &uf);
-                coloring_to_python(name, &m, &uf);
+                // coloring_to_python(name, &m, &uf);
                 break;
             }
         }

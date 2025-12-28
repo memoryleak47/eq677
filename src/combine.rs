@@ -2,7 +2,7 @@ use crate::*;
 
 
 fn good(m: &MatrixMagma) -> bool {
-    if !m.is_idempotent_ish() { return false }
+    if !m.is_idempotent() { return false }
     if m.n < 2 { return false }
     if m.n > 20 { return false }
 
