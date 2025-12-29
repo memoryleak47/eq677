@@ -89,6 +89,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let m = M(31, 0).get();
-    analyze(&m, 20);
+    partial_diag_db();
 }

@@ -285,6 +285,23 @@ pub fn partial_db() -> HashSet<MatrixMagma> {
     set
 }
 
+pub fn partial_diag_db() -> HashSet<MatrixMagma> {
+    let mut set: HashSet<MatrixMagma> = HashSet::new();
+    for (name, m) in db() {
+        println!("Looking in {name}:");
+        for x in 0..m.n {
+            let mm = partial_677_magma((x, x), &m);
+            let mm = shrink_partial_to_fit(&mm);
+            let mm = mm.canonicalize2();
+            if set.insert(mm.clone()) {
+                println!("size={}, defined={}:", mm.n, mm.count_defined());
+                mm.dump();
+            }
+        }
+    }
+    set
+}
+
 pub fn rebuild_c_classes(m: &MatrixMagma, map: &mut Map) {
     loop {
         let mut dirty = false;
