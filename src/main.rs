@@ -89,5 +89,6 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    partial_diag_db();
+    dbg!(glue5_chk(&M(21, 2).get()));
+    dbg!(glue5_chk(&M(21, 3).get()));
 }

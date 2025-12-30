@@ -13,12 +13,12 @@ pub fn conj(m: &MatrixMagma) {
     assert!(m.is_left_cancellative());
 
     conj_diag_orbit_size(m);
-    conj_cycle_size(m);
     conj_bijective_or_constant(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
     conj_unique_cycle_size(m);
 
+    // false_conj_cycle_size(m);
     // false_conj_cycles_summary(m);
     // false_conj_cycles_divide_n(m);
     // false_conj_not_rigid(m);
@@ -252,15 +252,12 @@ fn conj_diag_orbit_size(m: &MatrixMagma) {
     }
 }
 
-fn conj_cycle_size(m: &MatrixMagma) {
+fn false_conj_cycle_size(m: &MatrixMagma) {
     for x in 0..m.n {
         for z in 0..m.n {
             let i = c(m, x, z);
-            // It seems there are no 4 cycles?
-            assert!(i != 4);
-
-            // Known values:
-            // assert!(i == 1 || i == 2 || i == 5 || i == 6 || i == 7 || i == 8 || i == 9
+            // Known values for i:
+            // assert!(i == 1 || i == 2 || i == 4 || i == 5 || i == 6 || i == 7 || i == 8 || i == 9
             //     || i == 10 || i == 12 || i == 14 || i == 15 || i == 18
             //     || i == 21 || i == 36 || i == 42 || i == 48 || i == 49);
         }
