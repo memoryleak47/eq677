@@ -16,8 +16,8 @@ pub fn conj(m: &MatrixMagma) {
     conj_bijective_or_constant(m);
     conj_singleton_cycle(m);
     conj_2_orbit(m);
-    conj_unique_cycle_size(m);
 
+    // false_conj_unique_cycle_size(m);
     // false_conj_cycle_size(m);
     // false_conj_cycles_summary(m);
     // false_conj_cycles_divide_n(m);
@@ -158,7 +158,7 @@ fn false_conj_cycles_summary(m: &MatrixMagma) {
 }
 
 // This property seems often true, but not always true.
-fn conj_unique_cycle_size(m: &MatrixMagma) {
+fn false_conj_unique_cycle_size(m: &MatrixMagma) {
     if !is_prime(m.n) { return }
 
     let mut out = Vec::new();

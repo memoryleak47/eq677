@@ -89,6 +89,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    dbg!(glue5_chk(&M(21, 2).get()));
-    dbg!(glue5_chk(&M(21, 3).get()));
+    M(89, 0).get().cycle_dump();
 }
