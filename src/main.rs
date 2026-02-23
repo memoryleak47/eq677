@@ -64,6 +64,9 @@ pub use analysis::*;
 mod one_orbit;
 pub use one_orbit::*;
 
+mod one_orbit2;
+pub use one_orbit2::*;
+
 mod autom_search;
 pub use autom_search::*;
 
