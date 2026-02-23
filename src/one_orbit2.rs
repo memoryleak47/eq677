@@ -53,9 +53,12 @@ fn next_level(ctxt: &mut Ctxt) -> bool {
 fn dump_ctxt(ctxt: &Ctxt) {
     println!("-----------");
     for x in &ctxt.classes {
-        print!("{}: ", stringify_term(&x.main));
-        for alt in &x.alternatives {
-            print!("{}, ", stringify_term(alt));
+        print!("{} := ", stringify_term(&x.main));
+        for (i, alt) in x.alternatives.iter().enumerate() {
+            print!("{}", stringify_term(alt));
+            if i != x.alternatives.len()-1 {
+                print!(" | ");
+            }
         }
         println!();
     }
