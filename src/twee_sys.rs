@@ -57,7 +57,7 @@ fn stringify(eqs: &[Equation], diseq: &[Diseq]) -> String {
     s
 }
 
-fn stringify_term(t: &TTerm) -> String {
+pub fn stringify_term(t: &TTerm) -> String {
     match t {
         TTerm::Var(v) => v.to_string(),
         TTerm::Fun(symb, args) => {
