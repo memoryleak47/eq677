@@ -237,23 +237,24 @@ pub fn main_propagate(ctxt: &mut Ctxt) {
 }
 
 pub fn prove_triple(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
-    prove_triple_impl(x, y, z, ctxt)?;
-    for g in ctxt.forced_automs.clone() {
-        let (mut x, mut y, mut z) = (x, y, z);
-        for _ in 0..ctxt.n {
-            x = g[x as usize];
-            y = g[y as usize];
-            z = g[z as usize];
-            prove_triple_impl(x, y, z, ctxt)?;
+    if prove_triple_impl(x, y, z, ctxt)? {
+        for g in ctxt.forced_automs.clone() {
+            let x = g[x as usize];
+            let y = g[y as usize];
+            let z = g[z as usize];
+            prove_triple(x, y, z, ctxt)?;
         }
     }
     Ok(())
 }
 
-pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
+// Err(()) -- paradox encountered. gotta backtrack.
+// Ok(true) -- this was a new triple, is now added
+// Ok(false) -- this was an old triple.
+pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<bool, ()> {
     let xy_ref = &mut ctxt.classes_xy[idx(x, y, ctxt.n)].value;
     let xy = *xy_ref;
-    if xy == z { return Ok(()) }
+    if xy == z { return Ok(false) }
     if xy != E::MAX { return Err(()) }
 
     let xz_ref = &mut ctxt.classes_xz[idx(x, z, ctxt.n)].value;
@@ -268,7 +269,7 @@ pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     *xz_ref = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
     ctxt.propagate_queue.push((x, y, z));
-    Ok(())
+    Ok(true)
 }
 
 pub fn propagate(ctxt: &mut Ctxt) -> Result<(), ()> {

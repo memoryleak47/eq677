@@ -92,5 +92,7 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    one_orbit2_run();
+    c_run(11, vec![
+        vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0],
+    ]);
 }
