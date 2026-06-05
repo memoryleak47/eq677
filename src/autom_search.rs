@@ -11,6 +11,11 @@ pub fn db_autom_search() {
             println!();
         }
         println!("group computed!");
+        if grp.len() == 0 {
+            println!("empty group!");
+            continue
+        }
+
         if grp.len() < 2 && m.n >= 25 {
             println!("The group is probably not useful enough to restrict the search space!");
             continue

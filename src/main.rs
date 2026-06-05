@@ -92,7 +92,5 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    c_run(11, vec![
-        vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0],
-    ]);
+    db_autom_search();
 }
