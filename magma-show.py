@@ -18,9 +18,6 @@ root = tk.Tk()
 canvas = tk.Canvas(root, width=800, height=600)
 canvas.pack()
 
-x = random.randint(0, 4)
-y = random.randint(0, 4)
-
 # x = f(y, f(x, f(f(y, x), y)
 moves = [
     lambda: f(y, x),
@@ -32,12 +29,17 @@ moves = [
 move_i = 0
 
 def act(event):
-    global v, move_i
+    global x, y, v, move_i
 
     canvas.delete("all")
 
     for i in range(5):
         draw(i, "black", 30)
+
+
+    if move_i == 0:
+        x = random.randint(0, 4)
+        y = random.randint(0, 4)
 
     draw(x, "red", 20, text="x")
     draw(y, "yellow", 20, text="y")
@@ -49,16 +51,21 @@ def act(event):
         draw(v, "green", 10)
 
     t = """
-        v = f(y, x)
-        v = f(v, y)
-        v = f(v, x)
-        v = f(v, y)
-    """
-    canvas.create_text(370, 140, text=t, fill="white", font=("Arial", 20))
+        * = f(y, x)
 
-    canvas.create_oval(300, 83 + move_i * 30, 320, 103 + move_i * 30, fill="red", outline="")
+        * = f(*, y)
+
+        * = f(x, *)
+
+        * = f(y, *)
+    """
+    canvas.create_text(370, 140, text=t, fill="white", font=("Courier", 20))
+
+    if move_i != len(moves):
+        canvas.create_oval(340, 35 + move_i * 57, 360, 55 + move_i * 57, fill="green", outline="")
 
     move_i = (move_i+1)%(len(moves)+1)
 
 root.bind("<space>", act)
+act(None)
 root.mainloop()
