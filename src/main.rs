@@ -92,5 +92,8 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    db_autom_search();
+    for i in 0..11 {
+        dbg!(i);
+        c_run(i, Vec::new());
+    }
 }

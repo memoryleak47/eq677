@@ -1,19 +1,32 @@
 use crate::c_dpll::*;
 
+fn branch_on(x: E, y: E, mut ctxt: Ctxt) -> Vec<Ctxt> {
+    let mut out = Vec::new();
+    for z in 0..(ctxt.nonfresh+1).min(ctxt.n) {
+        let mut ctxt = ctxt.clone();
+        if z == ctxt.nonfresh { ctxt.nonfresh += 1; }
+        if prove_triple(x, y, z, &mut ctxt).is_ok() && propagate(&mut ctxt).is_ok() {
+            out.push(ctxt);
+        }
+    }
+    out
+}
+
 pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
     if !ctxt.forced_automs.is_empty() { return vec![ctxt] }
-    if ctxt.n <= 1 { return vec![ctxt] }
+    if ctxt.n <= 4 { return vec![ctxt] }
 
     let mut out = Vec::new();
 
     {
         let mut ctxt = ctxt.clone();
-        ctxt.nonfresh = ctxt.nonfresh.max(2);
-        if prove_triple(0, 0, 1, &mut ctxt).is_ok() {
-            if propagate(&mut ctxt).is_ok() {
-                out.push(ctxt);
-            }
-        }
+        ctxt.nonfresh = 3;
+        assert!(prove_triple(0, 0, 1, &mut ctxt).is_ok());
+        assert!(prove_triple(0, 1, 2, &mut ctxt).is_ok());
+        assert!(propagate(&mut ctxt).is_ok());
+
+        // select_p prefers (2, 0) branching here, but (0, 2) seems faster.
+        out.extend(branch_on(0, 2, ctxt));
     }
 
     {
