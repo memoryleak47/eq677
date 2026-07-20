@@ -84,5 +84,10 @@ fn main() {
     assert_eq!(models.len(), 1);
     let ctxt = models.into_iter().next().unwrap();
 
-    dbg!(tree_search(&ctxt));
+    dbg!(run_ctxt(&mut ctxt.clone()));
+
+    let tree = tree_search(&ctxt);
+    dbg!(&tree);
+
+    dbg!(combined_cost(&ctxt, &tree));
 }

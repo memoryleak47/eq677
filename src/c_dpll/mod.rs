@@ -10,11 +10,11 @@ use c::*;
 
 mod split;
 use split::*;
-pub use split::{split_models, tree_search, BranchTree};
+pub use split::{split_models, tree_search, BranchTree, combined_cost};
 
 mod run;
 use run::*;
-pub use run::{c_run, c_search};
+pub use run::{c_run, c_search, run_ctxt};
 
 mod twee;
 pub use twee::*;
