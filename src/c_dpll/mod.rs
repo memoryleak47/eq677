@@ -10,7 +10,7 @@ use c::*;
 
 mod split;
 use split::*;
-pub use split::{split_models, tree_search, BranchTree, combined_cost};
+pub use split::*;
 
 mod run;
 use run::*;

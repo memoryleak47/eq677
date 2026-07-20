@@ -8,6 +8,25 @@ pub enum BranchTree {
     Branch(/*x*/ E, /*y*/ E, BTreeMap</*z*/ E, BranchTree>),
 }
 
+pub fn bmap<const N: usize>(x: E, y: E, list: [(E, BranchTree); N]) -> BranchTree {
+    let map = list.into_iter().collect();
+    BranchTree::Branch(x, y, map)
+}
+
+pub fn draw(tree: &BranchTree) -> String {
+    match tree {
+        BranchTree::Heuristic => String::from("BranchTree::Heuristic"),
+        BranchTree::Branch(x, y, map) => {
+            let mut mapelems = Vec::new();
+            for (z, mm) in map {
+                mapelems.push(format!("({z}, {})", draw(mm)));
+            }
+            let mapstr = mapelems.join(", ");
+            format!("bmap({x}, {y}, [{mapstr}])")
+        },
+    }
+}
+
 // This excludes "paradox" leaves.
 fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut BranchTree)> {
     match tree {
