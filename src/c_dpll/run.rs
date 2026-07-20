@@ -1,13 +1,21 @@
 use crate::c_dpll::*;
 
 pub fn c_run(n: usize, automs: Vec<Vec<E>>) -> usize {
-    let models = split_models(build_ctxt(n, automs));
+    let mut models = split_models(build_ctxt(n, automs));
+
     let mut out = 0;
-    for mut ctxt in models {
-        main_branch(&mut ctxt);
-        out += ctxt.cost_counter;
+    for ctxt in &mut models {
+        out += run_ctxt(ctxt);
     };
     out
+}
+
+pub fn run_ctxt(ctxt: &mut Ctxt) -> usize {
+    assert!(ctxt.cost_counter == 0);
+
+    main_branch(ctxt);
+
+    ctxt.cost_counter
 }
 
 pub fn c_search() {
