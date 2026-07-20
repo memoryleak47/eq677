@@ -88,13 +88,9 @@ pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
 
     {
         let mut ctxt = ctxt.clone();
-        ctxt.nonfresh = 3;
+        ctxt.nonfresh = 2;
         assert!(prove_triple(0, 0, 1, &mut ctxt).is_ok());
-        assert!(prove_triple(0, 1, 2, &mut ctxt).is_ok());
         assert!(propagate(&mut ctxt).is_ok());
-
-        // select_p prefers (2, 0) branching here, but (0, 2) seems faster.
-        out.extend(branch_on(0, 2, ctxt));
     }
 
     {
