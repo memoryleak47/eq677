@@ -80,7 +80,7 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    let models = split_models(build_ctxt(9, Vec::new()));
+    let models = split_models(build_ctxt(8, Vec::new()));
     for m in &models {
         dbg!(tree_search(m));
     }
