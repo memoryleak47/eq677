@@ -43,7 +43,7 @@ pub struct Ctxt {
     chosen_per_row: Box<[E]>,
     yxx: Box<[E]>, // y := yxx[x] where y*x = x, E::MAX means undefined.
     forced_automs: Vec<Vec<E>>,
-    cost_counter: usize,
+    pub cost_counter: usize,
 }
 
 #[derive(Clone)]

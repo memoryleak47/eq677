@@ -84,6 +84,8 @@ fn main() {
     assert_eq!(models.len(), 1);
     let ctxt = models.into_iter().next().unwrap();
 
+    dbg!(ctxt.cost_counter);
+
     dbg!(select_p(&ctxt));
 
     // Those should agree:
@@ -92,6 +94,11 @@ fn main() {
 
     // And this one should agree too.
     let tree = bmap(0, 1, [(0, heur()), (1, heur()), (2, heur())]);
+
+    for (c, _) in iter_leaves(&ctxt, &mut tree.clone()) {
+        dbg!(run_ctxt(&mut c.clone()));
+    }
+
     dbg!(combined_cost(&ctxt, &tree));
 
 /*

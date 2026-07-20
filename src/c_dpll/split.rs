@@ -30,7 +30,9 @@ pub fn draw(tree: &BranchTree) -> String {
 }
 
 // This excludes "paradox" leaves.
-fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut BranchTree)> {
+pub fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut BranchTree)> {
+    assert_eq!(ctxt.cost_counter, 0);
+
     match tree {
         BranchTree::Heuristic => vec![(ctxt.clone(), tree)],
         BranchTree::Branch(x, y, map) => {
@@ -56,6 +58,8 @@ fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut 
 }
 
 fn grow(ctxt: &Ctxt, tree: &BranchTree) -> Vec<BranchTree> {
+    assert_eq!(ctxt.cost_counter, 0);
+
     let Some((i, (child_ctxt, _))) = iter_leaves(ctxt, &mut tree.clone()).into_iter().enumerate().max_by_key(|(_, (ct, _))| run_ctxt(&mut ct.clone())) else { return Vec::new() };
 
     let mut out = Vec::new();
@@ -83,6 +87,8 @@ fn grow(ctxt: &Ctxt, tree: &BranchTree) -> Vec<BranchTree> {
 
 // tries to find a good branching tree for this scenario.
 pub fn tree_search(ctxt: &Ctxt) -> BranchTree {
+    assert_eq!(ctxt.cost_counter, 0);
+
     let mut trees = vec![BranchTree::Heuristic];
 
     for _ in 0..2 {
@@ -98,6 +104,8 @@ pub fn tree_search(ctxt: &Ctxt) -> BranchTree {
 }
 
 pub fn combined_cost(ctxt: &Ctxt, tree: &BranchTree) -> usize {
+    assert_eq!(ctxt.cost_counter, 0);
+
     let mut out = 0;
     for (mut ct, _) in iter_leaves(ctxt, &mut tree.clone()) {
         out += run_ctxt(&mut ct);
@@ -106,6 +114,8 @@ pub fn combined_cost(ctxt: &Ctxt, tree: &BranchTree) -> usize {
 }
 
 pub fn split_models(ctxt: Ctxt) -> Vec<Ctxt> {
+    assert_eq!(ctxt.cost_counter, 0);
+
     if !ctxt.forced_automs.is_empty() { return vec![ctxt] }
     if ctxt.n <= 4 { return vec![ctxt] }
 
