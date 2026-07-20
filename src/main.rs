@@ -91,6 +91,7 @@ fn main() {
 
     for i in 0..11 {
         dbg!(i);
-        c_run(i, Vec::new());
+        let cost = c_run(i, Vec::new());
+        dbg!(cost);
     }
 }
