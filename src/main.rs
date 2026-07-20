@@ -81,7 +81,8 @@ fn main() {
     let _timer = Timer::new();
 
     let models = split_models(build_ctxt(8, Vec::new()));
-    for m in &models {
-        dbg!(tree_search(m));
-    }
+    assert_eq!(models.len(), 1);
+    let ctxt = models.into_iter().next().unwrap();
+
+    dbg!(tree_search(&ctxt));
 }
