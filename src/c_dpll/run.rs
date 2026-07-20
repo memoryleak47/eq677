@@ -83,7 +83,7 @@ fn submit_model(ctxt: &Ctxt) {
 
 pub fn defresh(e: E, ctxt: &mut Ctxt) {
     if e >= ctxt.nonfresh {
-        // assert!(e == ctxt.nonfresh);
+        assert!(e == ctxt.nonfresh);
         ctxt.nonfresh += 1;
         ctxt.trail.push(TrailEvent::Defresh);
     }
