@@ -87,8 +87,7 @@ fn main() {
     dbg!(run_ctxt(&mut ctxt.clone()));
 
     let tree = tree_search(&ctxt);
-
-    let tree2 = bmap(1, 0, [(0, BranchTree::Heuristic), (1, BranchTree::Heuristic), (2, bmap(0, 2, [(0, BranchTree::Heuristic), (1, BranchTree::Heuristic), (2, BranchTree::Heuristic), (3, BranchTree::Heuristic)]))]);
+    let tree2 = bmap(1, 0, [(0, heur()), (1, heur()), (2, bmap(0, 2, [(0, heur()), (1, heur()), (2, heur()), (3, heur())]))]);
 
     println!("tree = {}", draw(&tree));
     dbg!(combined_cost(&ctxt, &tree));

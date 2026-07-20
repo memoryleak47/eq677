@@ -13,9 +13,11 @@ pub fn bmap<const N: usize>(x: E, y: E, list: [(E, BranchTree); N]) -> BranchTre
     BranchTree::Branch(x, y, map)
 }
 
+pub fn heur() -> BranchTree { BranchTree::Heuristic }
+
 pub fn draw(tree: &BranchTree) -> String {
     match tree {
-        BranchTree::Heuristic => String::from("BranchTree::Heuristic"),
+        BranchTree::Heuristic => String::from("heur()"),
         BranchTree::Branch(x, y, map) => {
             let mut mapelems = Vec::new();
             for (z, mm) in map {
