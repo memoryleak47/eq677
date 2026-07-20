@@ -85,9 +85,6 @@ pub use enumerate::*;
 mod combine;
 pub use combine::*;
 
-mod uf;
-pub use uf::*;
-
 fn main() {
     setup_panic_hook();
     let _timer = Timer::new();

@@ -1,51 +1,13 @@
 use crate::c_dpll::*;
 
-use std::sync::atomic::{AtomicUsize, Ordering};
-
-const USE_COUNTER: bool = false;
-
-fn threading_depth(n: E) -> E { n + 1 }
-
-static RUNS_STARTED: AtomicUsize = AtomicUsize::new(0);
-static RUNS_FINISHED: AtomicUsize = AtomicUsize::new(0);
-
-pub fn c_run(n: usize, automs: Vec<Vec<E>>) {
+pub fn c_run(n: usize, automs: Vec<Vec<E>>) -> usize {
     let models = split_models(build_ctxt(n, automs));
-    into_par_for_each(models, |mut ctxt| {
-        prerun(0, &mut ctxt);
-    });
-}
-
-// Completes a partial magma.
-pub fn c_complete(mpart: &MatrixMagma) {
-    let n = mpart.n;
-    let mut ctxt = build_ctxt(n, Vec::new());
-    ctxt.nonfresh = n as _;
-    for x in 0..n {
-        for y in 0..n {
-            let z = mpart.f(x, y);
-            if z != usize::MAX {
-                if prove_triple(x as E, y as E, z as E, &mut ctxt).is_err() { return }
-            }
-        }
-    }
-    if propagate(&mut ctxt).is_err() { return }
-
-    prerun(0, &mut ctxt);
-}
-
-// Completes a partial magma, will try to extend if not possible.
-pub fn c_complete_extended(m: &MatrixMagma) {
-    for nn in m.n..m.n+30 {
-        dbg!(nn);
-        let mut m2 = MatrixMagma::undefined(nn);
-        for x in 0..m.n {
-            for y in 0..m.n {
-                m2.set_f(x, y, m.f(x, y));
-            }
-        }
-        c_complete(&m2);
-    }
+    let mut out = 0;
+    for mut ctxt in models {
+        main_branch(&mut ctxt);
+        out += ctxt.cost_counter;
+    };
+    out
 }
 
 pub fn c_search() {
@@ -54,52 +16,6 @@ pub fn c_search() {
     }
 }
 
-fn inc_counter(ctr: &AtomicUsize) {
-    if !USE_COUNTER { return }
-
-    let t = PRINT_MUTEX.lock().unwrap();
-    ctr.fetch_add(1, Ordering::SeqCst);
-
-    let started = RUNS_STARTED.load(Ordering::SeqCst);
-    let finished = RUNS_FINISHED.load(Ordering::SeqCst);
-
-    let running = started - finished;
-    println!("running: {running}, finished: {finished}");
-}
-
-fn prerun(depth: E, ctxt: &mut Ctxt) {
-    // No need to have a trail, we won't backtrack in the prerun.
-    ctxt.trail.clear();
-
-    if depth >= threading_depth(ctxt.n) {
-        inc_counter(&RUNS_STARTED);
-
-        main_branch(ctxt);
-
-        inc_counter(&RUNS_FINISHED);
-        return;
-    }
-
-    let Some((x, y)) = select_p(ctxt) else {
-        submit_model(ctxt);
-        return;
-    };
-
-    defresh(x, ctxt);
-    defresh(y, ctxt);
-
-    let count = ctxt.n.min(ctxt.nonfresh+1);
-    range_for_each(count, |e| {
-        if ctxt.classes_xz[idx(x, e, ctxt.n)].value != E::MAX { return }
-        let c = &mut ctxt.clone();
-
-        if prove_triple(x, y, e, c).is_err() { return }
-        if propagate(c).is_err() { return }
-
-        defresh(e, c);
-        prerun(depth+1, c);
-    });
-}
 
 fn score_c(c: CXY) -> i32 {
     match c {
@@ -186,6 +102,10 @@ fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
         if ctxt.classes_xz[idx(x, e, ctxt.n)].value == E::MAX { break }
         e += 1;
     }
+
+    // Every decision costs 1.
+    ctxt.cost_counter += 1;
+
     ctxt.trail.push(TrailEvent::Decision(x, y, e));
     ctxt.chosen_per_row[x as usize] += 1;
     prove_triple(x, y, e, ctxt)?;
