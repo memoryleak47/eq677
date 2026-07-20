@@ -37,14 +37,42 @@ fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut 
             let mut out = Vec::new();
             for (z, subtree) in map.iter_mut() {
                 let mut ctxt = ctxt.clone();
+                defresh(*x, &mut ctxt);
+                defresh(*y, &mut ctxt);
+                defresh(*z, &mut ctxt);
                 if prove_triple(*x, *y, *z, &mut ctxt).is_ok() && propagate(&mut ctxt).is_ok() {
-                    ctxt.nonfresh = ctxt.nonfresh.max(*x+1).max(*y+1).max(*z+1);
                     out.extend(iter_leaves(&ctxt, subtree));
                 }
             }
             out
         },
     }
+}
+
+fn grow(ctxt: &Ctxt, tree: &BranchTree) -> Vec<BranchTree> {
+    let Some((i, (child_ctxt, _))) = iter_leaves(ctxt, &mut tree.clone()).into_iter().enumerate().max_by_key(|(_, (ct, _))| run_ctxt(&mut ct.clone())) else { return Vec::new() };
+
+    let mut out = Vec::new();
+
+    let count = (child_ctxt.nonfresh+1).min(ctxt.n);
+    for x in 0..count {
+        for y in 0..count {
+            let mut child_ctxt = child_ctxt.clone();
+            defresh(x, &mut child_ctxt);
+            defresh(y, &mut child_ctxt);
+
+            let count2 = (child_ctxt.nonfresh+1).min(ctxt.n);
+            let map = (0..count2).map(|a| (a, BranchTree::Heuristic)).collect();
+
+            let mut tree2 = tree.clone();
+            let (_, leaf) = &mut iter_leaves(ctxt, &mut tree2)[i];
+            **leaf = BranchTree::Branch(x, y, map);
+
+            out.push(tree2);
+        }
+    }
+
+    out
 }
 
 // tries to find a good branching tree for this scenario.
@@ -54,26 +82,7 @@ pub fn tree_search(ctxt: &Ctxt) -> BranchTree {
     for _ in 0..2 {
         for mut tree in std::mem::take(&mut trees) {
             trees.push(tree.clone());
-
-            let Some((i, (ct, _))) = iter_leaves(ctxt, &mut tree).into_iter().enumerate().max_by_key(|(_, (ct, _))| run_ctxt(&mut ct.clone())) else { continue };
-            let ct = ct.clone();
-
-            let count = (ct.nonfresh+1).min(ct.n);
-            for x in 0..count {
-                for y in 0..count {
-                    let new_nonfresh = ct.nonfresh + (x == ct.nonfresh || y == ct.nonfresh) as E;
-                    let count2 = (new_nonfresh+1).min(ct.n);
-                    let mut map = BTreeMap::new();
-                    for z in 0..count2 {
-                        map.insert(z, BranchTree::Heuristic);
-                    }
-                    let mut tree2 = tree.clone();
-                    let (_, leaf) = &mut iter_leaves(ctxt, &mut tree2)[i];
-                    **leaf = BranchTree::Branch(x, y, map);
-
-                    trees.push(tree2);
-                }
-            }
+            trees.extend(grow(ctxt, &tree));
         }
     }
 
