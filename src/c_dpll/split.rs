@@ -1,6 +1,6 @@
 use crate::c_dpll::*;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Debug)]
 pub enum BranchTree {
@@ -34,7 +34,13 @@ fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut 
     match tree {
         BranchTree::Heuristic => vec![(ctxt.clone(), tree)],
         BranchTree::Branch(x, y, map) => {
+            let count = (ctxt.nonfresh+1).min(ctxt.n);
+            let set1: BTreeSet<_> = (0..count).collect();
+            let set2: BTreeSet<_> = map.keys().copied().collect();
+            assert_eq!(set1, set2);
+
             let mut out = Vec::new();
+
             for (z, subtree) in map.iter_mut() {
                 let mut ctxt = ctxt.clone();
                 defresh(*x, &mut ctxt);
