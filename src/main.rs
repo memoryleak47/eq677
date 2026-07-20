@@ -84,12 +84,22 @@ fn main() {
     assert_eq!(models.len(), 1);
     let ctxt = models.into_iter().next().unwrap();
 
-    dbg!(run_ctxt(&mut ctxt.clone()));
+    dbg!(select_p(&ctxt));
 
+    // Those should agree:
+    dbg!(run_ctxt(&mut ctxt.clone()));
+    dbg!(combined_cost(&ctxt, &heur()));
+
+    // And this one should agree too.
+    let tree = bmap(0, 1, [(0, heur()), (1, heur()), (2, heur())]);
+    dbg!(combined_cost(&ctxt, &tree));
+
+/*
     let tree = tree_search(&ctxt);
     let tree2 = bmap(1, 0, [(0, heur()), (1, heur()), (2, bmap(0, 2, [(0, heur()), (1, heur()), (2, heur()), (3, heur())]))]);
 
     println!("tree = {}", draw(&tree));
     dbg!(combined_cost(&ctxt, &tree));
     dbg!(combined_cost(&ctxt, &tree2));
+*/
 }

@@ -51,7 +51,7 @@ pub fn compute_base_score(x: E, y: E, ctxt: &Ctxt) -> i32 {
 }
 
 // returns None if we are done.
-fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
+pub fn select_p(ctxt: &Ctxt) -> Option<(E, E)> {
     // Should hold here:
     // check_score(ctxt);
 

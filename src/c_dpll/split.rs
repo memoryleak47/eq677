@@ -38,6 +38,7 @@ fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut 
             for (z, subtree) in map.iter_mut() {
                 let mut ctxt = ctxt.clone();
                 if prove_triple(*x, *y, *z, &mut ctxt).is_ok() && propagate(&mut ctxt).is_ok() {
+                    ctxt.nonfresh = ctxt.nonfresh.max(*x+1).max(*y+1).max(*z+1);
                     out.extend(iter_leaves(&ctxt, subtree));
                 }
             }

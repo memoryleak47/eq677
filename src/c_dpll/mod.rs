@@ -2,19 +2,16 @@ use crate::*;
 use smallvec::{SmallVec, smallvec};
 
 mod init;
-use init::*;
-pub use init::build_ctxt;
+pub use init::*;
 
 mod c;
-use c::*;
+pub use c::*;
 
 mod split;
-use split::*;
 pub use split::*;
 
 mod run;
-use run::*;
-pub use run::{c_run, c_search, run_ctxt};
+pub use run::*;
 
 mod twee;
 pub use twee::*;
