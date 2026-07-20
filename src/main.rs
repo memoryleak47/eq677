@@ -7,20 +7,14 @@
 mod magma;
 pub use magma::*;
 
+mod search;
+pub use search::*;
+
 mod matrix;
 pub use matrix::*;
 
-mod eq_dpll;
-pub use eq_dpll::*;
-
 mod sym_dpll;
 pub use sym_dpll::*;
-
-mod tinv_dpll;
-pub use tinv_dpll::*;
-
-mod semitinv_dpll;
-pub use semitinv_dpll::*;
 
 mod c_dpll;
 pub use c_dpll::*;
@@ -39,9 +33,6 @@ pub use parallel::*;
 
 mod present;
 pub use present::*;
-
-mod search;
-pub use search::*;
 
 mod kb;
 pub use kb::*;
@@ -89,9 +80,8 @@ fn main() {
     setup_panic_hook();
     let _timer = Timer::new();
 
-    for i in 0..11 {
-        dbg!(i);
-        let cost = c_run(i, Vec::new());
-        dbg!(cost);
+    let models = split_models(build_ctxt(9, Vec::new()));
+    for m in &models {
+        dbg!(tree_search(m));
     }
 }

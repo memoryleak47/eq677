@@ -3,12 +3,14 @@ use smallvec::{SmallVec, smallvec};
 
 mod init;
 use init::*;
+pub use init::build_ctxt;
 
 mod c;
 use c::*;
 
 mod split;
 use split::*;
+pub use split::{split_models, tree_search, BranchTree};
 
 mod run;
 use run::*;
@@ -34,7 +36,7 @@ struct ClassXZ {
 }
 
 #[derive(Clone)]
-struct Ctxt {
+pub struct Ctxt {
     trail: Vec<TrailEvent>,
     classes_xy: Box<[ClassXY]>,
     classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`

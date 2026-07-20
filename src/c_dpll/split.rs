@@ -2,7 +2,8 @@ use crate::c_dpll::*;
 
 use std::collections::BTreeMap;
 
-enum BranchTree {
+#[derive(Clone, Debug)]
+pub enum BranchTree {
     Heuristic,
     Branch(/*x*/ E, /*y*/ E, BTreeMap</*z*/ E, BranchTree>),
 }
@@ -22,6 +23,27 @@ fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut 
             out
         },
     }
+}
+
+// tries to find a good branching tree for this scenario.
+pub fn tree_search(ctxt: &Ctxt) -> BranchTree {
+    let mut trees = vec![BranchTree::Heuristic];
+
+    for mut tree in std::mem::take(&mut trees) {
+        let leaves = iter_leaves(ctxt, &mut tree);
+        // TODO find major leaf & branch it.
+        trees.push(tree);
+    }
+
+    todo!() // TODO pick best tree
+}
+
+fn combined_cost(ctxt: &Ctxt, tree: &BranchTree) -> usize {
+    let mut out = 0;
+    for (mut ct, _) in iter_leaves(ctxt, &mut tree.clone()) {
+        out += run_ctxt(&mut ct);
+    }
+    out
 }
 
 fn branch_on(x: E, y: E, mut ctxt: Ctxt) -> Vec<Ctxt> {
