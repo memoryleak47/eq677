@@ -1,5 +1,29 @@
 use crate::c_dpll::*;
 
+use std::collections::BTreeMap;
+
+enum BranchTree {
+    Heuristic,
+    Branch(/*x*/ E, /*y*/ E, BTreeMap</*z*/ E, BranchTree>),
+}
+
+// This excludes "paradox" leaves.
+fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut BranchTree)> {
+    match tree {
+        BranchTree::Heuristic => vec![(ctxt.clone(), tree)],
+        BranchTree::Branch(x, y, map) => {
+            let mut out = Vec::new();
+            for (z, subtree) in map.iter_mut() {
+                let mut ctxt = ctxt.clone();
+                if prove_triple(*x, *y, *z, &mut ctxt).is_ok() && propagate(&mut ctxt).is_ok() {
+                    out.extend(iter_leaves(&ctxt, subtree));
+                }
+            }
+            out
+        },
+    }
+}
+
 fn branch_on(x: E, y: E, mut ctxt: Ctxt) -> Vec<Ctxt> {
     let mut out = Vec::new();
     for z in 0..(ctxt.nonfresh+1).min(ctxt.n) {
