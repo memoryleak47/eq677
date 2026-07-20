@@ -39,8 +39,8 @@ pub fn tree_search(ctxt: &Ctxt) -> BranchTree {
             let count = (ct.nonfresh+1).min(ct.n);
             for x in 0..count {
                 for y in 0..count {
-                    let new_nonfresh = ctxt.nonfresh + (x == ctxt.nonfresh || y == ctxt.nonfresh) as E;
-                    let count2 = new_nonfresh.min(ct.n);
+                    let new_nonfresh = ctxt.nonfresh + (x == ct.nonfresh || y == ct.nonfresh) as E;
+                    let count2 = (new_nonfresh+1).min(ct.n);
                     let mut map = BTreeMap::new();
                     for z in 0..count2 {
                         map.insert(z, BranchTree::Heuristic);
