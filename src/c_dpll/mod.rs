@@ -34,7 +34,7 @@ struct ClassXZ {
 
 #[derive(Clone)]
 pub struct Ctxt {
-    trail: Vec<TrailEvent>,
+    pub trail: Vec<TrailEvent>,
     classes_xy: Box<[ClassXY]>,
     classes_xz: Box<[ClassXZ]>, // indexed by `idx(x,z)`
     n: E,
@@ -47,7 +47,7 @@ pub struct Ctxt {
 }
 
 #[derive(Clone)]
-enum TrailEvent {
+pub enum TrailEvent {
     Decision(E, E, E),
     DefineClass(E, E),
     Defresh,

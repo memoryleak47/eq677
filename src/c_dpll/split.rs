@@ -32,6 +32,7 @@ pub fn draw(tree: &BranchTree) -> String {
 // This excludes "paradox" leaves.
 pub fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a mut BranchTree)> {
     assert_eq!(ctxt.cost_counter, 0);
+    assert!(ctxt.trail.is_empty());
 
     match tree {
         BranchTree::Heuristic => vec![(ctxt.clone(), tree)],
@@ -49,6 +50,7 @@ pub fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a 
                 defresh(*y, &mut ctxt);
                 defresh(*z, &mut ctxt);
                 if prove_triple(*x, *y, *z, &mut ctxt).is_ok() && propagate(&mut ctxt).is_ok() {
+                    ctxt.trail.clear();
                     out.extend(iter_leaves(&ctxt, subtree));
                 }
             }

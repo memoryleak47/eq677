@@ -82,7 +82,8 @@ fn main() {
 
     let models = split_models(build_ctxt(8, Vec::new()));
     assert_eq!(models.len(), 1);
-    let ctxt = models.into_iter().next().unwrap();
+    let mut ctxt = models.into_iter().next().unwrap();
+    ctxt.trail.clear();
 
     dbg!(ctxt.cost_counter);
 
