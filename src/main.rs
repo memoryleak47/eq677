@@ -84,30 +84,11 @@ fn main() {
     assert_eq!(models.len(), 1);
     let mut ctxt = models.into_iter().next().unwrap();
     ctxt.trail.clear();
+    assert_eq!(ctxt.cost_counter, 0);
 
-    dbg!(ctxt.cost_counter);
-
-    dbg!(select_p(&ctxt));
-
-    // Those should agree:
-    dbg!(run_ctxt(&mut ctxt.clone()));
-    dbg!(combined_cost(&ctxt, &heur()));
-
-    // And this one should agree too.
-    let tree = bmap(0, 1, [(0, heur()), (1, heur()), (2, heur())]);
-
-    for (c, _) in iter_leaves(&ctxt, &mut tree.clone()) {
-        dbg!(run_ctxt(&mut c.clone()));
-    }
-
-    dbg!(combined_cost(&ctxt, &tree));
-
-/*
     let tree = tree_search(&ctxt);
-    let tree2 = bmap(1, 0, [(0, heur()), (1, heur()), (2, bmap(0, 2, [(0, heur()), (1, heur()), (2, heur()), (3, heur())]))]);
 
     println!("tree = {}", draw(&tree));
     dbg!(combined_cost(&ctxt, &tree));
-    dbg!(combined_cost(&ctxt, &tree2));
-*/
+    dbg!(combined_cost(&ctxt, &heur()));
 }

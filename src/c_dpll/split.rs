@@ -37,10 +37,15 @@ pub fn iter_leaves<'a>(ctxt: &Ctxt, tree: &'a mut BranchTree) -> Vec<(Ctxt, &'a 
     match tree {
         BranchTree::Heuristic => vec![(ctxt.clone(), tree)],
         BranchTree::Branch(x, y, map) => {
-            let count = (ctxt.nonfresh+1).min(ctxt.n);
-            let set1: BTreeSet<_> = (0..count).collect();
-            let set2: BTreeSet<_> = map.keys().copied().collect();
-            assert_eq!(set1, set2);
+            {
+                let mut ctxt = ctxt.clone();
+                defresh(*x, &mut ctxt);
+                defresh(*y, &mut ctxt);
+                let count = (ctxt.nonfresh+1).min(ctxt.n);
+                let set1: BTreeSet<_> = (0..count).collect();
+                let set2: BTreeSet<_> = map.keys().copied().collect();
+                assert_eq!(set1, set2);
+            }
 
             let mut out = Vec::new();
 
