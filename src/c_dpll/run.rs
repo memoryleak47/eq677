@@ -116,7 +116,6 @@ fn branch_options(x: E, y: E, mut e: E, ctxt: &mut Ctxt) -> Result<(), ()> {
     ctxt.cost_counter += 1;
 
     ctxt.trail.push(TrailEvent::Decision(x, y, e));
-    ctxt.chosen_per_row[x as usize] += 1;
     prove_triple(x, y, e, ctxt)?;
 
     // note: This defresh has to be after the decision point!
@@ -133,12 +132,12 @@ fn main_backtrack(ctxt: &mut Ctxt) {
         let Some(event) = ctxt.trail.pop() else { return };
         match event {
             TrailEvent::Decision(x, y, e) => {
-                ctxt.chosen_per_row[x as usize] -= 1;
                 if branch_options(x, y, e+1, ctxt).is_ok() { become main_propagate(ctxt); }
             },
             TrailEvent::DefineClass(x, y) => {
                 let z = std::mem::replace(&mut ctxt.classes_xy[idx(x, y, ctxt.n)].value, E::MAX);
                 ctxt.classes_xz[idx(x, z, ctxt.n)].value = E::MAX;
+                ctxt.chosen_per_row[x as usize] -= 1;
                 if y == z {
                     ctxt.yxx[y as usize] = E::MAX;
                 }
@@ -197,6 +196,8 @@ pub fn prove_triple_impl(x: E, y: E, z: E, ctxt: &mut Ctxt) -> Result<bool, ()> 
     *xy_ref = z;
     *xz_ref = y;
     ctxt.trail.push(TrailEvent::DefineClass(x, y));
+    ctxt.chosen_per_row[x as usize] += 1;
+
     ctxt.propagate_queue.push((x, y, z));
     Ok(true)
 }
