@@ -78,6 +78,10 @@ fn grow(ctxt: &Ctxt, tree: &BranchTree) -> Vec<BranchTree> {
             defresh(x, &mut child_ctxt);
             defresh(y, &mut child_ctxt);
 
+            let cls = &child_ctxt.classes_xy[idx(x, y, child_ctxt.n)];
+            if cls.value != E::MAX { continue }
+            if cls.cs.len() == 0 { continue } // We ignore classes with zero constraints. It's unlikely that they are good.
+
             let count2 = (child_ctxt.nonfresh+1).min(ctxt.n);
             let map = (0..count2).map(|a| (a, BranchTree::Heuristic)).collect();
 
@@ -98,7 +102,7 @@ pub fn tree_search(ctxt: &Ctxt) -> BranchTree {
 
     let mut trees = vec![BranchTree::Heuristic];
 
-    for _ in 0..2 {
+    for _ in 0..4 {
         for mut tree in std::mem::take(&mut trees) {
             trees.push(tree.clone());
             trees.extend(grow(ctxt, &tree));
