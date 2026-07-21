@@ -12,6 +12,7 @@ pub fn c_run(n: usize, automs: Vec<Vec<E>>) -> usize {
 
 pub fn run_ctxt(ctxt: &mut Ctxt) -> usize {
     assert!(ctxt.cost_counter == 0);
+    assert!(ctxt.trail.is_empty());
 
     main_branch(ctxt);
 
